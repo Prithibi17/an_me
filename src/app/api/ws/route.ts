@@ -119,6 +119,31 @@ function systemMessage(room: Room, text: string) {
   broadcast(room, { type: "chat", message });
 }
 
+function destroyRoom(room: Room, message?: string) {
+  if (message) broadcast(room, { type: "ended", message });
+  rooms.delete(room.code);
+  for (const member of room.participants.values()) {
+    if (member.disconnectTimer) clearTimeout(member.disconnectTimer);
+    if (member.socket) {
+      member.socket.room = undefined;
+      member.socket.participantId = undefined;
+      member.socket.close();
+      member.socket = null;
+    }
+  }
+  room.messages.length = 0;
+  room.participants.clear();
+  room.currentTime = 0;
+  room.playing = false;
+}
+
+function pruneExpiredRooms() {
+  const cutoff = Date.now() - 6 * 60 * 60 * 1000;
+  for (const room of rooms.values()) {
+    if (room.createdAt < cutoff) destroyRoom(room, "Room expired.");
+  }
+}
+
 function rateOkay(socket: RoomSocket, key: string, limit: number, windowMs: number) {
   const now = Date.now();
   socket.rates ||= {};
@@ -134,7 +159,7 @@ function removeDisconnectedMember(room: Room, member: Participant) {
   room.participants.delete(member.id);
   systemMessage(room, `${member.name} left the room.`);
   if (room.participants.size === 0) {
-    rooms.delete(room.code);
+    destroyRoom(room);
     return;
   }
   if (room.hostId === member.id) {
@@ -143,8 +168,7 @@ function removeDisconnectedMember(room: Room, member: Participant) {
       room.hostId = nextHost.id;
       systemMessage(room, `${nextHost.name} is now the host.`);
     } else {
-      broadcast(room, { type: "ended", message: "The room ended because the host left." });
-      rooms.delete(room.code);
+      destroyRoom(room, "The room ended because the host left.");
       return;
     }
   }
@@ -256,15 +280,14 @@ function handleMessage(socket: RoomSocket, raw: WebSocketData) {
   }
   if (data.type === "end-room") {
     if (!isHost) return send(socket, { type: "error", message: "Only the host can end the room." });
-    broadcast(room, { type: "ended", message: "The host ended the room." });
-    rooms.delete(room.code);
-    for (const member of room.participants.values()) member.socket?.close();
+    destroyRoom(room, "The host ended the room.");
     return;
   }
   if (data.type === "leave") socket.close();
 }
 
 export async function GET() {
+  pruneExpiredRooms();
   return experimental_upgradeWebSocket((rawSocket) => {
     const socket = rawSocket as RoomSocket;
     socket.on("message", (data) => handleMessage(socket, data));

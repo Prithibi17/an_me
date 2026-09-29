@@ -138,7 +138,7 @@ function AnimePageContent({
   const totalEps = episodes.length > 0 ? episodes.length : anime.episodes || 0;
 
   return (
-    <div className="relative w-full min-h-screen bg-[#0a0b0e] text-[#F5F7FA] pt-4 pb-16 px-3 sm:px-6 max-w-[1720px] mx-auto flex flex-col">
+    <div className="relative w-full min-h-screen bg-[#0a0b0e] text-[#F5F7FA] pt-2 sm:pt-4 pb-24 lg:pb-16 px-2.5 sm:px-6 max-w-[1720px] mx-auto flex flex-col">
       {/* Light Off Theater Scrim */}
       {isLightOff && (
         <div
@@ -149,7 +149,7 @@ function AnimePageContent({
       )}
 
       {/* Breadcrumb Navigation */}
-      <div className="flex items-center gap-1.5 text-xs text-white/50 mb-3 select-none flex-wrap">
+      <div className="hidden sm:flex items-center gap-1.5 text-xs text-white/50 mb-3 select-none flex-wrap">
         <Link href="/" className="hover:text-white transition-colors">
           Home
         </Link>
@@ -177,7 +177,7 @@ function AnimePageContent({
       </div>
 
       {/* Lower 2-Column Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start mt-4 lg:mt-6">
         {/* Left Column (Comments + Recommended For You) */}
         <div className="lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
           <CommentsSection
@@ -191,7 +191,7 @@ function AnimePageContent({
         </div>
 
         {/* Right Column (Most Popular Sidebar) */}
-        <div className="lg:col-span-4 xl:col-span-3">
+        <div className="hidden lg:block lg:col-span-4 xl:col-span-3">
           <MostPopularSidebar animeList={popularList} />
         </div>
       </div>

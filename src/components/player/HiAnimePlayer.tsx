@@ -489,13 +489,14 @@ export function HiAnimePlayer({
         {/* ========================================================================= */}
         {/* COLUMN 1 (LEFT): EPISODE LIST SIDEBAR (~3 cols on desktop) */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-3 xl:col-span-2 bg-[#13151b] rounded-lg border border-white/5 flex flex-col h-[480px] sm:h-[520px] lg:h-[580px] overflow-hidden">
+        <div className="order-2 lg:order-1 lg:col-span-3 xl:col-span-2 bg-[#13151b] rounded-xl lg:rounded-lg border border-white/5 flex flex-col h-auto lg:h-[580px] overflow-hidden">
           {/* Header & Filter */}
-          <div className="p-3 border-b border-white/5 flex flex-col gap-2 shrink-0 bg-[#161822]">
-            <span className="text-xs font-bold text-white/90 uppercase tracking-wider">
-              List of episodes:
+          <div className="p-3 sm:p-4 lg:p-3 border-b border-white/5 flex flex-col gap-2 shrink-0 bg-[#161822]">
+            <span className="text-lg lg:text-xs font-black lg:font-bold text-white/90 lg:uppercase lg:tracking-wider">
+              <span className="lg:hidden">Episodes</span>
+              <span className="hidden lg:inline">List of episodes:</span>
             </span>
-            <div className="relative flex items-center">
+            <div className="relative hidden lg:flex items-center">
               <Search className="w-3.5 h-3.5 text-white/40 absolute left-2.5 pointer-events-none" />
               <input
                 type="text"
@@ -510,7 +511,7 @@ export function HiAnimePlayer({
           {/* Scrollable Episode Items */}
           <div
             ref={epListRef}
-            className="flex-1 overflow-y-auto divide-y divide-white/5 p-1 text-xs"
+            className="grid grid-cols-6 lg:block flex-1 lg:overflow-y-auto gap-2 lg:gap-0 lg:divide-y lg:divide-white/5 p-3 sm:p-4 lg:p-1 text-xs"
           >
             {episodes.length === 0 ? (
               <div className="p-4 flex flex-col items-center justify-center gap-2 text-center text-xs text-white/50 h-full">
@@ -534,7 +535,7 @@ export function HiAnimePlayer({
                     data-active={isActive ? "true" : "false"}
                     onClick={() => selectEpisode(ep.number)}
                     className={cn(
-                      "w-full text-left px-3 py-2.5 rounded flex items-center gap-3 transition-colors cursor-pointer group",
+                      "w-full min-h-11 lg:min-h-0 justify-center lg:justify-start text-center lg:text-left px-2 lg:px-3 py-2.5 rounded-lg lg:rounded flex items-center gap-1 lg:gap-3 border lg:border-0 border-white/10 transition-colors cursor-pointer group",
                       isActive
                         ? "bg-[#ffbade] text-[#111] font-bold shadow-sm"
                         : "text-white/70 hover:text-white hover:bg-white/5"
@@ -542,13 +543,13 @@ export function HiAnimePlayer({
                   >
                     <span
                       className={cn(
-                        "w-5 text-right font-mono text-[11px] shrink-0",
+                        "w-auto lg:w-5 text-center lg:text-right font-mono text-sm lg:text-[11px] shrink-0",
                         isActive ? "text-[#111]" : "text-white/40 group-hover:text-white/70"
                       )}
                     >
                       {ep.number}
                     </span>
-                    <span className="truncate flex-1">
+                    <span className="hidden lg:block truncate flex-1">
                       Episode {ep.number}
                     </span>
                   </button>
@@ -561,12 +562,12 @@ export function HiAnimePlayer({
         {/* ========================================================================= */}
         {/* COLUMN 2 (CENTER): VIDEO PLAYER + UNDER-PLAYER CONTROLS + SERVER CARD */}
         {/* ========================================================================= */}
-        <div className="lg:col-span-6 xl:col-span-7 flex flex-col gap-3">
+        <div className="order-1 lg:order-2 lg:col-span-6 xl:col-span-7 flex flex-col gap-3">
           {/* Video Iframe Container */}
           <div
             id="player-wrap"
             ref={wrapRef}
-            className="relative w-full aspect-video rounded-lg overflow-hidden bg-black border border-white/10 shadow-2xl z-20"
+            className="relative w-full aspect-video rounded-xl lg:rounded-lg overflow-hidden bg-black border border-white/10 shadow-2xl z-20"
           >
             {episodes.length === 0 ? (
               <div className="relative w-full h-full flex flex-col items-center justify-center p-6 bg-[#0e1017] overflow-hidden">
@@ -610,7 +611,7 @@ export function HiAnimePlayer({
 
           {/* Control Bar Directly Under Video */}
           {episodes.length > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-2 px-2 py-1.5 bg-[#13151b] rounded-lg border border-white/5 text-[11px] font-semibold text-white/80">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5 lg:px-2 lg:py-1.5 bg-[#13151b] rounded-xl lg:rounded-lg border border-white/5 text-[11px] font-semibold text-white/80">
             {/* Left Controls */}
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {/* Auto Play Toggle */}
@@ -751,7 +752,7 @@ export function HiAnimePlayer({
 
           {/* Two-Tone Server Selection Card */}
           {episodes.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-12 rounded-lg overflow-hidden border border-white/5 bg-[#13151b]">
+          <div className="hidden lg:grid grid-cols-1 md:grid-cols-12 rounded-lg overflow-hidden border border-white/5 bg-[#13151b]">
             {/* Left Box (Pink/Rose info card) */}
             <div className="md:col-span-4 p-4 bg-gradient-to-br from-[#ff5c8a]/20 via-[#ff5c8a]/10 to-[#1b1420] border-b md:border-b-0 md:border-r border-white/5 flex flex-col justify-center text-center sm:text-left gap-1">
               <span className="text-xs text-white/80">You are watching</span>
@@ -853,7 +854,7 @@ export function HiAnimePlayer({
             onTransfer={watchTogether.transferHost}
             onLeave={watchTogether.leave}
           />
-        ) : <div className="lg:col-span-3 xl:col-span-3 bg-[#13151b] rounded-lg border border-white/5 p-4 flex flex-col gap-4 text-xs">
+        ) : <div className="order-3 lg:order-3 lg:col-span-3 xl:col-span-3 bg-[#13151b] rounded-xl lg:rounded-lg border border-white/5 p-4 flex flex-col gap-4 text-xs">
           {/* Top: Poster Thumbnail + Title */}
           <div className="flex gap-3">
             <div className="relative w-20 h-28 shrink-0 rounded overflow-hidden shadow-md">
