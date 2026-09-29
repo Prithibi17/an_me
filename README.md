@@ -13,42 +13,24 @@ npm run dev
 
 The web app runs at `http://localhost:3001`.
 
-Watch Together uses a separate authoritative WebSocket gateway. Start it in a second terminal:
-
-```bash
-npm run realtime
-```
-
-It runs at `ws://localhost:3002/ws`. Both processes must use the same `WATCH_TOGETHER_SECRET`.
+Watch Together is served by the app itself at `/api/ws`. It uses Vercel's WebSocket Functions beta in production, so no second service is required.
 
 ## Production deployment
-
-### 1. Real-time gateway
-
-Deploy this repository to a WebSocket-capable Node host such as Render using the included `render.yaml`, or Railway/Fly.io with:
-
-- Build: `npm ci`
-- Start: `npm run realtime`
-- `WATCH_TOGETHER_SECRET`: a long random secret
-- `ALLOWED_ORIGINS`: the exact Vercel URL, plus any custom domains, comma-separated
-
-The service exposes `/` for health checks and `/ws` for WebSocket connections.
-
-### 2. Vercel frontend
 
 Import the repository into Vercel with the standard Next.js preset and set:
 
 - `TURSO_DATABASE_URL`
 - `TURSO_AUTH_TOKEN`
-- `WATCH_TOGETHER_SECRET` — exactly the same value as the real-time gateway
-- `NEXT_PUBLIC_WATCH_TOGETHER_WS_URL` — for example `wss://an-me-watch-together.onrender.com/ws`
+- `WATCH_TOGETHER_SECRET` — a long random secret used to sign room identities
 
-Vercel uses the standard `next build` and `next start` scripts; no custom Next.js server is required.
+Vercel uses the standard `next build` and `next start` scripts. Fluid compute must remain enabled for WebSocket Functions. The client connects to the same deployment at `/api/ws`; no Render, Railway, or public WebSocket URL is needed.
+
+Watch Together rooms are held in the Vercel Function instance's memory. They can reset when a function restarts or a new deployment begins, and new connections are not guaranteed to reach an existing room if Vercel scales the app to multiple instances. Durable multi-instance rooms require shared pub/sub storage; this version intentionally has no external realtime dependency.
 
 ## Watch Together security
 
 - The Next.js API issues short-lived HMAC-signed participant identities.
-- The gateway validates identities and room codes server-side.
+- The Vercel WebSocket Function validates identities and room codes server-side.
 - The server, not the client, owns room membership and playback state.
 - Only the actual host identity may publish playback commands, transfer host, or end a room.
 - Chat and room actions are rate-limited, chat is length-limited and sanitized, and rooms expire after six hours.
