@@ -1,49 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# An:me
 
-## Turso authentication
+An:me is a Next.js 16 anime discovery and playback interface powered by AniList, with authentication, watchlists, watch history, episode-aware SUB/DUB availability, and real-time Watch Together rooms.
 
-Copy `.env.example` to `.env.local`, then set `TURSO_AUTH_TOKEN` to a token for the
-configured database:
+## Local development
 
-```bash
-turso db tokens create anime-web-prithibi
-```
-
-The app creates the `users` and `sessions` tables and their indexes automatically
-on the first auth request. Passwords are stored as salted scrypt hashes and login
-sessions use secure, HTTP-only cookies.
-
-## Getting Started
-
-First, run the development server:
+Copy `.env.example` to `.env.local` and configure Turso. The app creates its authentication tables automatically.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The web app runs at `http://localhost:3001`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Watch Together uses a separate authoritative WebSocket gateway. Start it in a second terminal:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run realtime
+```
 
-## Learn More
+It runs at `ws://localhost:3002/ws`. Both processes must use the same `WATCH_TOGETHER_SECRET`.
 
-To learn more about Next.js, take a look at the following resources:
+## Production deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 1. Real-time gateway
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Deploy this repository to a WebSocket-capable Node host such as Render using the included `render.yaml`, or Railway/Fly.io with:
 
-## Deploy on Vercel
+- Build: `npm ci`
+- Start: `npm run realtime`
+- `WATCH_TOGETHER_SECRET`: a long random secret
+- `ALLOWED_ORIGINS`: the exact Vercel URL, plus any custom domains, comma-separated
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The service exposes `/` for health checks and `/ws` for WebSocket connections.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 2. Vercel frontend
+
+Import the repository into Vercel with the standard Next.js preset and set:
+
+- `TURSO_DATABASE_URL`
+- `TURSO_AUTH_TOKEN`
+- `WATCH_TOGETHER_SECRET` — exactly the same value as the real-time gateway
+- `NEXT_PUBLIC_WATCH_TOGETHER_WS_URL` — for example `wss://an-me-watch-together.onrender.com/ws`
+
+Vercel uses the standard `next build` and `next start` scripts; no custom Next.js server is required.
+
+## Watch Together security
+
+- The Next.js API issues short-lived HMAC-signed participant identities.
+- The gateway validates identities and room codes server-side.
+- The server, not the client, owns room membership and playback state.
+- Only the actual host identity may publish playback commands, transfer host, or end a room.
+- Chat and room actions are rate-limited, chat is length-limited and sanitized, and rooms expire after six hours.
+- Disconnected hosts receive a reconnect grace period, then host ownership transfers to an online participant or the room ends safely.
+
+## Verification
+
+```bash
+npm run build
+npm run lint
+```

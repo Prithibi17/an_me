@@ -100,9 +100,7 @@ export function EpisodeSection({
         {filteredEpisodes.map((ep) => {
           const isActive = ep.number === currentEpisode;
           const hasEpisodeThumbnail = Boolean(ep.thumbnail);
-          const thumbnail = ep.thumbnail || (ep.number % 3 === 0 ? anime.coverImage : anime.bannerImage || anime.coverImage);
-          const fallbackPositionX = (ep.number * 29) % 101;
-          const fallbackPositionY = 20 + ((ep.number * 17) % 61);
+          const thumbnail = ep.thumbnail || anime.bannerImage || anime.coverImage;
 
           return (
             <div
@@ -122,19 +120,21 @@ export function EpisodeSection({
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   className="object-cover transition-transform duration-200 group-hover:scale-105"
-                  style={hasEpisodeThumbnail ? undefined : {
-                    objectPosition: `${fallbackPositionX}% ${fallbackPositionY}%`,
-                    transform: `scale(${1.08 + (ep.number % 4) * 0.04})${ep.number % 2 === 0 ? " scaleX(-1)" : ""}`,
-                  }}
                 />
 
                 {!hasEpisodeThumbnail && (
                   <div
                     className="absolute inset-0 pointer-events-none"
                     style={{
-                      background: `linear-gradient(${110 + (ep.number * 23) % 120}deg, rgba(8,10,13,.7), transparent 58%, rgba(118,87,255,.22))`,
+                      background: "linear-gradient(135deg, rgba(8,10,13,.7), transparent 58%, rgba(118,87,255,.22))",
                     }}
                   />
+                )}
+
+                {!hasEpisodeThumbnail && (
+                  <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/70 text-[9px] text-white/65 border border-white/10">
+                    Preview not published
+                  </span>
                 )}
 
                 <div

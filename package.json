@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "node server.mjs",
+    "dev": "next dev -p 3001",
     "build": "next build",
-    "start": "node server.mjs",
+    "start": "next start",
+    "realtime": "node realtime-server.mjs",
     "lint": "eslint"
   },
   "dependencies": {

@@ -24,8 +24,12 @@ export async function getWatchIdentity() {
 }
 
 export function watchSocketUrl() {
+  const configured = process.env.NEXT_PUBLIC_WATCH_TOGETHER_WS_URL;
+  if (configured) return configured;
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  return `${protocol}//${window.location.host}/api/watch-together/ws`;
+  return process.env.NODE_ENV === "development"
+    ? `${protocol}//${window.location.hostname}:3002/ws`
+    : `${protocol}//${window.location.host}/api/watch-together/ws`;
 }
 
 export async function openWatchSocket() {

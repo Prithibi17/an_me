@@ -13,7 +13,10 @@ export function useWatchTogether(roomCode: string | null, onRemoteControl: (cont
   const socketRef = useRef<WebSocket | null>(null);
   const callbackRef = useRef(onRemoteControl);
   const intentionalClose = useRef(false);
-  callbackRef.current = onRemoteControl;
+
+  useEffect(() => {
+    callbackRef.current = onRemoteControl;
+  }, [onRemoteControl]);
 
   useEffect(() => {
     if (!roomCode) return;

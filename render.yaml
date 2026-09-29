@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: an-me-watch-together
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm run realtime
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: WATCH_TOGETHER_SECRET
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
