@@ -172,7 +172,7 @@ export default function NewsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-4 mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#ff5c8a]/15 text-[#ff5c8a] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-[#ff2f6d]/15 text-[#ff2f6d] flex items-center justify-center">
             <Newspaper className="w-5 h-5" />
           </div>
           <div className="flex flex-col">
@@ -199,7 +199,7 @@ export default function NewsPage() {
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap",
                   isActive
-                    ? "bg-[#ff5c8a] text-white shadow-sm shadow-[#ff5c8a]/20"
+                    ? "bg-[#ff2f6d] text-white shadow-sm shadow-[#ff2f6d]/20"
                     : "bg-[#181a24] hover:bg-[#222533] text-white/70"
                 )}
               >
@@ -230,7 +230,7 @@ export default function NewsPage() {
             <div className="absolute inset-0 p-5 sm:p-8 flex items-end justify-between gap-6">
               <div className="flex flex-col gap-2.5 max-w-3xl">
                 <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded bg-[#ff5c8a] text-white font-extrabold text-[10px] uppercase tracking-wide">
+                  <span className="px-2.5 py-0.5 rounded bg-[#ff2f6d] text-white font-extrabold text-[10px] uppercase tracking-wide">
                     {filteredNews[0].category}
                   </span>
                   <span className="text-xs text-white/60">•</span>
@@ -242,7 +242,7 @@ export default function NewsPage() {
                   <span className="text-xs text-white/60">{filteredNews[0].readTime}</span>
                 </div>
 
-                <h2 className="text-lg sm:text-2xl lg:text-3xl font-black text-white group-hover:text-[#ff5c8a] transition-colors leading-tight">
+                <h2 className="text-lg sm:text-2xl lg:text-3xl font-black text-white group-hover:text-[#ff2f6d] transition-colors leading-tight">
                   {filteredNews[0].title}
                 </h2>
                 <p className="text-xs sm:text-sm text-white/70 line-clamp-2 leading-relaxed">
@@ -271,7 +271,7 @@ export default function NewsPage() {
                 className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
-              <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-black/80 backdrop-blur-xs text-[9px] font-bold text-[#ff5c8a] uppercase">
+              <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-black/80 backdrop-blur-xs text-[9px] font-bold text-[#ff2f6d] uppercase">
                 {item.category}
               </span>
             </div>
@@ -284,7 +284,7 @@ export default function NewsPage() {
                   <span>•</span>
                   <span>{item.readTime}</span>
                 </div>
-                <h3 className="text-sm font-bold text-white group-hover:text-[#ff5c8a] transition-colors line-clamp-2 leading-snug">
+                <h3 className="text-sm font-bold text-white group-hover:text-[#ff2f6d] transition-colors line-clamp-2 leading-snug">
                   {item.title}
                 </h3>
                 <p className="text-xs text-white/60 line-clamp-2 leading-relaxed">
@@ -292,7 +292,7 @@ export default function NewsPage() {
                 </p>
               </div>
 
-              <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs text-[#ff5c8a] font-bold">
+              <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs text-[#ff2f6d] font-bold">
                 <span>Read full report</span>
                 <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -319,7 +319,7 @@ export default function NewsPage() {
             {/* Header info */}
             <div className="flex flex-col gap-2 pr-6">
               <div className="flex items-center gap-2 text-xs text-white/60">
-                <span className="px-2 py-0.5 rounded bg-[#ff5c8a]/20 text-[#ff5c8a] font-extrabold text-[10px] uppercase">
+                <span className="px-2 py-0.5 rounded bg-[#ff2f6d]/20 text-[#ff2f6d] font-extrabold text-[10px] uppercase">
                   {selectedArticle.category}
                 </span>
                 <span>•</span>
@@ -352,9 +352,9 @@ export default function NewsPage() {
 
             {/* Related Anime Watch Link */}
             {selectedArticle.relatedAnimeId && (
-              <div className="p-3.5 rounded-xl bg-gradient-to-r from-[#181a24] to-[#1e1522] border border-[#ff5c8a]/30 flex items-center justify-between gap-3 mt-2">
+              <div className="p-3.5 rounded-xl bg-gradient-to-r from-[#181a24] to-[#1e1522] border border-[#ff2f6d]/30 flex items-center justify-between gap-3 mt-2">
                 <div className="flex items-center gap-2.5">
-                  <Play className="w-4 h-4 text-[#ff5c8a] fill-current" />
+                  <Play className="w-4 h-4 text-[#ff2f6d] fill-current" />
                   <span className="text-xs font-bold text-white">
                     Watch {selectedArticle.relatedAnimeTitle} on An:me
                   </span>
@@ -362,7 +362,7 @@ export default function NewsPage() {
                 <Link
                   href={`/anime/${selectedArticle.relatedAnimeId}/details`}
                   onClick={() => setSelectedArticle(null)}
-                  className="px-3 py-1.5 rounded-lg bg-[#ff5c8a] hover:bg-[#ff4377] text-white text-xs font-bold transition-all shadow-sm shadow-[#ff5c8a]/20"
+                  className="px-3 py-1.5 rounded-lg bg-[#ff2f6d] hover:bg-[#e9235e] text-white text-xs font-bold transition-all shadow-sm shadow-[#ff2f6d]/20"
                 >
                   Stream Now →
                 </Link>

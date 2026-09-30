@@ -27,7 +27,7 @@ export function WatchTogetherPanel(props: Props) {
   const content = (
     <>
       <div className="flex items-center justify-between p-3 border-b border-white/5">
-        <div className="flex items-center gap-2"><Users className="w-4 h-4 text-[#ff5c8a]" /><span className="font-black text-sm text-white">Watch Together</span></div>
+        <div className="flex items-center gap-2"><Users className="w-4 h-4 text-[#ff2f6d]" /><span className="font-black text-sm text-white">Watch Together</span></div>
         <div className="flex items-center gap-2 text-[10px] text-white/50">
           {status === "connected" ? <Wifi className="w-3 h-3 text-emerald-400" /> : <WifiOff className="w-3 h-3 text-amber-400 animate-pulse" />}
           <span>{room?.participants.filter((p) => p.connected).length || 0}/10</span>
@@ -41,7 +41,7 @@ export function WatchTogetherPanel(props: Props) {
             <span className="relative w-7 h-7 rounded-full bg-white/5 grid place-items-center">{person.avatar || person.name[0]}<i className={`absolute right-0 bottom-0 w-2 h-2 rounded-full border border-[#13151b] ${person.connected ? "bg-emerald-400" : "bg-white/20"}`} /></span>
             <span className="truncate text-white/80">{person.id === identity?.id ? "You" : person.name}</span>
             {person.id === room?.hostId && <span className="ml-auto flex items-center gap-1 text-[9px] font-bold text-amber-300"><Crown className="w-3 h-3" /> Host</span>}
-            {isHost && person.id !== identity?.id && person.connected && <button onClick={() => onTransfer(person.id)} className="ml-auto text-[9px] text-[#ff5c8a] hover:underline">Make host</button>}
+            {isHost && person.id !== identity?.id && person.connected && <button onClick={() => onTransfer(person.id)} className="ml-auto text-[9px] text-[#ff2f6d] hover:underline">Make host</button>}
           </div>
         ))}
       </div>
@@ -56,10 +56,10 @@ export function WatchTogetherPanel(props: Props) {
         <span className="text-[11px] font-bold text-white/65">Chat</span>
         <div ref={chatRef} className="flex-1 min-h-[130px] overflow-y-auto space-y-2 pr-1">
           {(room?.messages || []).map((item) => item.system ? <p key={item.id} className="text-[10px] text-white/35 text-center">{item.text}</p> : (
-            <div key={item.id} className="text-[11px]"><div className="flex items-center gap-1.5"><b className="text-[#ff5c8a]">{item.senderId === identity?.id ? "You" : item.sender}</b><time className="text-[9px] text-white/30">{new Date(item.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</time></div><p className="text-white/75 break-words">{item.text}</p></div>
+            <div key={item.id} className="text-[11px]"><div className="flex items-center gap-1.5"><b className="text-[#ff2f6d]">{item.senderId === identity?.id ? "You" : item.sender}</b><time className="text-[9px] text-white/30">{new Date(item.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</time></div><p className="text-white/75 break-words">{item.text}</p></div>
           ))}
         </div>
-        <form onSubmit={submit} className="flex gap-1.5"><input value={message} onChange={(e) => setMessage(e.target.value)} maxLength={300} placeholder="Type a message..." className="min-w-0 flex-1 h-9 px-2.5 rounded bg-[#0e1015] border border-white/5 text-xs text-white focus:outline-none focus:border-[#ff5c8a]/40" /><button className="w-9 h-9 rounded bg-[#ff5c8a] grid place-items-center"><Send className="w-3.5 h-3.5" /></button></form>
+        <form onSubmit={submit} className="flex gap-1.5"><input value={message} onChange={(e) => setMessage(e.target.value)} maxLength={300} placeholder="Type a message..." className="min-w-0 flex-1 h-9 px-2.5 rounded bg-[#0e1015] border border-white/5 text-xs text-white focus:outline-none focus:border-[#ff2f6d]/40" /><button className="w-9 h-9 rounded bg-[#ff2f6d] grid place-items-center"><Send className="w-3.5 h-3.5" /></button></form>
       </div>
       <div className="p-3 border-t border-white/5 flex gap-2"><button onClick={() => onLeave(false)} className="flex-1 h-8 rounded bg-white/5 text-white/60 hover:text-white text-[10px] font-bold flex items-center justify-center gap-1"><LogOut className="w-3 h-3" /> Leave</button>{isHost && <button onClick={() => onLeave(true)} className="flex-1 h-8 rounded bg-red-500/10 text-red-400 text-[10px] font-bold">End Room</button>}</div>
     </>
@@ -68,7 +68,7 @@ export function WatchTogetherPanel(props: Props) {
   return (
     <>
       <aside className="hidden lg:flex lg:col-span-3 xl:col-span-3 h-[580px] rounded-lg border border-white/5 bg-[#13151b] flex-col overflow-hidden">{content}</aside>
-      <button onClick={() => setMobileOpen(true)} className="lg:hidden fixed right-4 bottom-20 z-40 h-11 px-4 rounded-full bg-[#ff5c8a] text-white shadow-xl flex items-center gap-2 text-xs font-bold"><Users className="w-4 h-4" /> Room {room?.participants.filter((p) => p.connected).length || 0}<ChevronDown className="w-3 h-3" /></button>
+      <button onClick={() => setMobileOpen(true)} className="lg:hidden fixed right-4 bottom-20 z-40 h-11 px-4 rounded-full bg-[#ff2f6d] text-white shadow-xl flex items-center gap-2 text-xs font-bold"><Users className="w-4 h-4" /> Room {room?.participants.filter((p) => p.connected).length || 0}<ChevronDown className="w-3 h-3" /></button>
       {mobileOpen && <div className="lg:hidden fixed inset-0 z-50 bg-black/70 flex items-end" onClick={() => setMobileOpen(false)}><div onClick={(e) => e.stopPropagation()} className="w-full h-[72vh] rounded-t-2xl border-t border-white/10 bg-[#13151b] flex flex-col overflow-hidden">{content}</div></div>}
     </>
   );

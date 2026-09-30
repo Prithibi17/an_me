@@ -23,7 +23,7 @@ export function GenreChip({
     "inline-flex items-center justify-center rounded-full font-medium transition-colors duration-150 cursor-pointer select-none",
     sizeClasses,
     active
-      ? "bg-[#7657FF] text-white border border-[#7657FF]"
+      ? "bg-[#7c3cff] text-white border border-[#7c3cff]"
       : "bg-[#11151B] hover:bg-[#161B22] text-[#9CA3AF] hover:text-[#F5F7FA] border border-white/5 hover:border-white/15"
   );
 

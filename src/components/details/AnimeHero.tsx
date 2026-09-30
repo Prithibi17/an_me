@@ -89,7 +89,7 @@ export function AnimeHero({ anime, currentEpisode = 1, onWatchClick }: AnimeHero
 
           <div className="flex flex-wrap items-center gap-2">
             {anime.status && (
-              <span className="px-2.5 py-0.5 rounded bg-[#7657FF]/20 border border-[#7657FF]/40 text-[#866DFF] text-xs font-bold uppercase tracking-wider">
+              <span className="px-2.5 py-0.5 rounded bg-[#7c3cff]/20 border border-[#7c3cff]/40 text-[#9066ff] text-xs font-bold uppercase tracking-wider">
                 {anime.status}
               </span>
             )}
@@ -118,7 +118,7 @@ export function AnimeHero({ anime, currentEpisode = 1, onWatchClick }: AnimeHero
           </div>
 
           {genres && (
-            <p className="text-xs md:text-sm font-medium text-[#7657FF]">
+            <p className="text-xs md:text-sm font-medium text-[#7c3cff]">
               {genres}
             </p>
           )}

@@ -75,7 +75,7 @@ export function HiAnimeSpotlight({ spotlightList }: { spotlightList: Anime[] }) 
         <div className="max-w-xl lg:max-w-2xl flex flex-col gap-3 py-6">
           {/* Spotlight Rank */}
           <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-sm font-extrabold text-[#ff5c8a] tracking-wide">
+            <span className="text-xs sm:text-sm font-extrabold text-[#ff2f6d] tracking-wide">
               #{currentIndex + 1} Spotlight
             </span>
           </div>
@@ -90,7 +90,7 @@ export function HiAnimeSpotlight({ spotlightList }: { spotlightList: Anime[] }) 
             <span className="px-1.5 py-0.5 rounded bg-white/10 text-white/90 text-[11px] font-bold">
               {current.format || "TV"}
             </span>
-            <span className="px-1.5 py-0.5 rounded bg-[#ff5c8a]/20 text-[#ff5c8a] text-[11px] font-extrabold">
+            <span className="px-1.5 py-0.5 rounded bg-[#ff2f6d]/20 text-[#ff2f6d] text-[11px] font-extrabold">
               HD
             </span>
             <span className="px-1.5 py-0.5 rounded bg-[#22c55e]/20 text-[#4ade80] text-[11px] font-bold flex items-center gap-1">
@@ -123,7 +123,7 @@ export function HiAnimeSpotlight({ spotlightList }: { spotlightList: Anime[] }) 
             {counts.sub > 0 ? (
               <Link
                 href={`/anime/${current.id}?ep=${counts.sub}`}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#ff5c8a] hover:bg-[#ff4377] text-white text-xs sm:text-sm font-bold transition-all shadow-lg shadow-[#ff5c8a]/30 cursor-pointer"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#ff2f6d] hover:bg-[#e9235e] text-white text-xs sm:text-sm font-bold transition-all shadow-lg shadow-[#ff2f6d]/30 cursor-pointer"
               >
                 <Play className="w-4 h-4 fill-white" />
                 <span>Watch Now</span>
@@ -148,14 +148,14 @@ export function HiAnimeSpotlight({ spotlightList }: { spotlightList: Anime[] }) 
         <button
           onClick={handlePrev}
           aria-label="Previous Spotlight"
-          className="w-9 h-9 rounded-md bg-[#161822]/80 hover:bg-[#ff5c8a] text-white flex items-center justify-center transition-colors cursor-pointer backdrop-blur-sm border border-white/10"
+          className="w-9 h-9 rounded-md bg-[#161822]/80 hover:bg-[#ff2f6d] text-white flex items-center justify-center transition-colors cursor-pointer backdrop-blur-sm border border-white/10"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <button
           onClick={handleNext}
           aria-label="Next Spotlight"
-          className="w-9 h-9 rounded-md bg-[#161822]/80 hover:bg-[#ff5c8a] text-white flex items-center justify-center transition-colors cursor-pointer backdrop-blur-sm border border-white/10"
+          className="w-9 h-9 rounded-md bg-[#161822]/80 hover:bg-[#ff2f6d] text-white flex items-center justify-center transition-colors cursor-pointer backdrop-blur-sm border border-white/10"
         >
           <ChevronRight className="w-5 h-5" />
         </button>

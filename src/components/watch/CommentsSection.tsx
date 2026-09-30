@@ -102,7 +102,7 @@ export function CommentsSection({
         <div className="flex items-center gap-3">
           <h3 className="text-base font-black text-white">Comments</h3>
           <span className="px-2 py-0.5 rounded bg-white/10 text-[10px] font-bold text-white/80">
-            Community Guidelines <span className="text-[#ff5c8a] ml-1">NEW</span>
+            Community Guidelines <span className="text-[#ff2f6d] ml-1">NEW</span>
           </span>
         </div>
 
@@ -122,7 +122,7 @@ export function CommentsSection({
           </select>
 
           <span className="flex items-center gap-1">
-            <MessageSquare className="w-3.5 h-3.5 text-[#ff5c8a]" />
+            <MessageSquare className="w-3.5 h-3.5 text-[#ff2f6d]" />
             <span>{comments.length} Comments</span>
           </span>
 
@@ -152,7 +152,7 @@ export function CommentsSection({
               onChange={(e) => setCommentText(e.target.value)}
               placeholder={user ? "Leave a comment" : "Sign in to join the discussion"}
               disabled={!user}
-              className="w-full bg-[#181a24] rounded-md p-3 text-xs text-white placeholder-white/40 border border-white/10 focus:border-[#ff5c8a]/50 focus:outline-none transition-colors resize-none"
+              className="w-full bg-[#181a24] rounded-md p-3 text-xs text-white placeholder-white/40 border border-white/10 focus:border-[#ff2f6d]/50 focus:outline-none transition-colors resize-none"
             />
             <button
               type="button"
@@ -170,7 +170,7 @@ export function CommentsSection({
                 type="checkbox"
                 checked={isSpoiler}
                 onChange={(e) => setIsSpoiler(e.target.checked)}
-                className="rounded bg-[#1b1e27] border-white/20 text-[#ff5c8a] focus:ring-0 cursor-pointer"
+                className="rounded bg-[#1b1e27] border-white/20 text-[#ff2f6d] focus:ring-0 cursor-pointer"
               />
               <span>Spoiler?</span>
             </label>
@@ -178,7 +178,7 @@ export function CommentsSection({
             <button
               type="submit"
               disabled={!user || !commentText.trim()}
-              className="px-4 py-1.5 rounded-md bg-[#ff5c8a] hover:bg-[#ff4377] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold transition-all shadow-sm shadow-[#ff5c8a]/20 cursor-pointer"
+              className="px-4 py-1.5 rounded-md bg-[#ff2f6d] hover:bg-[#e9235e] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold transition-all shadow-sm shadow-[#ff2f6d]/20 cursor-pointer"
             >
               Comment
             </button>
@@ -220,7 +220,7 @@ export function CommentsSection({
                     </span>
                     <button
                       onClick={() => toggleSpoilerReveal(comment.id)}
-                      className="text-[#ff5c8a] font-bold text-[11px] hover:underline cursor-pointer"
+                      className="text-[#ff2f6d] font-bold text-[11px] hover:underline cursor-pointer"
                     >
                       Reveal
                     </button>

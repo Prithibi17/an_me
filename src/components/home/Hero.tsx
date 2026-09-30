@@ -84,7 +84,7 @@ export function Hero({ featured }: HeroProps) {
         <div className="max-w-xl lg:max-w-2xl flex flex-col gap-3">
           {/* Badge */}
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded bg-[#7657FF]/20 border border-[#7657FF]/40 text-[#866DFF] text-xs font-bold tracking-wider uppercase">
+            <span className="px-2.5 py-1 rounded bg-[#7c3cff]/20 border border-[#7c3cff]/40 text-[#9066ff] text-xs font-bold tracking-wider uppercase">
               #{currentIndex + 1} Trending
             </span>
           </div>
@@ -114,7 +114,7 @@ export function Hero({ featured }: HeroProps) {
 
           {/* Genres */}
           {genres && (
-            <p className="text-xs md:text-sm font-medium text-[#7657FF]">
+            <p className="text-xs md:text-sm font-medium text-[#7c3cff]">
               {genres}
             </p>
           )}
@@ -130,7 +130,7 @@ export function Hero({ featured }: HeroProps) {
           <div className="flex items-center gap-3 pt-2">
             <Link
               href={"/anime/" + current.id + "?watch=1"}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#7657FF] hover:bg-[#866DFF] text-white font-semibold text-sm transition-all shadow-md shadow-[#7657FF]/30 hover:scale-[1.02] active:scale-[0.98]"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#7c3cff] hover:bg-[#9066ff] text-white font-semibold text-sm transition-all shadow-md shadow-[#7c3cff]/30 hover:scale-[1.02] active:scale-[0.98]"
             >
               <Play className="w-4 h-4 fill-current ml-0.5" />
               <span>Watch Now</span>
@@ -158,7 +158,7 @@ export function Hero({ featured }: HeroProps) {
                 className={cn(
                   "h-1.5 rounded-full transition-all duration-300 cursor-pointer",
                   isActive
-                    ? "w-8 bg-[#7657FF]"
+                    ? "w-8 bg-[#7c3cff]"
                     : "w-2 bg-white/25 hover:bg-white/50"
                 )}
               />

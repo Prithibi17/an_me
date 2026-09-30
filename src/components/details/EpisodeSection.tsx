@@ -73,7 +73,7 @@ export function EpisodeSection({
                   className={cn(
                     "px-2.5 py-1 rounded text-xs font-semibold transition-colors cursor-pointer",
                     activeRangeIndex === idx
-                      ? "bg-[#7657FF] text-white"
+                      ? "bg-[#7c3cff] text-white"
                       : "bg-[#161B22] text-[#9CA3AF] hover:text-[#F5F7FA]"
                   )}
                 >
@@ -91,7 +91,7 @@ export function EpisodeSection({
             placeholder="Search episodes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-8 pl-8 pr-3 rounded-lg bg-[#11151B] border border-white/10 focus:border-[#7657FF] focus:outline-none text-xs text-[#F5F7FA] placeholder-[#6B7280]"
+            className="w-full h-8 pl-8 pr-3 rounded-lg bg-[#11151B] border border-white/10 focus:border-[#7c3cff] focus:outline-none text-xs text-[#F5F7FA] placeholder-[#6B7280]"
           />
         </div>
       </div>
@@ -109,7 +109,7 @@ export function EpisodeSection({
               className={cn(
                 "group flex flex-col rounded-xl overflow-hidden bg-[#11151B] border transition-all duration-180 cursor-pointer text-left hover:-translate-y-0.5",
                 isActive
-                  ? "border-[#7657FF] shadow-md shadow-[#7657FF]/20"
+                  ? "border-[#7c3cff] shadow-md shadow-[#7c3cff]/20"
                   : "border-white/5 hover:border-white/15"
               )}
             >
@@ -143,7 +143,7 @@ export function EpisodeSection({
                     isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                   )}
                 >
-                  <div className="w-10 h-10 rounded-full bg-[#7657FF] text-white flex items-center justify-center shadow-lg">
+                  <div className="w-10 h-10 rounded-full bg-[#7c3cff] text-white flex items-center justify-center shadow-lg">
                     <Play className="w-4 h-4 fill-current ml-0.5" />
                   </div>
                 </div>
@@ -165,7 +165,7 @@ export function EpisodeSection({
                 <h4
                   className={cn(
                     "text-xs md:text-sm font-semibold truncate transition-colors",
-                    isActive ? "text-[#866DFF]" : "text-[#F5F7FA] group-hover:text-[#866DFF]"
+                    isActive ? "text-[#9066ff]" : "text-[#F5F7FA] group-hover:text-[#9066ff]"
                   )}
                 >
                   {ep.title}

@@ -29,7 +29,7 @@ export function HiAnimeTop10({ animeList }: { animeList: Anime[] }) {
               className={cn(
                 "px-2 py-0.5 rounded transition-all cursor-pointer",
                 activeTab === tab
-                  ? "bg-[#ff5c8a] text-white shadow-sm"
+                  ? "bg-[#ff2f6d] text-white shadow-sm"
                   : "text-white/60 hover:text-white"
               )}
             >
@@ -59,7 +59,7 @@ export function HiAnimeTop10({ animeList }: { animeList: Anime[] }) {
                 className={cn(
                   "font-mono text-sm font-black w-6 text-center shrink-0",
                   index === 0
-                    ? "text-[#ff5c8a]"
+                    ? "text-[#ff2f6d]"
                     : isTop3
                     ? "text-white/90"
                     : "text-white/40"
@@ -81,7 +81,7 @@ export function HiAnimeTop10({ animeList }: { animeList: Anime[] }) {
 
               {/* Info */}
               <div className="flex flex-col gap-1 min-w-0 flex-1">
-                <h4 className="text-xs font-bold text-white group-hover:text-[#ff5c8a] transition-colors truncate">
+                <h4 className="text-xs font-bold text-white group-hover:text-[#ff2f6d] transition-colors truncate">
                   {title}
                 </h4>
                 <div className="flex items-center gap-1.5 text-[10px]">

@@ -47,13 +47,13 @@ export function RelatedList({ relations, recommendations }: RelatedListProps) {
                       className="object-cover group-hover:scale-105 transition-transform duration-200"
                     />
                     <div className="absolute top-2 left-2">
-                      <span className="px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-md text-[#866DFF] text-[10px] font-bold uppercase tracking-wider border border-white/10">
+                      <span className="px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-md text-[#9066ff] text-[10px] font-bold uppercase tracking-wider border border-white/10">
                         {rel.relationType.replace(/_/g, " ")}
                       </span>
                     </div>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-xs font-semibold text-[#F5F7FA] group-hover:text-[#866DFF] truncate">
+                    <span className="text-xs font-semibold text-[#F5F7FA] group-hover:text-[#9066ff] truncate">
                       {relTitle}
                     </span>
                     <span className="text-[11px] text-[#9CA3AF]">

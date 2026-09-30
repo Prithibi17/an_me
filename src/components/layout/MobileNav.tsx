@@ -26,7 +26,7 @@ export function MobileNav() {
               href={item.href}
               className={cn(
                 "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors",
-                isActive ? "text-[#7657FF]" : "text-[#9CA3AF] hover:text-[#F5F7FA]"
+                isActive ? "text-[#7c3cff]" : "text-[#9CA3AF] hover:text-[#F5F7FA]"
               )}
             >
               <Icon className="w-5 h-5" />

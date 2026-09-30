@@ -28,7 +28,7 @@ export function DesktopFilters({
         <select
           value={selectedGenre || ""}
           onChange={(e) => onFilterChange("genre", e.target.value || undefined)}
-          className="appearance-none h-9 px-3.5 pr-8 rounded-lg bg-[#11151B] border border-white/10 hover:border-white/20 text-xs font-semibold text-[#F5F7FA] focus:outline-none focus:border-[#7657FF] cursor-pointer"
+          className="appearance-none h-9 px-3.5 pr-8 rounded-lg bg-[#11151B] border border-white/10 hover:border-white/20 text-xs font-semibold text-[#F5F7FA] focus:outline-none focus:border-[#7c3cff] cursor-pointer"
         >
           <option value="" className="bg-[#11151B] text-[#9CA3AF]">
             Genre: All
@@ -47,7 +47,7 @@ export function DesktopFilters({
         <select
           value={selectedYear || ""}
           onChange={(e) => onFilterChange("year", e.target.value || undefined)}
-          className="appearance-none h-9 px-3.5 pr-8 rounded-lg bg-[#11151B] border border-white/10 hover:border-white/20 text-xs font-semibold text-[#F5F7FA] focus:outline-none focus:border-[#7657FF] cursor-pointer"
+          className="appearance-none h-9 px-3.5 pr-8 rounded-lg bg-[#11151B] border border-white/10 hover:border-white/20 text-xs font-semibold text-[#F5F7FA] focus:outline-none focus:border-[#7c3cff] cursor-pointer"
         >
           <option value="" className="bg-[#11151B] text-[#9CA3AF]">
             Year: All
@@ -66,7 +66,7 @@ export function DesktopFilters({
         <select
           value={selectedSeason || ""}
           onChange={(e) => onFilterChange("season", e.target.value || undefined)}
-          className="appearance-none h-9 px-3.5 pr-8 rounded-lg bg-[#11151B] border border-white/10 hover:border-white/20 text-xs font-semibold text-[#F5F7FA] focus:outline-none focus:border-[#7657FF] cursor-pointer"
+          className="appearance-none h-9 px-3.5 pr-8 rounded-lg bg-[#11151B] border border-white/10 hover:border-white/20 text-xs font-semibold text-[#F5F7FA] focus:outline-none focus:border-[#7c3cff] cursor-pointer"
         >
           <option value="" className="bg-[#11151B] text-[#9CA3AF]">
             Season: All
@@ -85,7 +85,7 @@ export function DesktopFilters({
         <select
           value={selectedFormat || ""}
           onChange={(e) => onFilterChange("format", e.target.value || undefined)}
-          className="appearance-none h-9 px-3.5 pr-8 rounded-lg bg-[#11151B] border border-white/10 hover:border-white/20 text-xs font-semibold text-[#F5F7FA] focus:outline-none focus:border-[#7657FF] cursor-pointer"
+          className="appearance-none h-9 px-3.5 pr-8 rounded-lg bg-[#11151B] border border-white/10 hover:border-white/20 text-xs font-semibold text-[#F5F7FA] focus:outline-none focus:border-[#7c3cff] cursor-pointer"
         >
           <option value="" className="bg-[#11151B] text-[#9CA3AF]">
             Format: All
@@ -104,7 +104,7 @@ export function DesktopFilters({
         <select
           value={selectedSort || "TRENDING_DESC"}
           onChange={(e) => onFilterChange("sort", e.target.value)}
-          className="appearance-none h-9 px-3.5 pr-8 rounded-lg bg-[#11151B] border border-white/10 hover:border-white/20 text-xs font-semibold text-[#F5F7FA] focus:outline-none focus:border-[#7657FF] cursor-pointer"
+          className="appearance-none h-9 px-3.5 pr-8 rounded-lg bg-[#11151B] border border-white/10 hover:border-white/20 text-xs font-semibold text-[#F5F7FA] focus:outline-none focus:border-[#7c3cff] cursor-pointer"
         >
           {SORTS.map((s) => (
             <option key={s.value} value={s.value} className="bg-[#11151B] text-[#F5F7FA]">

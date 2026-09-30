@@ -158,7 +158,7 @@ export default function CommunityPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4 mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#ff5c8a]/15 text-[#ff5c8a] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-[#ff2f6d]/15 text-[#ff2f6d] flex items-center justify-center">
             <MessageSquare className="w-5 h-5" />
           </div>
           <div className="flex flex-col">
@@ -179,7 +179,7 @@ export default function CommunityPage() {
           onClick={() => user && setShowNewPostModal(true)}
           disabled={!user}
           title={user ? "Create a discussion" : "Log in to create a discussion"}
-          className="px-4 py-2 rounded-xl bg-[#ff5c8a] hover:bg-[#ff4377] text-white font-bold text-xs transition-all shadow-md shadow-[#ff5c8a]/20 flex items-center gap-1.5 cursor-pointer self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
+          className="px-4 py-2 rounded-xl bg-[#ff2f6d] hover:bg-[#e9235e] text-white font-bold text-xs transition-all shadow-md shadow-[#ff2f6d]/20 flex items-center gap-1.5 cursor-pointer self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Plus className="w-4 h-4" />
           <span>New Discussion</span>
@@ -199,7 +199,7 @@ export default function CommunityPage() {
                 className={cn(
                   "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap",
                   isActive
-                    ? "bg-[#ff5c8a] text-white shadow-sm shadow-[#ff5c8a]/20"
+                    ? "bg-[#ff2f6d] text-white shadow-sm shadow-[#ff2f6d]/20"
                     : "bg-[#181a24] hover:bg-[#222533] text-white/70"
                 )}
               >
@@ -217,7 +217,7 @@ export default function CommunityPage() {
             placeholder="Search discussions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-9 pl-9 pr-3 rounded-lg bg-[#181a24] border border-white/5 text-xs text-white placeholder-white/30 focus:border-[#ff5c8a]/50 focus:outline-none transition-colors"
+            className="w-full h-9 pl-9 pr-3 rounded-lg bg-[#181a24] border border-white/5 text-xs text-white placeholder-white/30 focus:border-[#ff2f6d]/50 focus:outline-none transition-colors"
           />
         </div>
       </div>
@@ -249,7 +249,7 @@ export default function CommunityPage() {
                       {post.author}
                     </span>
                     {post.badge && (
-                      <span className="px-1.5 py-0.2 rounded bg-[#ff5c8a]/20 text-[#ff5c8a] text-[9px] font-extrabold uppercase">
+                      <span className="px-1.5 py-0.2 rounded bg-[#ff2f6d]/20 text-[#ff2f6d] text-[9px] font-extrabold uppercase">
                         {post.badge}
                       </span>
                     )}
@@ -264,7 +264,7 @@ export default function CommunityPage() {
 
                 {/* Title & snippet */}
                 <div className="flex flex-col gap-1">
-                  <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-[#ff5c8a] transition-colors leading-snug">
+                  <h3 className="text-sm sm:text-base font-bold text-white group-hover:text-[#ff2f6d] transition-colors leading-snug">
                     {post.title}
                   </h3>
                   <p className="text-xs text-white/60 line-clamp-2 leading-relaxed">
@@ -278,7 +278,7 @@ export default function CommunityPage() {
                     onClick={(e) => handleLike(post.id, e)}
                     className={cn(
                       "flex items-center gap-1.5 transition-colors cursor-pointer",
-                      isLiked ? "text-[#ff5c8a] font-bold" : "hover:text-[#ff5c8a]"
+                      isLiked ? "text-[#ff2f6d] font-bold" : "hover:text-[#ff2f6d]"
                     )}
                   >
                     <Heart className={cn("w-3.5 h-3.5", isLiked && "fill-current")} />
@@ -348,7 +348,7 @@ export default function CommunityPage() {
                   selectedPost.comments.map((c, idx) => (
                     <div key={idx} className="p-2.5 rounded-lg bg-white/5 flex flex-col gap-1 text-xs">
                       <div className="flex items-center justify-between text-[10px] text-white/40">
-                        <span className="font-bold text-[#ff5c8a]">{c.author}</span>
+                        <span className="font-bold text-[#ff2f6d]">{c.author}</span>
                         <span>{c.time}</span>
                       </div>
                       <p className="text-white/80 text-xs">{c.text}</p>
@@ -365,12 +365,12 @@ export default function CommunityPage() {
                   disabled={!user}
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
-                  className="flex-1 h-9 px-3 rounded-lg bg-[#181a24] text-xs text-white placeholder-white/30 border border-white/5 focus:border-[#ff5c8a]/50 focus:outline-none transition-colors"
+                  className="flex-1 h-9 px-3 rounded-lg bg-[#181a24] text-xs text-white placeholder-white/30 border border-white/5 focus:border-[#ff2f6d]/50 focus:outline-none transition-colors"
                 />
                 <button
                   type="submit"
                   disabled={!user || !commentText.trim()}
-                  className="px-4 h-9 rounded-lg bg-[#ff5c8a] hover:bg-[#ff4377] text-white font-bold text-xs transition-colors cursor-pointer disabled:opacity-40"
+                  className="px-4 h-9 rounded-lg bg-[#ff2f6d] hover:bg-[#e9235e] text-white font-bold text-xs transition-colors cursor-pointer disabled:opacity-40"
                 >
                   <Send className="w-3.5 h-3.5" />
                 </button>
@@ -402,7 +402,7 @@ export default function CommunityPage() {
                 <select
                   value={newCategory}
                   onChange={(e) => setNewCategory(e.target.value)}
-                  className="h-9 px-3 rounded-lg bg-[#181a24] border border-white/5 text-xs text-white focus:outline-none focus:border-[#ff5c8a]/50 cursor-pointer"
+                  className="h-9 px-3 rounded-lg bg-[#181a24] border border-white/5 text-xs text-white focus:outline-none focus:border-[#ff2f6d]/50 cursor-pointer"
                 >
                   <option value="Episode Reactions">Episode Reactions</option>
                   <option value="Recommendations">Recommendations</option>
@@ -418,7 +418,7 @@ export default function CommunityPage() {
                   placeholder="e.g. My thoughts on the latest episode animation"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="h-10 px-3.5 rounded-lg bg-[#181a24] border border-white/5 text-xs text-white placeholder-white/30 focus:border-[#ff5c8a]/50 focus:outline-none transition-colors"
+                  className="h-10 px-3.5 rounded-lg bg-[#181a24] border border-white/5 text-xs text-white placeholder-white/30 focus:border-[#ff2f6d]/50 focus:outline-none transition-colors"
                 />
               </div>
 
@@ -429,14 +429,14 @@ export default function CommunityPage() {
                   placeholder="Share your discussion, review, or thoughts with the community..."
                   value={newContent}
                   onChange={(e) => setNewContent(e.target.value)}
-                  className="p-3.5 rounded-lg bg-[#181a24] border border-white/5 text-xs text-white placeholder-white/30 focus:border-[#ff5c8a]/50 focus:outline-none transition-colors resize-none"
+                  className="p-3.5 rounded-lg bg-[#181a24] border border-white/5 text-xs text-white placeholder-white/30 focus:border-[#ff2f6d]/50 focus:outline-none transition-colors resize-none"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={!newTitle.trim() || !newContent.trim()}
-                className="w-full h-10 mt-1 rounded-lg bg-[#ff5c8a] hover:bg-[#ff4377] text-white font-bold text-xs transition-all shadow-md shadow-[#ff5c8a]/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
+                className="w-full h-10 mt-1 rounded-lg bg-[#ff2f6d] hover:bg-[#e9235e] text-white font-bold text-xs transition-all shadow-md shadow-[#ff2f6d]/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
               >
                 Publish Discussion
               </button>

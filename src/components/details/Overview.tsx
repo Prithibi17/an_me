@@ -68,7 +68,7 @@ export function Overview({ anime }: OverviewProps) {
             >
               <span className="text-[#9CA3AF] font-medium">{item.label}</span>
               {item.label === "Format" ? (
-                <Link href={`/search?type=${encodeURIComponent(item.value)}`} className="text-[#F5F7FA] hover:text-[#7657FF] font-semibold text-right truncate">
+                <Link href={`/search?type=${encodeURIComponent(item.value)}`} className="text-[#F5F7FA] hover:text-[#7c3cff] font-semibold text-right truncate">
                   {item.value}
                 </Link>
               ) : (

@@ -61,7 +61,7 @@ export function MostPopularSidebar({ animeList }: { animeList: Anime[] }) {
                 </div>
 
                 <div className="flex flex-col gap-1 min-w-0">
-                  <h4 className="text-xs font-bold text-white group-hover:text-[#ff5c8a] transition-colors truncate">
+                  <h4 className="text-xs font-bold text-white group-hover:text-[#ff2f6d] transition-colors truncate">
                     {title}
                   </h4>
                   <div className="flex items-center gap-1.5 text-[10px]">
@@ -82,10 +82,10 @@ export function MostPopularSidebar({ animeList }: { animeList: Anime[] }) {
               {/* Right: + Button */}
               <button
                 onClick={(e) => handleToggle(e, item)}
-                className="w-7 h-7 rounded bg-[#1f222d] hover:bg-[#ff5c8a] hover:text-white text-white/60 flex items-center justify-center shrink-0 transition-colors cursor-pointer"
+                className="w-7 h-7 rounded bg-[#1f222d] hover:bg-[#ff2f6d] hover:text-white text-white/60 flex items-center justify-center shrink-0 transition-colors cursor-pointer"
                 title={isAdded ? "Remove from list" : "Add to list"}
               >
-                {isAdded ? <Check className="w-3.5 h-3.5 text-[#ff5c8a] group-hover:text-white" /> : <Plus className="w-3.5 h-3.5" />}
+                {isAdded ? <Check className="w-3.5 h-3.5 text-[#ff2f6d] group-hover:text-white" /> : <Plus className="w-3.5 h-3.5" />}
               </button>
               </Link>
             </div>

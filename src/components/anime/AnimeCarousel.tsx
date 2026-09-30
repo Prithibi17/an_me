@@ -43,7 +43,7 @@ export function AnimeCarousel({
           {seeAllHref && (
             <Link
               href={seeAllHref}
-              className="text-xs md:text-sm font-semibold text-[#9CA3AF] hover:text-[#7657FF] transition-colors flex items-center gap-1 group"
+              className="text-xs md:text-sm font-semibold text-[#9CA3AF] hover:text-[#7c3cff] transition-colors flex items-center gap-1 group"
             >
               <span>See All</span>
               <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />

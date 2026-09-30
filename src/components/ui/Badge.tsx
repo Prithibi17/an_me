@@ -8,7 +8,7 @@ interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 export function Badge({ variant = "secondary", className, children, ...props }: BadgeProps) {
   const variantStyles = {
-    accent: "bg-[#7657FF]/15 text-[#7657FF] border border-[#7657FF]/30",
+    accent: "bg-[#7c3cff]/15 text-[#7c3cff] border border-[#7c3cff]/30",
     rating: "bg-[#F5C451]/15 text-[#F5C451] border border-[#F5C451]/30 font-semibold",
     secondary: "bg-[#161B22] text-[#9CA3AF] border border-white/5",
     rank: "bg-[#080A0D]/80 backdrop-blur-md text-white font-mono font-bold border border-white/10",

@@ -23,6 +23,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "./BrandLogo";
 
 interface SidebarDrawerProps {
   isOpen: boolean;
@@ -115,7 +116,7 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
             onClick={onClose}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 hover:text-white text-xs font-semibold transition-colors cursor-pointer"
           >
-            <ChevronLeft className="w-4 h-4 text-[#ff5c8a]" />
+            <ChevronLeft className="w-4 h-4 text-[#ff2f6d]" />
             <span>Close menu</span>
           </button>
 
@@ -124,9 +125,7 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
             onClick={onClose}
             className="flex items-center gap-1 group"
           >
-            <span className="text-xl font-black tracking-tight text-white flex items-center">
-              An<span className="text-[#ff5c8a]">:</span>me
-            </span>
+            <BrandLogo compact />
           </Link>
         </div>
 
@@ -177,14 +176,14 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
                   className={cn(
                     "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group cursor-pointer",
                     isActive
-                      ? "bg-[#ff5c8a] text-white font-bold shadow-sm shadow-[#ff5c8a]/20"
+                      ? "bg-[#ff2f6d] text-white font-bold shadow-sm shadow-[#ff2f6d]/20"
                       : "text-white/70 hover:text-white hover:bg-white/5"
                   )}
                 >
                   <Icon
                     className={cn(
                       "w-4 h-4 transition-transform group-hover:scale-110",
-                      isActive ? "text-white" : "text-white/60 group-hover:text-[#ff5c8a]"
+                      isActive ? "text-white" : "text-white/60 group-hover:text-[#ff2f6d]"
                     )}
                   />
                   <span>{link.label}</span>
@@ -199,7 +198,7 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
               onClick={() => setGenresExpanded((prev) => !prev)}
               className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/80 hover:text-white font-bold transition-colors cursor-pointer"
             >
-              <span className="uppercase text-[11px] tracking-wider text-[#ff5c8a]">
+              <span className="uppercase text-[11px] tracking-wider text-[#ff2f6d]">
                 Genres
               </span>
               {genresExpanded ? (
@@ -218,7 +217,7 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
                       onClose();
                       router.push(`/filter?genres=${encodeURIComponent(g)}`);
                     }}
-                    className="px-2.5 py-1.5 rounded bg-[#181a24] hover:bg-[#ff5c8a] hover:text-white text-white/70 text-[11px] font-medium transition-colors text-left truncate cursor-pointer"
+                    className="px-2.5 py-1.5 rounded bg-[#181a24] hover:bg-[#ff2f6d] hover:text-white text-white/70 text-[11px] font-medium transition-colors text-left truncate cursor-pointer"
                   >
                     {g}
                   </button>

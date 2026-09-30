@@ -30,7 +30,7 @@ export function SearchBar({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full h-12 md:h-14 pl-12 pr-12 rounded-xl bg-[#11151B] border border-white/10 hover:border-white/20 focus:border-[#7657FF] focus:outline-none focus:ring-1 focus:ring-[#7657FF] text-[#F5F7FA] text-sm md:text-base placeholder-[#6B7280] shadow-sm transition-all"
+        className="w-full h-12 md:h-14 pl-12 pr-12 rounded-xl bg-[#11151B] border border-white/10 hover:border-white/20 focus:border-[#7c3cff] focus:outline-none focus:ring-1 focus:ring-[#7c3cff] text-[#F5F7FA] text-sm md:text-base placeholder-[#6B7280] shadow-sm transition-all"
       />
 
       {value && (

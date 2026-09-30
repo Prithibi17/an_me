@@ -46,7 +46,7 @@ export function ContinueWatching() {
 
                 {/* Dark Vignette */}
                 <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors flex items-center justify-center">
-                  <div className="w-10 h-10 rounded-full bg-[#7657FF] text-white flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+                  <div className="w-10 h-10 rounded-full bg-[#7c3cff] text-white flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
                     <Play className="w-4 h-4 fill-current ml-0.5" />
                   </div>
                 </div>
@@ -54,7 +54,7 @@ export function ContinueWatching() {
                 {/* Progress Bar at Bottom of Thumbnail */}
                 <div className="absolute bottom-0 inset-x-0 h-1 bg-black/60">
                   <div
-                    className="h-full bg-[#7657FF] transition-all"
+                    className="h-full bg-[#7c3cff] transition-all"
                     style={{ width: percent + "%" }}
                   />
                 </div>
@@ -63,14 +63,14 @@ export function ContinueWatching() {
               {/* Info */}
               <div className="flex items-center justify-between gap-2 px-1">
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-semibold text-[#F5F7FA] truncate group-hover:text-[#866DFF] transition-colors">
+                  <h3 className="text-sm font-semibold text-[#F5F7FA] truncate group-hover:text-[#9066ff] transition-colors">
                     {item.animeTitle}
                   </h3>
                   <p className="text-xs text-[#9CA3AF] truncate">
                     Episode {item.episode}
                   </p>
                 </div>
-                <span className="text-xs font-semibold text-[#7657FF] shrink-0">
+                <span className="text-xs font-semibold text-[#7c3cff] shrink-0">
                   {percent}%
                 </span>
               </div>

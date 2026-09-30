@@ -59,7 +59,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
 
         {/* Modal Header */}
         <div className="flex flex-col items-center text-center gap-1.5 pt-1">
-          <div className="w-10 h-10 rounded-full bg-[#ff5c8a]/15 text-[#ff5c8a] flex items-center justify-center mb-1">
+          <div className="w-10 h-10 rounded-full bg-[#ff2f6d]/15 text-[#ff2f6d] flex items-center justify-center mb-1">
             <Sparkles className="w-5 h-5" />
           </div>
           <h2 className="text-xl font-black text-white">
@@ -78,7 +78,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
             className={cn(
               "py-2 rounded-md transition-all cursor-pointer",
               tab === "login"
-                ? "bg-[#ff5c8a] text-white shadow-sm"
+                ? "bg-[#ff2f6d] text-white shadow-sm"
                 : "text-white/60 hover:text-white"
             )}
           >
@@ -90,7 +90,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
             className={cn(
               "py-2 rounded-md transition-all cursor-pointer",
               tab === "register"
-                ? "bg-[#ff5c8a] text-white shadow-sm"
+                ? "bg-[#ff2f6d] text-white shadow-sm"
                 : "text-white/60 hover:text-white"
             )}
           >
@@ -116,7 +116,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                   placeholder="e.g. OtakuMaster"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#181a24] border border-white/5 text-xs text-white placeholder-white/30 focus:border-[#ff5c8a]/50 focus:outline-none transition-colors"
+                  className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#181a24] border border-white/5 text-xs text-white placeholder-white/30 focus:border-[#ff2f6d]/50 focus:outline-none transition-colors"
                 />
               </div>
             </div>
@@ -140,7 +140,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                     setEmail(e.target.value);
                   }
                 }}
-                className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#181a24] border border-white/5 text-xs text-white placeholder-white/30 focus:border-[#ff5c8a]/50 focus:outline-none transition-colors"
+                className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#181a24] border border-white/5 text-xs text-white placeholder-white/30 focus:border-[#ff2f6d]/50 focus:outline-none transition-colors"
               />
             </div>
           </div>
@@ -152,7 +152,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                 <button
                   type="button"
                   onClick={() => alert("Password reset link sent to your email address.")}
-                  className="text-[10px] text-[#ff5c8a] hover:underline"
+                  className="text-[10px] text-[#ff2f6d] hover:underline"
                 >
                   Forgot?
                 </button>
@@ -165,7 +165,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#181a24] border border-white/5 text-xs text-white placeholder-white/30 focus:border-[#ff5c8a]/50 focus:outline-none transition-colors"
+                className="w-full h-10 pl-9 pr-3 rounded-lg bg-[#181a24] border border-white/5 text-xs text-white placeholder-white/30 focus:border-[#ff2f6d]/50 focus:outline-none transition-colors"
               />
             </div>
           </div>
@@ -174,7 +174,7 @@ export function AuthModal({ isOpen, onClose, onSuccess }: AuthModalProps) {
           <button
             type="submit"
             disabled={isSuccess || isSubmitting}
-            className="w-full h-10 mt-1 rounded-lg bg-[#ff5c8a] hover:bg-[#ff4377] text-white font-bold text-xs transition-all shadow-md shadow-[#ff5c8a]/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+            className="w-full h-10 mt-1 rounded-lg bg-[#ff2f6d] hover:bg-[#e9235e] text-white font-bold text-xs transition-all shadow-md shadow-[#ff2f6d]/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
           >
             {isSuccess ? (
               <>

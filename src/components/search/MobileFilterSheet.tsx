@@ -60,7 +60,7 @@ export function MobileFilterSheet({
                   className={cn(
                     "px-3 py-1 rounded-full text-xs font-medium transition-colors",
                     active
-                      ? "bg-[#7657FF] text-white"
+                      ? "bg-[#7c3cff] text-white"
                       : "bg-[#161B22] text-[#9CA3AF] border border-white/5"
                   )}
                 >
@@ -107,7 +107,7 @@ export function MobileFilterSheet({
                   className={cn(
                     "py-2 px-3 rounded-lg text-xs font-medium transition-colors",
                     active
-                      ? "bg-[#7657FF] text-white"
+                      ? "bg-[#7c3cff] text-white"
                       : "bg-[#161B22] text-[#9CA3AF] border border-white/5"
                   )}
                 >
@@ -135,7 +135,7 @@ export function MobileFilterSheet({
                   className={cn(
                     "px-3 py-1.5 rounded-lg text-xs font-medium transition-colors",
                     active
-                      ? "bg-[#7657FF] text-white"
+                      ? "bg-[#7c3cff] text-white"
                       : "bg-[#161B22] text-[#9CA3AF] border border-white/5"
                   )}
                 >
@@ -156,7 +156,7 @@ export function MobileFilterSheet({
           </button>
           <button
             onClick={onClose}
-            className="flex-2 py-2.5 rounded-lg bg-[#7657FF] hover:bg-[#866DFF] text-xs font-semibold text-white shadow-md shadow-[#7657FF]/30"
+            className="flex-2 py-2.5 rounded-lg bg-[#7c3cff] hover:bg-[#9066ff] text-xs font-semibold text-white shadow-md shadow-[#7c3cff]/30"
           >
             Show Results
           </button>

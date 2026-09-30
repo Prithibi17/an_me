@@ -49,7 +49,7 @@ export function DetailsTabs({
                   className={cn(
                     "text-[10px] px-1.5 py-0.5 rounded-full",
                     isActive
-                      ? "bg-[#7657FF]/30 text-[#866DFF]"
+                      ? "bg-[#7c3cff]/30 text-[#9066ff]"
                       : "bg-[#161B22] text-[#6B7280]"
                   )}
                 >
@@ -57,7 +57,7 @@ export function DetailsTabs({
                 </span>
               )}
               {isActive && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#7657FF] rounded-full" />
+                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#7c3cff] rounded-full" />
               )}
             </button>
           );

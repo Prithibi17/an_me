@@ -170,12 +170,12 @@ export function NavbarSearch({
             if (query.trim().length >= 1) setIsOpen(true);
           }}
           onKeyDown={handleKeyDown}
-          className="w-full h-9 pl-3.5 pr-20 rounded-md bg-[#1d1f27] border border-transparent focus:border-[#ff5c8a]/50 focus:outline-none text-xs text-[#F5F7FA] placeholder-white/40 transition-colors"
+          className="w-full h-9 pl-3.5 pr-20 rounded-md bg-[#1d1f27] border border-transparent focus:border-[#ff2f6d]/50 focus:outline-none text-xs text-[#F5F7FA] placeholder-white/40 transition-colors"
         />
 
         <div className="absolute right-1.5 flex items-center gap-1">
           {isLoading ? (
-            <div className="p-1.5 text-[#ff5c8a]" title="Searching...">
+            <div className="p-1.5 text-[#ff2f6d]" title="Searching...">
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
             </div>
           ) : (
@@ -208,7 +208,7 @@ export function NavbarSearch({
         <div className="absolute left-0 right-0 top-full mt-1.5 bg-[#14161f] border border-white/10 rounded-lg shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
           {isLoading && suggestions.length === 0 ? (
             <div className="p-4 text-center text-xs text-white/50 flex items-center justify-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin text-[#ff5c8a]" />
+              <Loader2 className="w-4 h-4 animate-spin text-[#ff2f6d]" />
               <span>Searching for &ldquo;{query}&rdquo;...</span>
             </div>
           ) : suggestions.length > 0 ? (
@@ -255,7 +255,7 @@ export function NavbarSearch({
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs sm:text-sm font-semibold text-white group-hover:text-[#ff5c8a] transition-colors truncate">
+                        <div className="text-xs sm:text-sm font-semibold text-white group-hover:text-[#ff2f6d] transition-colors truncate">
                           {title}
                         </div>
 
@@ -302,7 +302,7 @@ export function NavbarSearch({
               <button
                 type="button"
                 onClick={handleViewAll}
-                className="w-full py-2.5 px-3 bg-[#ff5c8a]/10 hover:bg-[#ff5c8a] text-[#ff5c8a] hover:text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer group"
+                className="w-full py-2.5 px-3 bg-[#ff2f6d]/10 hover:bg-[#ff2f6d] text-[#ff2f6d] hover:text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer group"
               >
                 <span>View all results for &ldquo;{query}&rdquo;</span>
                 <span className="group-hover:translate-x-0.5 transition-transform">
@@ -318,7 +318,7 @@ export function NavbarSearch({
               <button
                 type="button"
                 onClick={handleViewAll}
-                className="mt-2 text-[11px] text-[#ff5c8a] hover:underline cursor-pointer"
+                className="mt-2 text-[11px] text-[#ff2f6d] hover:underline cursor-pointer"
               >
                 Search all in filter page →
               </button>

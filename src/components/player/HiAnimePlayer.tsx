@@ -503,7 +503,7 @@ export function HiAnimePlayer({
                 value={epFilter}
                 onChange={(e) => setEpFilter(e.target.value)}
                 placeholder="Number of Ep"
-                className="w-full h-8 pl-8 pr-2.5 rounded bg-[#0e1015] border border-white/5 focus:border-[#ff5c8a]/50 focus:outline-none text-xs text-white placeholder-white/40 transition-colors"
+                className="w-full h-8 pl-8 pr-2.5 rounded bg-[#0e1015] border border-white/5 focus:border-[#ff2f6d]/50 focus:outline-none text-xs text-white placeholder-white/40 transition-colors"
               />
             </div>
           </div>
@@ -537,7 +537,7 @@ export function HiAnimePlayer({
                     className={cn(
                       "w-full min-h-11 lg:min-h-0 justify-center lg:justify-start text-center lg:text-left px-2 lg:px-3 py-2.5 rounded-lg lg:rounded flex items-center gap-1 lg:gap-3 border lg:border-0 border-white/10 transition-colors cursor-pointer group",
                       isActive
-                        ? "bg-[#ffbade] text-[#111] font-bold shadow-sm"
+                        ? "bg-[#ff4f86] text-[#111] font-bold shadow-sm"
                         : "text-white/70 hover:text-white hover:bg-white/5"
                     )}
                   >
@@ -578,7 +578,7 @@ export function HiAnimePlayer({
                   />
                 ) : null}
                 <div className="relative z-10 max-w-md w-full flex flex-col items-center gap-3 text-center">
-                  <span className="px-2.5 py-0.5 rounded bg-[#ff5c8a]/20 text-[#ff5c8a] font-extrabold text-[11px] uppercase tracking-wider">
+                  <span className="px-2.5 py-0.5 rounded bg-[#ff2f6d]/20 text-[#ff2f6d] font-extrabold text-[11px] uppercase tracking-wider">
                     {anime.status === "NOT_YET_RELEASED" ? "Upcoming Release" : "No Aired Episodes"}
                   </span>
                   <h3 className="text-base sm:text-lg font-black text-white line-clamp-2">
@@ -617,14 +617,14 @@ export function HiAnimePlayer({
               {/* Auto Play Toggle */}
               <button
                 onClick={toggleAutoPlay}
-                className="flex items-center gap-1 hover:text-[#ff5c8a] transition-colors cursor-pointer"
+                className="flex items-center gap-1 hover:text-[#ff2f6d] transition-colors cursor-pointer"
                 title="Automatically start playback"
               >
                 <span className="text-white/60">Auto Play</span>
                 <span
                   className={cn(
                     "px-1 py-0.2 rounded text-[10px] font-bold transition-colors",
-                    autoPlay ? "bg-[#ff5c8a]/20 text-[#ff5c8a]" : "bg-white/10 text-white/40"
+                    autoPlay ? "bg-[#ff2f6d]/20 text-[#ff2f6d]" : "bg-white/10 text-white/40"
                   )}
                 >
                   {autoPlay ? "On" : "Off"}
@@ -634,14 +634,14 @@ export function HiAnimePlayer({
               {/* Auto Next Toggle */}
               <button
                 onClick={toggleAutoNext}
-                className="flex items-center gap-1 hover:text-[#ff5c8a] transition-colors cursor-pointer"
+                className="flex items-center gap-1 hover:text-[#ff2f6d] transition-colors cursor-pointer"
                 title="Automatically advance to the next episode"
               >
                 <span className="text-white/60">Auto Next</span>
                 <span
                   className={cn(
                     "px-1 py-0.2 rounded text-[10px] font-bold transition-colors",
-                    autoNext ? "bg-[#ff5c8a]/20 text-[#ff5c8a]" : "bg-white/10 text-white/40"
+                    autoNext ? "bg-[#ff2f6d]/20 text-[#ff2f6d]" : "bg-white/10 text-white/40"
                   )}
                 >
                   {autoNext ? "On" : "Off"}
@@ -651,14 +651,14 @@ export function HiAnimePlayer({
               {/* Auto Skip Intro Toggle */}
               <button
                 onClick={toggleAutoSkipIntro}
-                className="flex items-center gap-1 hover:text-[#ff5c8a] transition-colors cursor-pointer"
+                className="flex items-center gap-1 hover:text-[#ff2f6d] transition-colors cursor-pointer"
                 title="Automatically skip opening intro theme"
               >
                 <span className="text-white/60">Auto Skip Intro</span>
                 <span
                   className={cn(
                     "px-1 py-0.2 rounded text-[10px] font-bold transition-colors",
-                    autoSkipIntro ? "bg-[#ff5c8a]/20 text-[#ff5c8a]" : "bg-white/10 text-white/40"
+                    autoSkipIntro ? "bg-[#ff2f6d]/20 text-[#ff2f6d]" : "bg-white/10 text-white/40"
                   )}
                 >
                   {autoSkipIntro ? "On" : "Off"}
@@ -672,7 +672,7 @@ export function HiAnimePlayer({
                   className={cn(
                     "px-2 py-0.5 rounded transition-all cursor-pointer",
                     track === "sub"
-                      ? "bg-[#ffbade] text-[#111] shadow-sm font-extrabold"
+                      ? "bg-[#ff4f86] text-[#111] shadow-sm font-extrabold"
                       : "text-white/60 hover:text-white"
                   )}
                   title="Switch to Japanese Audio with English Subtitles"
@@ -685,7 +685,7 @@ export function HiAnimePlayer({
                     className={cn(
                       "px-2 py-0.5 rounded transition-all cursor-pointer",
                       track === "dub"
-                        ? "bg-[#ffbade] text-[#111] shadow-sm font-extrabold"
+                        ? "bg-[#ff4f86] text-[#111] shadow-sm font-extrabold"
                         : "text-white/60 hover:text-white"
                     )}
                     title="Switch to English Dubbed Audio"
@@ -703,11 +703,11 @@ export function HiAnimePlayer({
                 onClick={handleToggleBookmark}
                 className={cn(
                   "p-1.5 rounded bg-[#1c1f28] hover:bg-white/10 transition-colors cursor-pointer",
-                  isBookmarked ? "text-[#ff5c8a]" : "text-white/70"
+                  isBookmarked ? "text-[#ff2f6d]" : "text-white/70"
                 )}
                 title={isBookmarked ? "In Watchlist" : "Add to Watchlist"}
               >
-                {isBookmarked ? <Check className="w-3.5 h-3.5 text-[#ff5c8a]" /> : <Plus className="w-3.5 h-3.5" />}
+                {isBookmarked ? <Check className="w-3.5 h-3.5 text-[#ff2f6d]" /> : <Plus className="w-3.5 h-3.5" />}
               </button>
 
               {/* Previous Episode */}
@@ -736,7 +736,7 @@ export function HiAnimePlayer({
                   setReportSubmitted(false);
                   setIsReportModalOpen(true);
                 }}
-                className="p-1.5 rounded bg-[#1c1f28] hover:bg-white/10 text-white/70 hover:text-[#ff5c8a] transition-colors cursor-pointer"
+                className="p-1.5 rounded bg-[#1c1f28] hover:bg-white/10 text-white/70 hover:text-[#ff2f6d] transition-colors cursor-pointer"
                 title="Report issue with stream"
               >
                 <Flag className="w-3.5 h-3.5" />
@@ -754,9 +754,9 @@ export function HiAnimePlayer({
           {episodes.length > 0 && (
           <div className="hidden lg:grid grid-cols-1 md:grid-cols-12 rounded-lg overflow-hidden border border-white/5 bg-[#13151b]">
             {/* Left Box (Pink/Rose info card) */}
-            <div className="md:col-span-4 p-4 bg-gradient-to-br from-[#ff5c8a]/20 via-[#ff5c8a]/10 to-[#1b1420] border-b md:border-b-0 md:border-r border-white/5 flex flex-col justify-center text-center sm:text-left gap-1">
+            <div className="md:col-span-4 p-4 bg-gradient-to-br from-[#ff2f6d]/20 via-[#ff2f6d]/10 to-[#1b1420] border-b md:border-b-0 md:border-r border-white/5 flex flex-col justify-center text-center sm:text-left gap-1">
               <span className="text-xs text-white/80">You are watching</span>
-              <span className="text-sm font-black text-[#ff5c8a]">
+              <span className="text-sm font-black text-[#ff2f6d]">
                 Episode {currentEpisode} ({track.toUpperCase()})
               </span>
               <p className="text-[11px] text-white/60 leading-relaxed pt-1">
@@ -769,7 +769,7 @@ export function HiAnimePlayer({
               {/* SUB Row */}
               <div className="flex flex-wrap items-center gap-2">
                 <div className="flex items-center gap-1.5 w-16 text-xs font-bold text-white/80 shrink-0">
-                  <Subtitles className="w-3.5 h-3.5 text-[#ff5c8a]" />
+                  <Subtitles className="w-3.5 h-3.5 text-[#ff2f6d]" />
                   <span>SUB:</span>
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5">
@@ -779,7 +779,7 @@ export function HiAnimePlayer({
                     className={cn(
                       "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                       selectedServer === "megaplay" && track === "sub"
-                        ? "bg-[#ffbade] text-[#111] shadow-sm font-extrabold"
+                        ? "bg-[#ff4f86] text-[#111] shadow-sm font-extrabold"
                         : "bg-[#1f222d] hover:bg-[#2a2e3d] text-white/80"
                     )}
                   >
@@ -792,7 +792,7 @@ export function HiAnimePlayer({
                     className={cn(
                       "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                       selectedServer === "zokoanime" && track === "sub"
-                        ? "bg-[#ffbade] text-[#111] shadow-sm font-extrabold"
+                        ? "bg-[#ff4f86] text-[#111] shadow-sm font-extrabold"
                         : "bg-[#1f222d] hover:bg-[#2a2e3d] text-white/80"
                     )}
                   >
@@ -814,7 +814,7 @@ export function HiAnimePlayer({
                     className={cn(
                       "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                       selectedServer === "megaplay" && track === "dub"
-                        ? "bg-[#ffbade] text-[#111] shadow-sm font-extrabold"
+                        ? "bg-[#ff4f86] text-[#111] shadow-sm font-extrabold"
                         : "bg-[#1f222d] hover:bg-[#2a2e3d] text-white/80"
                     )}
                   >
@@ -827,7 +827,7 @@ export function HiAnimePlayer({
                     className={cn(
                       "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                       selectedServer === "zokoanime" && track === "dub"
-                        ? "bg-[#ffbade] text-[#111] shadow-sm font-extrabold"
+                        ? "bg-[#ff4f86] text-[#111] shadow-sm font-extrabold"
                         : "bg-[#1f222d] hover:bg-[#2a2e3d] text-white/80"
                     )}
                   >
@@ -876,7 +876,7 @@ export function HiAnimePlayer({
                 <span className="px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-bold text-white/90">
                   R
                 </span>
-                <span className="px-1.5 py-0.5 rounded bg-[#ff5c8a]/20 text-[#ff5c8a] text-[10px] font-extrabold">
+                <span className="px-1.5 py-0.5 rounded bg-[#ff2f6d]/20 text-[#ff2f6d] text-[10px] font-extrabold">
                   HD
                 </span>
                 {episodes.length > 0 ? (
@@ -891,7 +891,7 @@ export function HiAnimePlayer({
                     </span>
                   </>
                 ) : (
-                  <span className="px-1.5 py-0.5 rounded bg-[#ff5c8a]/20 text-[#ff5c8a] text-[10px] font-extrabold uppercase">
+                  <span className="px-1.5 py-0.5 rounded bg-[#ff2f6d]/20 text-[#ff2f6d] text-[10px] font-extrabold uppercase">
                     Upcoming
                   </span>
                 )}
@@ -914,7 +914,7 @@ export function HiAnimePlayer({
               <button
                 type="button"
                 onClick={() => setIsSynopsisExpanded((expanded) => !expanded)}
-                className="self-start text-[11px] font-bold text-[#ff5c8a] hover:underline cursor-pointer"
+                className="self-start text-[11px] font-bold text-[#ff2f6d] hover:underline cursor-pointer"
                 aria-expanded={isSynopsisExpanded}
               >
                 {isSynopsisExpanded ? "Show less" : "More information"}
@@ -933,7 +933,7 @@ export function HiAnimePlayer({
           {/* View Detail Toggle */}
           <Link
             href={`/anime/${anime.id}/details`}
-            className="text-[#ff5c8a] hover:underline font-bold text-xs self-start cursor-pointer"
+            className="text-[#ff2f6d] hover:underline font-bold text-xs self-start cursor-pointer"
           >
             View details
           </Link>
@@ -947,7 +947,7 @@ export function HiAnimePlayer({
               </div>
               <button
                 onClick={() => alert("Thanks for voting!")}
-                className="text-white/70 hover:text-[#ff5c8a] text-[11px] font-bold transition-colors cursor-pointer"
+                className="text-white/70 hover:text-[#ff2f6d] text-[11px] font-bold transition-colors cursor-pointer"
               >
                 Vote now
               </button>
@@ -964,7 +964,7 @@ export function HiAnimePlayer({
                 className={cn(
                   "flex flex-col items-center py-2 px-1 rounded transition-colors cursor-pointer",
                   selectedReaction === "boring"
-                    ? "bg-[#ff5c8a]/20 text-[#ff5c8a]"
+                    ? "bg-[#ff2f6d]/20 text-[#ff2f6d]"
                     : "bg-[#181a24] hover:bg-[#202330] text-white/70"
                 )}
               >
@@ -977,7 +977,7 @@ export function HiAnimePlayer({
                 className={cn(
                   "flex flex-col items-center py-2 px-1 rounded transition-colors cursor-pointer",
                   selectedReaction === "great"
-                    ? "bg-[#ff5c8a]/20 text-[#ff5c8a]"
+                    ? "bg-[#ff2f6d]/20 text-[#ff2f6d]"
                     : "bg-[#181a24] hover:bg-[#202330] text-white/70"
                 )}
               >
@@ -990,7 +990,7 @@ export function HiAnimePlayer({
                 className={cn(
                   "flex flex-col items-center py-2 px-1 rounded transition-colors cursor-pointer",
                   selectedReaction === "amazing"
-                    ? "bg-[#ff5c8a]/20 text-[#ff5c8a]"
+                    ? "bg-[#ff2f6d]/20 text-[#ff2f6d]"
                     : "bg-[#181a24] hover:bg-[#202330] text-white/70"
                 )}
               >
@@ -1002,7 +1002,7 @@ export function HiAnimePlayer({
             {/* Bottom comment counter & avatar */}
             <div className="flex items-center justify-between pt-2 border-t border-white/5 text-white/60 text-[11px]">
               <div className="flex items-center gap-1.5">
-                <MessageSquare className="w-3.5 h-3.5 text-[#ff5c8a]" />
+                <MessageSquare className="w-3.5 h-3.5 text-[#ff2f6d]" />
                 <span className="font-bold">0</span>
               </div>
               <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-amber-400 to-rose-400 flex items-center justify-center text-[10px] font-black text-black">
@@ -1019,7 +1019,7 @@ export function HiAnimePlayer({
           <div className="relative w-full max-w-md bg-[#141620] border border-white/10 rounded-xl shadow-2xl p-5 flex flex-col gap-4 text-xs select-none">
             <div className="flex items-center justify-between pb-3 border-b border-white/5">
               <span className="font-bold text-sm text-white flex items-center gap-2">
-                <Flag className="w-4 h-4 text-[#ff5c8a]" />
+                <Flag className="w-4 h-4 text-[#ff2f6d]" />
                 Report Episode Issue
               </span>
               <button
@@ -1047,7 +1047,7 @@ export function HiAnimePlayer({
                     setIsReportModalOpen(false);
                     setReportSubmitted(false);
                   }}
-                  className="mt-3 px-5 py-2 rounded-lg bg-[#ff5c8a] hover:bg-[#ff4578] text-white font-bold cursor-pointer transition-colors"
+                  className="mt-3 px-5 py-2 rounded-lg bg-[#ff2f6d] hover:bg-[#e9235e] text-white font-bold cursor-pointer transition-colors"
                 >
                   Done
                 </button>
@@ -1072,7 +1072,7 @@ export function HiAnimePlayer({
                       className={cn(
                         "flex items-center gap-2.5 p-2.5 rounded-lg border cursor-pointer transition-colors",
                         reportReason === reason
-                          ? "bg-[#ff5c8a]/15 border-[#ff5c8a]/40 text-white font-semibold"
+                          ? "bg-[#ff2f6d]/15 border-[#ff2f6d]/40 text-white font-semibold"
                           : "bg-white/5 border-transparent text-white/70 hover:bg-white/10"
                       )}
                     >
@@ -1081,7 +1081,7 @@ export function HiAnimePlayer({
                         name="report_reason"
                         checked={reportReason === reason}
                         onChange={() => setReportReason(reason)}
-                        className="accent-[#ff5c8a]"
+                        className="accent-[#ff2f6d]"
                       />
                       <span>{reason}</span>
                     </label>
@@ -1099,7 +1099,7 @@ export function HiAnimePlayer({
                   <button
                     type="button"
                     onClick={() => setReportSubmitted(true)}
-                    className="px-4 py-1.5 rounded-lg bg-[#ff5c8a] hover:bg-[#ff4377] text-white font-bold cursor-pointer transition-all shadow-md shadow-[#ff5c8a]/20"
+                    className="px-4 py-1.5 rounded-lg bg-[#ff2f6d] hover:bg-[#e9235e] text-white font-bold cursor-pointer transition-all shadow-md shadow-[#ff2f6d]/20"
                   >
                     Submit Report
                   </button>
@@ -1112,8 +1112,8 @@ export function HiAnimePlayer({
 
       {/* Floating Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-lg bg-[#141620] border border-[#ff5c8a]/40 text-white text-xs font-bold shadow-2xl flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-2 duration-150">
-          <span className="w-2 h-2 rounded-full bg-[#ff5c8a] animate-pulse" />
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-lg bg-[#141620] border border-[#ff2f6d]/40 text-white text-xs font-bold shadow-2xl flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-2 duration-150">
+          <span className="w-2 h-2 rounded-full bg-[#ff2f6d] animate-pulse" />
           <span>{toastMessage}</span>
         </div>
       )}

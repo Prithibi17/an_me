@@ -263,12 +263,12 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
       <div className="w-full rounded-2xl bg-[#13151b] border border-white/5 p-4 sm:p-6 shadow-2xl mb-8 flex flex-col gap-5">
         <div className="flex items-center justify-between border-b border-white/5 pb-3">
           <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-            <FilterIcon className="w-4 h-4 text-[#ff5c8a]" />
+            <FilterIcon className="w-4 h-4 text-[#ff2f6d]" />
             Filter
           </h2>
           <button
             onClick={handleReset}
-            className="flex items-center gap-1 text-xs text-white/50 hover:text-[#ff5c8a] transition-colors cursor-pointer"
+            className="flex items-center gap-1 text-xs text-white/50 hover:text-[#ff2f6d] transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3 h-3" />
             <span>Reset</span>
@@ -283,7 +283,7 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="w-full h-8 px-2 rounded-lg bg-[#181a24] border border-white/5 text-white/90 text-xs focus:outline-none focus:border-[#ff5c8a]/50 cursor-pointer"
+              className="w-full h-8 px-2 rounded-lg bg-[#181a24] border border-white/5 text-white/90 text-xs focus:outline-none focus:border-[#ff2f6d]/50 cursor-pointer"
             >
               <option value="All">All</option>
               <option value="MOVIE">Movie</option>
@@ -301,7 +301,7 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full h-8 px-2 rounded-lg bg-[#181a24] border border-white/5 text-white/90 text-xs focus:outline-none focus:border-[#ff5c8a]/50 cursor-pointer"
+              className="w-full h-8 px-2 rounded-lg bg-[#181a24] border border-white/5 text-white/90 text-xs focus:outline-none focus:border-[#ff2f6d]/50 cursor-pointer"
             >
               <option value="All">All</option>
               <option value="FINISHED">Finished</option>
@@ -316,7 +316,7 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
             <select
               value={selectedRated}
               onChange={(e) => setSelectedRated(e.target.value)}
-              className="w-full h-8 px-2 rounded-lg bg-[#181a24] border border-white/5 text-white/90 text-xs focus:outline-none focus:border-[#ff5c8a]/50 cursor-pointer"
+              className="w-full h-8 px-2 rounded-lg bg-[#181a24] border border-white/5 text-white/90 text-xs focus:outline-none focus:border-[#ff2f6d]/50 cursor-pointer"
             >
               <option value="All">All</option>
               <option value="G">G</option>
@@ -333,7 +333,7 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
             <select
               value={selectedScore}
               onChange={(e) => setSelectedScore(e.target.value)}
-              className="w-full h-8 px-2 rounded-lg bg-[#181a24] border border-white/5 text-white/90 text-xs focus:outline-none focus:border-[#ff5c8a]/50 cursor-pointer"
+              className="w-full h-8 px-2 rounded-lg bg-[#181a24] border border-white/5 text-white/90 text-xs focus:outline-none focus:border-[#ff2f6d]/50 cursor-pointer"
             >
               <option value="All">All</option>
               <option value="(10) Masterpiece">(10) Masterpiece</option>
@@ -351,7 +351,7 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
             <select
               value={selectedSeason}
               onChange={(e) => setSelectedSeason(e.target.value)}
-              className="w-full h-8 px-2 rounded-lg bg-[#181a24] border border-white/5 text-white/90 text-xs focus:outline-none focus:border-[#ff5c8a]/50 cursor-pointer"
+              className="w-full h-8 px-2 rounded-lg bg-[#181a24] border border-white/5 text-white/90 text-xs focus:outline-none focus:border-[#ff2f6d]/50 cursor-pointer"
             >
               <option value="All">All</option>
               <option value="SPRING">Spring</option>
@@ -367,7 +367,7 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
             <select
               value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value)}
-              className="w-full h-8 px-2 rounded-lg bg-[#181a24] border border-white/5 text-white/90 text-xs focus:outline-none focus:border-[#ff5c8a]/50 cursor-pointer"
+              className="w-full h-8 px-2 rounded-lg bg-[#181a24] border border-white/5 text-white/90 text-xs focus:outline-none focus:border-[#ff2f6d]/50 cursor-pointer"
             >
               <option value="All">All</option>
               <option value="SUB">SUB</option>
@@ -385,21 +385,21 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
                 placeholder="Year"
                 value={startYear}
                 onChange={(e) => setStartYear(e.target.value)}
-                className="w-full h-8 px-1 text-center rounded bg-[#181a24] border border-white/5 text-white text-[10px] focus:outline-none focus:border-[#ff5c8a]/50 placeholder-white/30"
+                className="w-full h-8 px-1 text-center rounded bg-[#181a24] border border-white/5 text-white text-[10px] focus:outline-none focus:border-[#ff2f6d]/50 placeholder-white/30"
               />
               <input
                 type="text"
                 placeholder="Month"
                 value={startMonth}
                 onChange={(e) => setStartMonth(e.target.value)}
-                className="w-full h-8 px-1 text-center rounded bg-[#181a24] border border-white/5 text-white text-[10px] focus:outline-none focus:border-[#ff5c8a]/50 placeholder-white/30"
+                className="w-full h-8 px-1 text-center rounded bg-[#181a24] border border-white/5 text-white text-[10px] focus:outline-none focus:border-[#ff2f6d]/50 placeholder-white/30"
               />
               <input
                 type="text"
                 placeholder="Day"
                 value={startDay}
                 onChange={(e) => setStartDay(e.target.value)}
-                className="w-full h-8 px-1 text-center rounded bg-[#181a24] border border-white/5 text-white text-[10px] focus:outline-none focus:border-[#ff5c8a]/50 placeholder-white/30"
+                className="w-full h-8 px-1 text-center rounded bg-[#181a24] border border-white/5 text-white text-[10px] focus:outline-none focus:border-[#ff2f6d]/50 placeholder-white/30"
               />
             </div>
           </div>
@@ -413,21 +413,21 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
                 placeholder="Year"
                 value={endYear}
                 onChange={(e) => setEndYear(e.target.value)}
-                className="w-full h-8 px-1 text-center rounded bg-[#181a24] border border-white/5 text-white text-[10px] focus:outline-none focus:border-[#ff5c8a]/50 placeholder-white/30"
+                className="w-full h-8 px-1 text-center rounded bg-[#181a24] border border-white/5 text-white text-[10px] focus:outline-none focus:border-[#ff2f6d]/50 placeholder-white/30"
               />
               <input
                 type="text"
                 placeholder="Month"
                 value={endMonth}
                 onChange={(e) => setEndMonth(e.target.value)}
-                className="w-full h-8 px-1 text-center rounded bg-[#181a24] border border-white/5 text-white text-[10px] focus:outline-none focus:border-[#ff5c8a]/50 placeholder-white/30"
+                className="w-full h-8 px-1 text-center rounded bg-[#181a24] border border-white/5 text-white text-[10px] focus:outline-none focus:border-[#ff2f6d]/50 placeholder-white/30"
               />
               <input
                 type="text"
                 placeholder="Day"
                 value={endDay}
                 onChange={(e) => setEndDay(e.target.value)}
-                className="w-full h-8 px-1 text-center rounded bg-[#181a24] border border-white/5 text-white text-[10px] focus:outline-none focus:border-[#ff5c8a]/50 placeholder-white/30"
+                className="w-full h-8 px-1 text-center rounded bg-[#181a24] border border-white/5 text-white text-[10px] focus:outline-none focus:border-[#ff2f6d]/50 placeholder-white/30"
               />
             </div>
           </div>
@@ -438,7 +438,7 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
             <select
               value={selectedSort}
               onChange={(e) => setSelectedSort(e.target.value)}
-              className="w-full h-8 px-2 rounded-lg bg-[#181a24] border border-white/5 text-white/90 text-xs focus:outline-none focus:border-[#ff5c8a]/50 cursor-pointer"
+              className="w-full h-8 px-2 rounded-lg bg-[#181a24] border border-white/5 text-white/90 text-xs focus:outline-none focus:border-[#ff2f6d]/50 cursor-pointer"
             >
               <option value="Default">Default</option>
               <option value="Recently Added">Recently Added</option>
@@ -465,7 +465,7 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
                   className={cn(
                     "px-2.5 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer whitespace-nowrap",
                     isSelected
-                      ? "bg-[#ff5c8a] text-white shadow-sm shadow-[#ff5c8a]/30 font-bold"
+                      ? "bg-[#ff2f6d] text-white shadow-sm shadow-[#ff2f6d]/30 font-bold"
                       : "bg-[#181a24] hover:bg-[#222533] text-white/70"
                   )}
                 >
@@ -480,7 +480,7 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
         <div className="pt-1">
           <button
             onClick={() => handleApplyFilter()}
-            className="px-7 py-2 rounded-lg bg-[#ff5c8a] hover:bg-[#ff4377] text-white text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-[#ff5c8a]/25 cursor-pointer active:scale-95"
+            className="px-7 py-2 rounded-lg bg-[#ff2f6d] hover:bg-[#e9235e] text-white text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-[#ff2f6d]/25 cursor-pointer active:scale-95"
           >
             Filter
           </button>
@@ -500,9 +500,9 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
           </h1>
 
           {searchKeyword && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#ff5c8a]/15 border border-[#ff5c8a]/30 text-xs text-white">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#ff2f6d]/15 border border-[#ff2f6d]/30 text-xs text-white">
               <span className="text-white/60">Keyword:</span>
-              <span className="font-bold text-[#ff5c8a]">"{searchKeyword}"</span>
+              <span className="font-bold text-[#ff2f6d]">"{searchKeyword}"</span>
               <button
                 type="button"
                 onClick={() => {
@@ -539,7 +539,7 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
           </p>
           <button
             onClick={handleReset}
-            className="mt-2 px-4 py-1.5 rounded-lg bg-[#ff5c8a] text-white text-xs font-bold cursor-pointer"
+            className="mt-2 px-4 py-1.5 rounded-lg bg-[#ff2f6d] text-white text-xs font-bold cursor-pointer"
           >
             Reset Filters
           </button>
@@ -555,7 +555,7 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
                 <AnimeHoverPreview anime={anime} side={index % 6 < 3 ? "right" : "left"} />
                 <Link
                   href={`/anime/${anime.id}/details`}
-                  className="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-[#161822] shadow-md border border-white/5 group-hover:border-[#ff5c8a]/50 transition-all duration-300"
+                  className="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-[#161822] shadow-md border border-white/5 group-hover:border-[#ff2f6d]/50 transition-all duration-300"
                 >
                   <Image
                     src={anime.coverImage}
@@ -588,7 +588,7 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
                   <Link
                     href={`/anime/${anime.id}/details`}
                     title={title}
-                    className="text-xs sm:text-sm font-bold text-white group-hover:text-[#ff5c8a] transition-colors truncate"
+                    className="text-xs sm:text-sm font-bold text-white group-hover:text-[#ff2f6d] transition-colors truncate"
                   >
                     {title}
                   </Link>
@@ -639,7 +639,7 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
                 className={cn(
                   "w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all cursor-pointer",
                   isCurrent
-                    ? "bg-[#ff5c8a] text-white shadow-md shadow-[#ff5c8a]/30 scale-105"
+                    ? "bg-[#ff2f6d] text-white shadow-md shadow-[#ff2f6d]/30 scale-105"
                     : "bg-[#161822] hover:bg-[#222533] text-white/80"
                 )}
               >

@@ -47,14 +47,14 @@ export function TrendingPosts() {
               <div className="flex items-center gap-2">
                 <span className="text-sm">{post.avatar}</span>
                 <span className="font-bold text-white/90">{post.author}</span>
-                {post.badge && <span className="px-1 rounded bg-[#ff5c8a]/20 text-[#ff5c8a] text-[9px] font-black">{post.badge}</span>}
+                {post.badge && <span className="px-1 rounded bg-[#ff2f6d]/20 text-[#ff2f6d] text-[9px] font-black">{post.badge}</span>}
                 <span className="text-[10px] text-white/40 ml-auto">{post.timeAgo}</span>
               </div>
               <h4 className="font-bold text-white line-clamp-1">{post.title}</h4>
               <p className="text-white/50 text-[11px] line-clamp-2 leading-relaxed">{post.content}</p>
               <div className="flex items-center gap-4 text-[11px] text-white/40 pt-1">
                 <span className="flex items-center gap-1"><Heart className="w-3 h-3 text-rose-400" />{post.likes}</span>
-                <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3 text-[#ff5c8a]" />{post.replies}</span>
+                <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3 text-[#ff2f6d]" />{post.replies}</span>
               </div>
             </div>
           ))}

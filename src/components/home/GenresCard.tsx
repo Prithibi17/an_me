@@ -6,7 +6,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ALL_GENRES = [
-  { name: "Action", color: "hover:text-[#ff5c8a]" },
+  { name: "Action", color: "hover:text-[#ff2f6d]" },
   { name: "Adventure", color: "hover:text-[#38bdf8]" },
   { name: "Cars", color: "hover:text-[#4ade80]" },
   { name: "Comedy", color: "hover:text-[#facc15]" },

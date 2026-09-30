@@ -120,7 +120,7 @@ export function UpcomingCountdown({
     return (
       <span
         className={cn(
-          "inline-flex items-center gap-1 text-[10px] font-bold text-[#ff5c8a]",
+          "inline-flex items-center gap-1 text-[10px] font-bold text-[#ff2f6d]",
           className
         )}
       >
@@ -135,14 +135,14 @@ export function UpcomingCountdown({
   return (
     <div
       className={cn(
-        "w-full rounded-lg bg-gradient-to-r from-[#181a24] to-[#14161f] border border-[#ff5c8a]/20 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs",
+        "w-full rounded-lg bg-gradient-to-r from-[#181a24] to-[#14161f] border border-[#ff2f6d]/20 p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs",
         className
       )}
     >
       {/* Left: Episode info & Air Date */}
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
-          <span className="px-2 py-0.5 rounded bg-[#ff5c8a]/15 text-[#ff5c8a] font-extrabold text-[11px] uppercase tracking-wide">
+          <span className="px-2 py-0.5 rounded bg-[#ff2f6d]/15 text-[#ff2f6d] font-extrabold text-[11px] uppercase tracking-wide">
             Upcoming Episode {nextAiringEpisode.episode}
           </span>
         </div>
@@ -189,7 +189,7 @@ export function UpcomingCountdown({
           </div>
           <span className="text-white/40 font-bold">:</span>
           <div className="flex flex-col items-center bg-[#0e1017] px-2.5 py-1.5 rounded border border-white/5 min-w-[42px]">
-            <span className="text-sm font-black text-[#ff5c8a]">
+            <span className="text-sm font-black text-[#ff2f6d]">
               {String(timeLeft?.seconds || 0).padStart(2, "0")}
             </span>
             <span className="text-[9px] uppercase text-white/40 font-sans font-bold">

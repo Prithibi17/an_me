@@ -25,6 +25,7 @@ import { useAnimeNameLanguage } from "@/lib/storage/language";
 import { cn } from "@/lib/utils";
 import { NavbarSearch } from "./NavbarSearch";
 import { SidebarDrawer } from "./SidebarDrawer";
+import { BrandLogo } from "./BrandLogo";
 
 export function Navbar() {
   const router = useRouter();
@@ -74,9 +75,7 @@ export function Navbar() {
 
             {/* An:me Logo */}
             <Link href="/" className="flex items-center gap-1 group">
-              <span className="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center">
-                An<span className="text-[#ff5c8a]">:</span>me
-              </span>
+              <BrandLogo compact className="sm:h-9 sm:w-[88px] transition-transform group-hover:scale-[1.02]" />
             </Link>
           </div>
 
@@ -124,10 +123,10 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={() => setIsWatchModalOpen(true)}
-                className="flex items-center gap-1.5 hover:text-[#ff5c8a] transition-colors cursor-pointer group"
+                className="flex items-center gap-1.5 hover:text-[#ff2f6d] transition-colors cursor-pointer group"
                 title="Start or join a synchronized watch party"
               >
-                <Users className="w-4 h-4 text-[#ff5c8a] group-hover:scale-110 transition-transform" />
+                <Users className="w-4 h-4 text-[#ff2f6d] group-hover:scale-110 transition-transform" />
                 <span className="font-semibold text-white/90 group-hover:text-white">Watch Together</span>
               </button>
 
@@ -135,7 +134,7 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={handleRandom}
-                className="flex items-center gap-1 hover:text-[#ff5c8a] transition-colors cursor-pointer"
+                className="flex items-center gap-1 hover:text-[#ff2f6d] transition-colors cursor-pointer"
                 title="Random Anime"
               >
                 <Shuffle className="w-3.5 h-3.5 text-white/70" />
@@ -149,7 +148,7 @@ export function Navbar() {
                 className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10 text-[10px] font-bold text-white/90 transition-colors cursor-pointer"
                 title="Toggle Anime Name Display"
               >
-                <Languages className="w-3 h-3 text-[#ff5c8a]" />
+                <Languages className="w-3 h-3 text-[#ff2f6d]" />
                 <span>{langPreference} Anime Name</span>
               </button>
 
@@ -158,11 +157,11 @@ export function Navbar() {
                 href="/news"
                 className={cn(
                   "flex items-center gap-1.5 transition-colors cursor-pointer group",
-                  pathname === "/news" ? "text-[#ff5c8a] font-bold" : "hover:text-[#ff5c8a]"
+                  pathname === "/news" ? "text-[#ff2f6d] font-bold" : "hover:text-[#ff2f6d]"
                 )}
                 title="Anime News & Official Bulletins"
               >
-                <Newspaper className="w-3.5 h-3.5 text-white/70 group-hover:text-[#ff5c8a] transition-colors" />
+                <Newspaper className="w-3.5 h-3.5 text-white/70 group-hover:text-[#ff2f6d] transition-colors" />
                 <span>News</span>
               </Link>
 
@@ -171,11 +170,11 @@ export function Navbar() {
                 href="/community"
                 className={cn(
                   "flex items-center gap-1.5 transition-colors cursor-pointer group",
-                  pathname === "/community" ? "text-[#ff5c8a] font-bold" : "hover:text-[#ff5c8a]"
+                  pathname === "/community" ? "text-[#ff2f6d] font-bold" : "hover:text-[#ff2f6d]"
                 )}
                 title="Community Discussion Forum"
               >
-                <MessageSquare className="w-3.5 h-3.5 text-white/70 group-hover:text-[#ff5c8a] transition-colors" />
+                <MessageSquare className="w-3.5 h-3.5 text-white/70 group-hover:text-[#ff2f6d] transition-colors" />
                 <span>Community</span>
               </Link>
             </div>
@@ -186,7 +185,7 @@ export function Navbar() {
               className={cn(
                 "sm:hidden p-2 rounded-lg transition-colors cursor-pointer",
                 isMobileSearchOpen
-                  ? "text-[#ff5c8a] bg-white/10"
+                  ? "text-[#ff2f6d] bg-white/10"
                   : "text-white/80 hover:text-white hover:bg-white/5"
               )}
               aria-label="Search"
@@ -202,7 +201,7 @@ export function Navbar() {
                   onClick={() => setShowUserMenu((prev) => !prev)}
                   className="flex items-center gap-2 pl-2 pr-2.5 py-1 rounded-full bg-[#181a24] hover:bg-[#202330] border border-white/10 transition-colors cursor-pointer"
                 >
-                  <div className="w-6 h-6 rounded-full bg-[#ff5c8a] text-white font-black text-[10px] flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-[#ff2f6d] text-white font-black text-[10px] flex items-center justify-center">
                     {user.avatar || user.username.charAt(0).toUpperCase()}
                   </div>
                   <span className="text-xs font-bold text-white max-w-[90px] truncate">
@@ -252,7 +251,7 @@ export function Navbar() {
                             }}
                             className={cn(
                               "h-8 rounded-md text-base hover:bg-white/10 transition-colors disabled:opacity-50",
-                              user.avatar === avatar && "bg-[#ff5c8a]/20 ring-1 ring-[#ff5c8a]/50"
+                              user.avatar === avatar && "bg-[#ff2f6d]/20 ring-1 ring-[#ff2f6d]/50"
                             )}
                             aria-label={`Use ${avatar} avatar`}
                           >
@@ -267,7 +266,7 @@ export function Navbar() {
                       onClick={() => setShowUserMenu(false)}
                       className="px-3.5 py-2 hover:bg-white/5 text-white/80 hover:text-white flex items-center gap-2 transition-colors"
                     >
-                      <Bookmark className="w-3.5 h-3.5 text-[#ff5c8a]" />
+                      <Bookmark className="w-3.5 h-3.5 text-[#ff2f6d]" />
                       <span>Watchlist</span>
                     </Link>
 
@@ -301,7 +300,7 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={() => setIsAuthModalOpen(true)}
-                className="px-4 py-1.5 rounded-lg bg-[#ff5c8a] hover:bg-[#ff4377] text-white text-xs font-bold transition-all shadow-sm shadow-[#ff5c8a]/20 cursor-pointer"
+                className="px-4 py-1.5 rounded-lg bg-[#ff2f6d] hover:bg-[#e9235e] text-white text-xs font-bold transition-all shadow-sm shadow-[#ff2f6d]/20 cursor-pointer"
               >
                 Login
               </button>

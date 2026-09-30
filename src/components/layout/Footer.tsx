@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { MessageSquare, Send, Radio } from "lucide-react";
+import { BrandLogo } from "./BrandLogo";
 
 const ALPHABET = [
   "All",
@@ -42,9 +43,7 @@ export function Footer() {
         {/* Top: Logo + Social Buttons */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-6">
           <Link href="/" className="flex items-center gap-1">
-            <span className="text-2xl font-black tracking-tight text-white flex items-center">
-              An<span className="text-[#ff5c8a]">:</span>me
-            </span>
+            <BrandLogo />
           </Link>
 
           <div className="flex items-center gap-2">
@@ -103,7 +102,7 @@ export function Footer() {
               <Link
                 key={item}
                 href={item === "All" ? "/search" : "/search?letter=" + item}
-                className="px-2.5 py-1 rounded bg-[#161820] hover:bg-[#ff5c8a] hover:text-white text-xs font-semibold text-white/80 transition-colors"
+                className="px-2.5 py-1 rounded bg-[#161820] hover:bg-[#ff2f6d] hover:text-white text-xs font-semibold text-white/80 transition-colors"
               >
                 {item}
               </Link>
@@ -114,22 +113,22 @@ export function Footer() {
         {/* Bottom Links & Disclaimer */}
         <div className="flex flex-col gap-3 pt-2 text-xs">
           <div className="flex flex-wrap items-center gap-6 font-semibold text-white/70">
-            <Link href="/" className="hover:text-[#ff5c8a] transition-colors">
+            <Link href="/" className="hover:text-[#ff2f6d] transition-colors">
               Terms of service
             </Link>
-            <Link href="/" className="hover:text-[#ff5c8a] transition-colors">
+            <Link href="/" className="hover:text-[#ff2f6d] transition-colors">
               DMCA
             </Link>
-            <Link href="/search" className="hover:text-[#ff5c8a] transition-colors">
+            <Link href="/search" className="hover:text-[#ff2f6d] transition-colors">
               Guides
             </Link>
-            <Link href="/" className="hover:text-[#ff5c8a] transition-colors">
+            <Link href="/" className="hover:text-[#ff2f6d] transition-colors">
               Mirrors
             </Link>
-            <Link href="/" className="hover:text-[#ff5c8a] transition-colors">
+            <Link href="/" className="hover:text-[#ff2f6d] transition-colors">
               Contact
             </Link>
-            <Link href="/" className="hover:text-[#ff5c8a] transition-colors">
+            <Link href="/" className="hover:text-[#ff2f6d] transition-colors">
               Request
             </Link>
           </div>

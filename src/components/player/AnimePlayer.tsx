@@ -262,7 +262,7 @@ export function AnimePlayer({
             <h2 className="text-sm md:text-base font-bold text-[#F5F7FA] truncate max-w-xs sm:max-w-md">
               {title}
             </h2>
-            <span className="text-xs text-[#7657FF] font-semibold">
+            <span className="text-xs text-[#7c3cff] font-semibold">
               Episode {currentEpisode} {currentEpItem?.title ? "• " + currentEpItem.title : ""}
             </span>
           </div>
@@ -284,7 +284,7 @@ export function AnimePlayer({
                   className={cn(
                     "px-2.5 py-1 rounded-md transition-colors text-xs font-semibold cursor-pointer",
                     isActive
-                      ? "bg-[#7657FF] text-white shadow-sm"
+                      ? "bg-[#7c3cff] text-white shadow-sm"
                       : "text-[#9CA3AF] hover:text-[#F5F7FA]"
                   )}
                 >
@@ -303,7 +303,7 @@ export function AnimePlayer({
                 className={cn(
                   "px-3 py-1 rounded-md transition-colors uppercase tracking-wider text-xs cursor-pointer",
                   track === t
-                    ? "bg-[#7657FF] text-white shadow-sm"
+                    ? "bg-[#7c3cff] text-white shadow-sm"
                     : "text-[#9CA3AF] hover:text-[#F5F7FA]"
                 )}
               >
@@ -369,7 +369,7 @@ export function AnimePlayer({
         <button
           disabled={!nextEp}
           onClick={() => nextEp && onSelectEpisode(nextEp)}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#7657FF] hover:bg-[#866DFF] text-xs font-semibold text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-md shadow-[#7657FF]/20 cursor-pointer"
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#7c3cff] hover:bg-[#9066ff] text-xs font-semibold text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-md shadow-[#7c3cff]/20 cursor-pointer"
         >
           <span>Episode {nextEp || "-"}</span>
           <ChevronRight className="w-4 h-4" />
@@ -391,7 +391,7 @@ export function AnimePlayer({
                 className={cn(
                   "w-10 h-8 rounded-md text-xs font-mono font-semibold transition-colors cursor-pointer",
                   isActive
-                    ? "bg-[#7657FF] text-white border border-[#7657FF]"
+                    ? "bg-[#7c3cff] text-white border border-[#7c3cff]"
                     : "bg-[#11151B] hover:bg-[#161B22] text-[#9CA3AF] hover:text-[#F5F7FA] border border-white/5"
                 )}
               >

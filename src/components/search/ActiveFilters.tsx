@@ -27,7 +27,7 @@ export function ActiveFilters({
   return (
     <div className="flex flex-wrap items-center gap-2 pt-1">
       {genre && (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7657FF]/20 border border-[#7657FF]/40 text-[#866DFF] text-xs font-semibold">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7c3cff]/20 border border-[#7c3cff]/40 text-[#9066ff] text-xs font-semibold">
           <span>{genre}</span>
           <button
             onClick={() => onRemove("genre")}
@@ -40,7 +40,7 @@ export function ActiveFilters({
       )}
 
       {year && (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7657FF]/20 border border-[#7657FF]/40 text-[#866DFF] text-xs font-semibold">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7c3cff]/20 border border-[#7c3cff]/40 text-[#9066ff] text-xs font-semibold">
           <span>{year}</span>
           <button
             onClick={() => onRemove("year")}
@@ -53,7 +53,7 @@ export function ActiveFilters({
       )}
 
       {season && (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7657FF]/20 border border-[#7657FF]/40 text-[#866DFF] text-xs font-semibold">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7c3cff]/20 border border-[#7c3cff]/40 text-[#9066ff] text-xs font-semibold">
           <span>{season}</span>
           <button
             onClick={() => onRemove("season")}
@@ -66,7 +66,7 @@ export function ActiveFilters({
       )}
 
       {format && (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7657FF]/20 border border-[#7657FF]/40 text-[#866DFF] text-xs font-semibold">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#7c3cff]/20 border border-[#7c3cff]/40 text-[#9066ff] text-xs font-semibold">
           <span>{format}</span>
           <button
             onClick={() => onRemove("format")}

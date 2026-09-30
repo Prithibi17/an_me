@@ -22,7 +22,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const variantStyles = {
-      primary: "bg-[#7657FF] hover:bg-[#866DFF] text-white shadow-sm shadow-[#7657FF]/25",
+      primary: "bg-[#7c3cff] hover:bg-[#9066ff] text-white shadow-sm shadow-[#7c3cff]/25",
       secondary: "bg-[#161B22] hover:bg-[#1f2630] text-[#F5F7FA] border border-white/10",
       outline: "bg-transparent border border-white/15 hover:border-white/30 text-[#F5F7FA] hover:bg-white/5",
       ghost: "bg-transparent hover:bg-white/5 text-[#9CA3AF] hover:text-[#F5F7FA]",

@@ -39,7 +39,7 @@ export function AnimeSectionGrid({
         <h3 className="text-lg sm:text-xl font-black text-white">{title}</h3>
         <Link
           href={viewMoreHref}
-          className="flex items-center gap-1 text-xs font-bold text-white/50 hover:text-[#ff5c8a] transition-colors"
+          className="flex items-center gap-1 text-xs font-bold text-white/50 hover:text-[#ff2f6d] transition-colors"
         >
           <span>View more</span>
           <ChevronRight className="w-3.5 h-3.5" />
@@ -78,7 +78,7 @@ export function AnimeSectionGrid({
                 {/* Top Badge: HD or Status */}
                 <div className="absolute top-1.5 left-1.5 flex items-center gap-1">
                   {isUpcoming ? (
-                    <span className="px-1.5 py-0.5 rounded bg-[#ff5c8a]/90 text-white text-[9px] font-black uppercase tracking-wider">
+                    <span className="px-1.5 py-0.5 rounded bg-[#ff2f6d]/90 text-white text-[9px] font-black uppercase tracking-wider">
                       Upcoming
                     </span>
                   ) : (
@@ -119,11 +119,11 @@ export function AnimeSectionGrid({
 
               {/* Title & Format */}
               <div className="flex flex-col gap-0.5">
-                <Link href={detailHref} className="text-xs font-bold text-white hover:text-[#ff5c8a] transition-colors truncate" title={`View details for ${itemTitle}`}>
+                <Link href={detailHref} className="text-xs font-bold text-white hover:text-[#ff2f6d] transition-colors truncate" title={`View details for ${itemTitle}`}>
                   {itemTitle}
                 </Link>
                 <div className="flex items-center gap-1.5 text-[10px] text-white/50 font-semibold">
-                  <Link href={`/search?type=${encodeURIComponent(item.format || "TV")}`} className="hover:text-[#ff5c8a] transition-colors">
+                  <Link href={`/search?type=${encodeURIComponent(item.format || "TV")}`} className="hover:text-[#ff2f6d] transition-colors">
                     {item.format || "TV"}
                   </Link>
                   <span>•</span>
@@ -132,7 +132,7 @@ export function AnimeSectionGrid({
                       Episode {item.latestAiredEpisode}
                     </span>
                   ) : isUpcoming && item.nextAiringEpisode ? (
-                    <span className="text-[#ff5c8a] font-bold">
+                    <span className="text-[#ff2f6d] font-bold">
                       Ep {item.nextAiringEpisode.episode}
                     </span>
                   ) : (

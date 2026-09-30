@@ -72,7 +72,7 @@ export function RecommendedSection({
 
               {/* Title & Format */}
               <div className="flex flex-col gap-0.5">
-                <h4 className="text-xs font-bold text-white group-hover:text-[#ff5c8a] transition-colors truncate">
+                <h4 className="text-xs font-bold text-white group-hover:text-[#ff2f6d] transition-colors truncate">
                   {title}
                 </h4>
                 <div className="flex items-center gap-1.5 text-[10px] text-white/50 font-semibold">

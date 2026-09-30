@@ -62,7 +62,7 @@ function ColumnBlock({
 
               {/* Info */}
               <div className="flex flex-col gap-1 min-w-0 flex-1">
-                <h4 className="text-xs font-bold text-white group-hover:text-[#ff5c8a] transition-colors truncate">
+                <h4 className="text-xs font-bold text-white group-hover:text-[#ff2f6d] transition-colors truncate">
                   {itemTitle}
                 </h4>
                 <div className="flex items-center gap-1.5 text-[10px]">
@@ -87,7 +87,7 @@ function ColumnBlock({
       {/* View More Link */}
       <Link
         href={viewMoreHref}
-        className="flex items-center gap-1 text-[11px] font-bold text-white/50 hover:text-[#ff5c8a] pt-1 transition-colors self-start cursor-pointer"
+        className="flex items-center gap-1 text-[11px] font-bold text-white/50 hover:text-[#ff2f6d] pt-1 transition-colors self-start cursor-pointer"
       >
         <span>View more</span>
         <ChevronRight className="w-3.5 h-3.5" />

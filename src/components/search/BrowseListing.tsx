@@ -84,10 +84,10 @@ export function BrowseListing({ data, params, topAnime }: { data: AnimePageResul
                         <span className="rounded bg-black/70 px-1.5 py-0.5 text-white">{counts.total ?? "?"}</span>
                       </div>
                     </div>
-                    <h2 className="mt-2 truncate text-xs font-bold group-hover:text-[#ff5c8a]">{title}</h2>
+                    <h2 className="mt-2 truncate text-xs font-bold group-hover:text-[#ff2f6d]">{title}</h2>
                   </Link>
                   <div className="mt-1 flex gap-1.5 text-[10px] text-white/45">
-                    <Link href={`/search?type=${anime.format || "TV"}`} className="hover:text-[#ff5c8a]">{anime.format || "TV"}</Link>
+                    <Link href={`/search?type=${anime.format || "TV"}`} className="hover:text-[#ff2f6d]">{anime.format || "TV"}</Link>
                     <span>•</span><span>{anime.duration ? `${anime.duration}m` : "Unknown"}</span>
                   </div>
                 </article>

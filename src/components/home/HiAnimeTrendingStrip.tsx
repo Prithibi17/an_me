@@ -28,14 +28,14 @@ export function HiAnimeTrendingStrip({ items }: { items: Anime[] }) {
           <button
             onClick={() => handleScroll("left")}
             aria-label="Scroll left"
-            className="w-7 h-7 rounded bg-[#161822] hover:bg-[#ff5c8a] text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-7 h-7 rounded bg-[#161822] hover:bg-[#ff2f6d] text-white flex items-center justify-center transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
           <button
             onClick={() => handleScroll("right")}
             aria-label="Scroll right"
-            className="w-7 h-7 rounded bg-[#161822] hover:bg-[#ff5c8a] text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-7 h-7 rounded bg-[#161822] hover:bg-[#ff2f6d] text-white flex items-center justify-center transition-colors cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

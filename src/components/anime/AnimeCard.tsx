@@ -32,7 +32,7 @@ export function AnimeCard({ anime, showRank = false, priority = false, className
       <Link
       href={`/anime/${anime.id}/details`}
       className={cn(
-        "relative flex flex-col w-full text-left transition-transform duration-200 ease-out hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7657FF] rounded-lg"
+        "relative flex flex-col w-full text-left transition-transform duration-200 ease-out hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7c3cff] rounded-lg"
       )}
     >
       {/* Poster Container (2:3 aspect ratio) */}
@@ -48,7 +48,7 @@ export function AnimeCard({ anime, showRank = false, priority = false, className
 
         {/* Subtle Dark Gradient Overlay on Hover */}
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
-          <div className="w-10 h-10 rounded-full bg-[#7657FF] text-white flex items-center justify-center shadow-lg shadow-[#7657FF]/40 transform scale-90 group-hover:scale-100 transition-transform duration-180">
+          <div className="w-10 h-10 rounded-full bg-[#7c3cff] text-white flex items-center justify-center shadow-lg shadow-[#7c3cff]/40 transform scale-90 group-hover:scale-100 transition-transform duration-180">
             <Play className="w-4 h-4 fill-current ml-0.5" />
           </div>
         </div>
@@ -77,7 +77,7 @@ export function AnimeCard({ anime, showRank = false, priority = false, className
       <div className="mt-2.5 flex flex-col gap-0.5">
         <h3
           title={title}
-          className="text-sm md:text-base font-semibold text-[#F5F7FA] group-hover:text-[#866DFF] transition-colors duration-150 line-clamp-1 leading-snug"
+          className="text-sm md:text-base font-semibold text-[#F5F7FA] group-hover:text-[#9066ff] transition-colors duration-150 line-clamp-1 leading-snug"
         >
           {title}
         </h3>

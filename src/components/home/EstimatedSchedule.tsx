@@ -115,7 +115,7 @@ export function EstimatedSchedule({ initialSchedules = [] }: EstimatedSchedulePr
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
         <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-[#ff5c8a]" />
+          <Calendar className="w-4 h-4 text-[#ff2f6d]" />
           <h3 className="text-base font-black text-white">Estimated Schedule</h3>
           <span className="text-[10px] text-white/40 hidden sm:inline">• Real AniList Broadcast Data</span>
         </div>
@@ -135,14 +135,14 @@ export function EstimatedSchedule({ initialSchedules = [] }: EstimatedSchedulePr
               className={cn(
                 "flex flex-col items-center min-w-[70px] sm:min-w-[85px] py-2 px-2 rounded-md transition-all cursor-pointer relative",
                 isActive
-                  ? "bg-[#ff5c8a] text-white font-extrabold shadow-sm shadow-[#ff5c8a]/20"
+                  ? "bg-[#ff2f6d] text-white font-extrabold shadow-sm shadow-[#ff2f6d]/20"
                   : "bg-[#181a24] hover:bg-[#222533] text-white/70"
               )}
             >
               <div className="flex items-center gap-1">
                 <span className="text-xs font-bold">{d.day}</span>
                 {d.isToday && !isActive && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#ff5c8a]" title="Today" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#ff2f6d]" title="Today" />
                 )}
               </div>
               <span className="text-[10px] opacity-80">{d.date}</span>
@@ -155,7 +155,7 @@ export function EstimatedSchedule({ initialSchedules = [] }: EstimatedSchedulePr
       <div className="flex flex-col divide-y divide-white/5 pt-1 min-h-[140px]">
         {isLoading ? (
           <div className="py-8 flex flex-col items-center justify-center gap-2 text-white/40 text-xs">
-            <div className="w-5 h-5 border-2 border-[#ff5c8a] border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-[#ff2f6d] border-t-transparent rounded-full animate-spin" />
             <span>Loading broadcast schedule...</span>
           </div>
         ) : itemsForSelectedDay.length === 0 ? (
@@ -192,7 +192,7 @@ export function EstimatedSchedule({ initialSchedules = [] }: EstimatedSchedulePr
                   </span>
                   <Link
                     href={`/anime/${item.anime.id}/details`}
-                    className="font-bold text-white group-hover:text-[#ff5c8a] transition-colors truncate max-w-xs sm:max-w-md md:max-w-lg"
+                    className="font-bold text-white group-hover:text-[#ff2f6d] transition-colors truncate max-w-xs sm:max-w-md md:max-w-lg"
                   >
                     {title}
                   </Link>
@@ -205,7 +205,7 @@ export function EstimatedSchedule({ initialSchedules = [] }: EstimatedSchedulePr
                 {hasAired ? (
                   <Link
                     href={`/anime/${item.anime.id}?ep=${item.episode}`}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#1e202c] hover:bg-[#ff5c8a] text-white/80 hover:text-white text-[11px] font-bold transition-colors shrink-0"
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#1e202c] hover:bg-[#ff2f6d] text-white/80 hover:text-white text-[11px] font-bold transition-colors shrink-0"
                   >
                     <Play className="w-2.5 h-2.5 fill-current" />
                     <span>Episode {item.episode}</span>
@@ -215,14 +215,14 @@ export function EstimatedSchedule({ initialSchedules = [] }: EstimatedSchedulePr
                   </Link>
                 ) : (
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[10px] font-bold text-[#ff5c8a]/90 hidden md:inline">
+                    <span className="text-[10px] font-bold text-[#ff2f6d]/90 hidden md:inline">
                       {diffHours > 0 ? `in ${diffHours}h ${diffMins}m` : `in ${diffMins}m`}
                     </span>
                     <Link
                       href={`/anime/${item.anime.id}/details`}
                       className="flex items-center gap-1 px-2.5 py-1 rounded bg-white/5 hover:bg-white/10 text-white/70 hover:text-white text-[11px] font-semibold transition-colors"
                     >
-                      <Clock className="w-2.5 h-2.5 text-[#ff5c8a]" />
+                      <Clock className="w-2.5 h-2.5 text-[#ff2f6d]" />
                       <span>Episode {item.episode}</span>
                     </Link>
                   </div>
