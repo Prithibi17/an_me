@@ -46,6 +46,15 @@ interface HiAnimePlayerProps {
   partyCode?: string | null;
 }
 
+type AnikotoSource = {
+  provider: "anikoto";
+  serverName: "Server 3";
+  episode: number;
+  title: string;
+  subUrl: string | null;
+  dubUrl: string | null;
+};
+
 export function HiAnimePlayer({
   anime,
   currentEpisode,
@@ -58,7 +67,36 @@ export function HiAnimePlayer({
   const [selectedServer, setSelectedServer] = useState<string>("megaplay");
   const [track, setTrack] = useState<"sub" | "dub">("sub");
   const [availability, setAvailability] = useState<{ sub: number[]; dub: number[] } | null>(null);
-  const currentDubAvailable = Boolean(availability?.dub.includes(currentEpisode));
+  const [anikotoSource, setAnikotoSource] = useState<AnikotoSource | null>(null);
+  const [isAnikotoLoading, setIsAnikotoLoading] = useState(false);
+  const currentDubAvailable = Boolean(availability?.dub.includes(currentEpisode) || anikotoSource?.dubUrl);
+
+  useEffect(() => {
+    if (anime.countryOfOrigin !== "CN") {
+      setAnikotoSource(null);
+      setSelectedServer((server) => server === "anikoto" ? "megaplay" : server);
+      return;
+    }
+    let active = true;
+    setIsAnikotoLoading(true);
+    setAnikotoSource(null);
+    fetch(`/api/anikoto/episode?animeId=${anime.id}&episode=${currentEpisode}&origin=CN`)
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then((result) => {
+        if (!active) return;
+        const source = result.source as AnikotoSource | null;
+        setAnikotoSource(source);
+        if (!source) setSelectedServer((server) => server === "anikoto" ? "megaplay" : server);
+      })
+      .catch(() => {
+        if (active) {
+          setAnikotoSource(null);
+          setSelectedServer((server) => server === "anikoto" ? "megaplay" : server);
+        }
+      })
+      .finally(() => { if (active) setIsAnikotoLoading(false); });
+    return () => { active = false; };
+  }, [anime.countryOfOrigin, anime.id, currentEpisode]);
 
   useEffect(() => {
     if (episodes.length === 0) { setAvailability({ sub: [], dub: [] }); return; }
@@ -93,6 +131,7 @@ export function HiAnimePlayer({
 
   const handleSelectTrack = useCallback((newTrack: "sub" | "dub") => {
     if (newTrack === "dub" && !currentDubAvailable) return;
+    if (selectedServer === "anikoto" && !(newTrack === "dub" ? anikotoSource?.dubUrl : anikotoSource?.subUrl)) return;
     setTrack(newTrack);
     setHasError(false);
     setReloadKey((k) => k + 1);
@@ -101,9 +140,10 @@ export function HiAnimePlayer({
     } catch (e) {
       console.error(e);
     }
-  }, [currentDubAvailable]);
+  }, [anikotoSource, currentDubAvailable, selectedServer]);
 
   const handleSelectServer = useCallback((serverId: string, forcedTrack?: "sub" | "dub") => {
+    if (serverId === "anikoto" && !anikotoSource) return;
     if (forcedTrack === "dub" && !currentDubAvailable) return;
     setSelectedServer(serverId);
     if (forcedTrack) {
@@ -121,7 +161,7 @@ export function HiAnimePlayer({
     } catch (e) {
       console.error(e);
     }
-  }, [currentDubAvailable]);
+  }, [anikotoSource, currentDubAvailable]);
 
   const [langPreference] = useAnimeNameLanguage();
   const [autoPlay, setAutoPlay] = useState<boolean>(true);
@@ -214,16 +254,18 @@ export function HiAnimePlayer({
   };
 
   // Generate embed URL from current provider
-  const embedUrl = provider.getEmbedUrl({
-    source: "anilist",
-    animeId: anime.id,
-    episode: currentEpisode,
-    track,
-    accentColor: "ff5c8a",
-    autoplay: autoPlay,
-    asi: autoSkipIntro,
-    autonext: autoNext,
-  });
+  const embedUrl = selectedServer === "anikoto"
+    ? (track === "dub" ? anikotoSource?.dubUrl : anikotoSource?.subUrl) || ""
+    : provider.getEmbedUrl({
+        source: "anilist",
+        animeId: anime.id,
+        episode: currentEpisode,
+        track,
+        accentColor: "ff5c8a",
+        autoplay: autoPlay,
+        asi: autoSkipIntro,
+        autonext: autoNext,
+      });
 
   // PostMessage sender
   const send = useCallback((msg: Record<string, any>) => {
@@ -593,7 +635,9 @@ export function HiAnimePlayer({
                   setHasError(false);
                   setReloadKey((k) => k + 1);
                 }}
-                message="This episode stream is currently unavailable on this server. Please choose Server 2 (MegaPlay) or switch audio language below."
+                message={selectedServer === "anikoto"
+                  ? "Server 3 is currently unavailable. Try Server 1 or Server 2."
+                  : "This episode stream is currently unavailable on this server. Please try another server or audio language below."}
               />
             ) : (
               <iframe
@@ -602,7 +646,8 @@ export function HiAnimePlayer({
                 src={embedUrl}
                 width="100%"
                 height="100%"
-                allow="fullscreen; autoplay; encrypted-media"
+                allow="fullscreen; autoplay; encrypted-media; picture-in-picture"
+                referrerPolicy={selectedServer === "anikoto" ? "strict-origin-when-cross-origin" : undefined}
                 allowFullScreen
                 className="w-full h-full border-0"
               />
@@ -798,6 +843,24 @@ export function HiAnimePlayer({
                   >
                     ZokoAnime
                   </button>
+
+                  {anikotoSource?.subUrl && (
+                    <button
+                      onClick={() => handleSelectServer("anikoto", "sub")}
+                      className={cn(
+                        "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
+                        selectedServer === "anikoto" && track === "sub"
+                          ? "bg-gradient-to-r from-[#ff2f6d] to-[#7c3cff] text-white shadow-sm"
+                          : "bg-[#1f222d] hover:bg-[#2a2e3d] text-white/80"
+                      )}
+                      title="Anikoto source for this Chinese episode"
+                    >
+                      Server 3
+                    </button>
+                  )}
+                  {isAnikotoLoading && anime.countryOfOrigin === "CN" && (
+                    <span className="px-2 text-[10px] text-white/40">Checking Server 3…</span>
+                  )}
                 </div>
               </div>
 
@@ -833,6 +896,19 @@ export function HiAnimePlayer({
                   >
                     ZokoAnime
                   </button>
+                  {anikotoSource?.dubUrl && (
+                    <button
+                      onClick={() => handleSelectServer("anikoto", "dub")}
+                      className={cn(
+                        "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
+                        selectedServer === "anikoto" && track === "dub"
+                          ? "bg-gradient-to-r from-[#ff2f6d] to-[#7c3cff] text-white shadow-sm"
+                          : "bg-[#1f222d] hover:bg-[#2a2e3d] text-white/80"
+                      )}
+                    >
+                      Server 3
+                    </button>
+                  )}
                 </div>
               </div>}
             </div>

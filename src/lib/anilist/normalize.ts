@@ -92,6 +92,7 @@ export function normalizeAnime(raw: any, rank?: number): Anime {
     tags: raw.tags?.map((tag: any) => ({ name: tag.name, rank: tag.rank ?? null })) || [],
     episodes: raw.episodes || null,
     duration: raw.duration || null,
+    countryOfOrigin: raw.countryOfOrigin || null,
     status: raw.status || null,
     isAdult: Boolean(raw.isAdult),
     format: raw.format || null,

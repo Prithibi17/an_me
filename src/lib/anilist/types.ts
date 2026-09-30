@@ -26,6 +26,7 @@ export interface RelationNode {
   isAdult?: boolean;
   genres?: string[];
   duration?: number | null;
+  countryOfOrigin?: string | null;
   tags?: { name: string; rank?: number | null }[];
   coverImage?: {
     large?: string | null;
@@ -68,6 +69,7 @@ export interface Anime {
   tags?: { name: string; rank?: number | null }[];
   episodes?: number | null;
   duration?: number | null;
+  countryOfOrigin?: string | null;
   status?: string | null;
   isAdult?: boolean;
   format?: string | null;

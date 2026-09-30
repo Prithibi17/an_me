@@ -22,6 +22,7 @@ export const MEDIA_FIELDS_FRAGMENT = `
   }
   episodes
   duration
+  countryOfOrigin
   status
   isAdult
   format
