@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAnimeDetails } from "@/lib/anilist/client";
 import { getJikanAnime } from "@/lib/jikan/client";
-import { mergeAnimeMetadata } from "@/lib/data/decision";
+import { getAnikotoAnimeMetadata } from "@/lib/anikoto/client";
+import { applyEpisodeAvailability, mergeAnimeMetadata } from "@/lib/data/decision";
 
 export async function GET(request: NextRequest) {
   const id = Number(request.nextUrl.searchParams.get("id"));
@@ -11,8 +12,12 @@ export async function GET(request: NextRequest) {
   const anime = await getAnimeDetails(id);
   if (!anime) return NextResponse.json({ error: "Anime not found." }, { status: 404 });
 
-  const jikan = anime.idMal ? await getJikanAnime(anime.idMal) : null;
-  return NextResponse.json({ anime: mergeAnimeMetadata(anime, jikan) }, {
-    headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },
+  const [jikan, anikoto] = await Promise.all([
+    anime.idMal ? getJikanAnime(anime.idMal) : Promise.resolve(null),
+    anime.countryOfOrigin === "CN" ? getAnikotoAnimeMetadata(anime.id) : Promise.resolve(null),
+  ]);
+  const merged = applyEpisodeAvailability(mergeAnimeMetadata(anime, jikan), anikoto);
+  return NextResponse.json({ anime: merged }, {
+    headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
   });
 }

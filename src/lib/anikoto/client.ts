@@ -7,6 +7,9 @@ const PER_PAGE = 100;
 type CatalogRow = {
   id: number;
   ani_id?: string | number | null;
+  is_sub?: string | number | null;
+  episodes?: string | number | null;
+  status?: string | null;
 };
 
 type EpisodeRow = {
@@ -28,7 +31,14 @@ export type AnikotoEpisodeSource = {
   dubUrl: string | null;
 };
 
-let catalogCache: { expiresAt: number; byAniListId: Map<number, number> } | null = null;
+export type AnikotoAnimeMetadata = {
+  provider: "Anikoto";
+  episodes: number | null;
+  latestAiredEpisode: number;
+  status: "RELEASING" | "FINISHED";
+};
+
+let catalogCache: { expiresAt: number; byAniListId: Map<number, CatalogRow> } | null = null;
 
 async function fetchJson<T>(path: string, revalidate: number): Promise<T | null> {
   try {
@@ -52,17 +62,40 @@ async function getCatalogMap() {
       fetchJson<CatalogResponse>(`/recent-anime?page=${index + 1}&per_page=${PER_PAGE}`, 21600)
     )
   );
-  const byAniListId = new Map<number, number>();
+  const byAniListId = new Map<number, CatalogRow>();
   for (const response of responses) {
     for (const row of response?.data || []) {
       const aniListId = Number(row.ani_id);
       if (Number.isInteger(aniListId) && aniListId > 0 && Number.isInteger(row.id)) {
-        byAniListId.set(aniListId, row.id);
+        byAniListId.set(aniListId, row);
       }
     }
   }
   catalogCache = { expiresAt: Date.now() + 6 * 60 * 60 * 1000, byAniListId };
   return byAniListId;
+}
+
+function positiveInteger(value: unknown) {
+  const number = Number(value);
+  return Number.isInteger(number) && number > 0 ? number : null;
+}
+
+/** Availability evidence for a Chinese title, matched only by its exact AniList ID. */
+export async function getAnikotoAnimeMetadata(aniListId: number): Promise<AnikotoAnimeMetadata | null> {
+  if (!Number.isInteger(aniListId) || aniListId < 1) return null;
+  const row = (await getCatalogMap()).get(aniListId);
+  if (!row) return null;
+
+  const latestAiredEpisode = positiveInteger(row.is_sub);
+  if (!latestAiredEpisode) return null;
+  const episodes = positiveInteger(row.episodes);
+  const finished = /finished|completed/i.test(row.status || "");
+  return {
+    provider: "Anikoto",
+    episodes,
+    latestAiredEpisode,
+    status: finished ? "FINISHED" : "RELEASING",
+  };
 }
 
 function trustedEmbedUrl(value: unknown, track: "sub" | "dub") {
@@ -81,10 +114,10 @@ function trustedEmbedUrl(value: unknown, track: "sub" | "dub") {
 
 export async function getAnikotoEpisodeSource(aniListId: number, episode: number) {
   if (!Number.isInteger(aniListId) || aniListId < 1 || !Number.isInteger(episode) || episode < 1) return null;
-  const internalId = (await getCatalogMap()).get(aniListId);
-  if (!internalId) return null;
+  const catalogRow = (await getCatalogMap()).get(aniListId);
+  if (!catalogRow) return null;
 
-  const series = await fetchJson<SeriesResponse>(`/series/${internalId}`, 1800);
+  const series = await fetchJson<SeriesResponse>(`/series/${catalogRow.id}`, 1800);
   const row = series?.data?.episodes?.find((item) => Number(item.number) === episode);
   if (!row) return null;
 
