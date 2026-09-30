@@ -7,7 +7,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "An:me • Discover & Stream",
   description: "An:me is a cinematic anime discovery and streaming experience powered by AniList.",
-  icons: { icon: "/anme-logo.png", apple: "/anme-logo.png" },
+  icons: { icon: "/anme-icon.png", shortcut: "/anme-icon.png", apple: "/anme-icon.png" },
 };
 
 export default function RootLayout({

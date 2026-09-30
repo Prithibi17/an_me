@@ -1,5 +1,5 @@
 import React from "react";
-import { getRecentlyAiredAnime, getTrendingAnime, searchAnime } from "@/lib/anilist/client";
+import { getRecentlyAiredAnimePage, getTrendingAnime, searchAnime } from "@/lib/anilist/client";
 import type { AnimePageResult } from "@/lib/anilist/types";
 import { BrowseListing } from "@/components/search/BrowseListing";
 
@@ -30,16 +30,7 @@ export default async function FilterPage({ searchParams }: PageProps) {
   }
 
   const dataPromise: Promise<AnimePageResult> = params.view === "latest"
-    ? getRecentlyAiredAnime(page, 24).then((media) => ({
-        media,
-        pageInfo: {
-          total: media.length === 24 ? Math.max(6, page + 1) * 24 : (page - 1) * 24 + media.length,
-          perPage: 24,
-          currentPage: page,
-          lastPage: media.length === 24 ? Math.max(6, page + 1) : page,
-          hasNextPage: media.length === 24,
-        },
-      }))
+    ? getRecentlyAiredAnimePage(page, 24)
     : searchAnime({
     query: params.q?.trim() || undefined,
     sort: sort as any,

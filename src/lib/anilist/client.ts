@@ -106,50 +106,83 @@ export async function getTopRatedAnime(page = 1, perPage = 10): Promise<Anime[]>
   }
 }
 
-export async function getRecentlyAiredAnime(page = 1, perPage = 18): Promise<Anime[]> {
+export async function getRecentlyAiredAnimePage(page = 1, perPage = 18): Promise<AnimePageResult> {
   try {
-    const now = Math.floor(Date.now() / 1000);
+    // A five-minute boundary keeps Next's fetch cache useful instead of making
+    // every request unique by including the current second in the cache key.
+    const now = Math.floor(Date.now() / 300_000) * 300;
     const targetEnd = page * perPage;
-    const schedules: any[] = [];
+    const uniqueAnime: Anime[] = [];
+    const seenMediaIds = new Set<number>();
+    let sourceTotal = 0;
+    let sourceLastPage = Number.MAX_SAFE_INTEGER;
+    let sourceEventsRead = 0;
+    let apiPage = 1;
+
     // AniList pages airing events, not anime. Build one stable, globally
     // deduplicated stream first so an anime cannot move onto multiple UI pages.
-    for (let apiPage = 1; apiPage <= Math.max(3, page * 2); apiPage++) {
-      const data = await anilistRequest<{ Page: { airingSchedules: any[] } }>(RECENTLY_AIRED_QUERY, {
-        page: apiPage,
-        perPage: 50,
-        airingAt_lesser: now,
-      });
-      const batch = data.Page?.airingSchedules || [];
-      schedules.push(...batch);
-      if (batch.length < 50) break;
-      const uniqueCount = new Set(schedules.map((schedule) => schedule.media?.id).filter(Boolean)).size;
-      if (uniqueCount >= targetEnd + perPage) break;
-    }
+    while (uniqueAnime.length < targetEnd + perPage && apiPage <= sourceLastPage) {
+      const pages = Array.from(
+        { length: Math.min(4, sourceLastPage - apiPage + 1) },
+        (_, index) => apiPage + index,
+      );
+      const results = await Promise.all(pages.map((sourcePage) =>
+        anilistRequest<{ Page: { pageInfo: { total: number; lastPage: number; hasNextPage: boolean }; airingSchedules: any[] } }>(RECENTLY_AIRED_QUERY, {
+          page: sourcePage,
+          perPage: 50,
+          airingAt_lesser: now,
+        })
+      ));
 
-    const seenMediaIds = new Set<number>();
-    const uniqueAnime: Anime[] = [];
+      for (const data of results) {
+        const batch = data.Page?.airingSchedules || [];
+        sourceTotal = data.Page?.pageInfo?.total || sourceTotal;
+        sourceLastPage = data.Page?.pageInfo?.lastPage || sourceLastPage;
+        sourceEventsRead += batch.length;
 
-    for (const schedule of schedules) {
-      if (!schedule.media || seenMediaIds.has(schedule.media.id)) continue;
-      // Only include valid television/ONA/web releases with title
-      if (!schedule.media.title?.english && !schedule.media.title?.romaji) continue;
+        for (const schedule of batch) {
+          if (!schedule.media || seenMediaIds.has(schedule.media.id)) continue;
+          if (!schedule.media.title?.english && !schedule.media.title?.romaji) continue;
+          seenMediaIds.add(schedule.media.id);
+          const normalized = normalizeAnime({
+            ...schedule.media,
+            airingAt: schedule.airingAt,
+            latestEpisode: schedule.episode,
+          });
+          if (isAllowedAnime(normalized)) uniqueAnime.push(normalized);
+        }
+      }
 
-      seenMediaIds.add(schedule.media.id);
-      const normalized = normalizeAnime({
-        ...schedule.media,
-        airingAt: schedule.airingAt,
-        latestEpisode: schedule.episode,
-      });
-      if (!isAllowedAnime(normalized)) continue;
-      if (isAllowedAnime(normalized)) uniqueAnime.push(normalized);
+      apiPage += pages.length;
     }
 
     const start = (page - 1) * perPage;
-    return uniqueAnime.slice(start, start + perPage);
+    const media = uniqueAnime.slice(start, start + perPage);
+    const uniqueRatio = sourceEventsRead > 0 ? uniqueAnime.length / sourceEventsRead : 1;
+    const estimatedUniqueTotal = Math.max(uniqueAnime.length, Math.floor(sourceTotal * uniqueRatio));
+    const lastPage = Math.max(page, Math.ceil(estimatedUniqueTotal / perPage));
+
+    return {
+      media,
+      pageInfo: {
+        total: estimatedUniqueTotal,
+        perPage,
+        currentPage: page,
+        lastPage,
+        hasNextPage: page < lastPage && (media.length === perPage || apiPage <= sourceLastPage),
+      },
+    };
   } catch (err) {
     console.error("Failed to fetch recently aired anime:", err);
-    return [];
+    return {
+      media: [],
+      pageInfo: { total: 0, perPage, currentPage: page, lastPage: page, hasNextPage: false },
+    };
   }
+}
+
+export async function getRecentlyAiredAnime(page = 1, perPage = 18): Promise<Anime[]> {
+  return (await getRecentlyAiredAnimePage(page, perPage)).media;
 }
 
 export async function getAiringSchedule(

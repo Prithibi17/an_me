@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -42,11 +42,22 @@ export function BrowseListing({ data, params, topAnime }: { data: AnimePageResul
   const currentPage = data.pageInfo.currentPage || 1;
   const lastPage = Math.max(data.pageInfo.lastPage || 1, 1);
   const visiblePages = (() => {
-    if (lastPage <= 5) return Array.from({ length: lastPage }, (_, index) => index + 1);
-    if (currentPage <= 2) return [1, 2, 3, 4, 5];
-    if (currentPage >= lastPage - 2) return Array.from({ length: 6 }, (_, index) => lastPage - 5 + index);
+    if (lastPage <= 7) return Array.from({ length: lastPage }, (_, index) => index + 1);
+    if (currentPage <= 4) return [1, 2, 3, 4, 5];
+    if (currentPage >= lastPage - 3) return Array.from({ length: 5 }, (_, index) => lastPage - 4 + index);
     return Array.from({ length: 5 }, (_, index) => currentPage - 2 + index);
   })();
+
+  // Warm the routes users are most likely to click so changing pages feels
+  // immediate even though the results remain server-rendered and current.
+  useEffect(() => {
+    const candidates = new Set([...visiblePages, currentPage - 1, currentPage + 1, lastPage]);
+    candidates.forEach((number) => {
+      if (number >= 1 && number <= lastPage && number !== currentPage) {
+        router.prefetch(pageHref(params, number));
+      }
+    });
+  }, [currentPage, lastPage, params, router, visiblePages]);
   const goToPage = (target: number) => {
     const safeTarget = Math.min(lastPage, Math.max(1, target));
     if (safeTarget === currentPage || isChangingPage) return;
@@ -58,14 +69,14 @@ export function BrowseListing({ data, params, topAnime }: { data: AnimePageResul
 
   const pageButtonClass = (active = false, disabled = false) =>
     `grid h-9 w-9 place-items-center rounded-full text-xs font-bold transition-colors ${
-      active ? "bg-[#ffabd3] text-black" : "bg-[#171923] hover:bg-[#252837]"
+      active ? "bg-gradient-to-br from-[#ff2f6d] to-[#7c3cff] text-white" : "bg-[#171923] hover:bg-[#252837]"
     } ${disabled || isChangingPage ? "cursor-not-allowed opacity-30" : "cursor-pointer"}`;
 
   return (
     <main className="w-full max-w-[1720px] mx-auto min-h-screen bg-[#0a0b0e] px-3 sm:px-6 lg:px-8 py-6 text-white">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <section className="lg:col-span-8 xl:col-span-9">
-          <h1 className="mb-5 text-xl sm:text-2xl font-black text-[#ffabd3]">{listingTitle(params)}</h1>
+          <h1 className="mb-5 text-xl sm:text-2xl font-black text-[#ff4f86]">{listingTitle(params)}</h1>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-x-3 gap-y-5">
             {data.media.map((anime, index) => {
@@ -100,7 +111,12 @@ export function BrowseListing({ data, params, topAnime }: { data: AnimePageResul
           <nav className="flex justify-center items-center gap-2 py-12" aria-label="Pagination" aria-busy={isChangingPage}>
             <button type="button" aria-label="First page" disabled={currentPage <= 1 || isChangingPage} onClick={() => goToPage(1)} className={pageButtonClass(false, currentPage <= 1)}><ChevronsLeft className="h-4 w-4" /></button>
             <button type="button" aria-label="Previous page" disabled={currentPage <= 1 || isChangingPage} onClick={() => goToPage(currentPage - 1)} className={pageButtonClass(false, currentPage <= 1)}><ChevronLeft className="h-4 w-4" /></button>
-            {visiblePages[0] > 1 && <span className="text-white/40">…</span>}
+            {visiblePages[0] > 1 && (
+              <>
+                <button type="button" disabled={currentPage === 1 || isChangingPage} onClick={() => goToPage(1)} className={pageButtonClass(currentPage === 1)}>1</button>
+                <span className="text-white/40">…</span>
+              </>
+            )}
             {visiblePages.map((number) => <button type="button" key={number} disabled={number === currentPage || isChangingPage} aria-current={number === currentPage ? "page" : undefined} onClick={() => goToPage(number)} className={pageButtonClass(number === currentPage)}>{number}</button>)}
             {visiblePages.at(-1)! < lastPage && (
               <>
