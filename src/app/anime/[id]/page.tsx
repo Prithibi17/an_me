@@ -4,7 +4,8 @@ import React, { useState, useEffect, use, Suspense } from "react";
 import Link from "next/link";
 import { notFound, useSearchParams, useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { getAnimeDetails, getTrendingAnime } from "@/lib/anilist/client";
+import { getTrendingAnime } from "@/lib/anilist/client";
+import { fetchAnimeDetails } from "@/lib/data/client";
 import { Anime } from "@/lib/anilist/types";
 import { getDefaultPlaybackProvider, EpisodeItem } from "@/lib/providers";
 import { getAnimeWatchProgress } from "@/lib/storage/watch-history";
@@ -50,7 +51,7 @@ function AnimePageContent({
       setIsLoading(true);
       try {
         const [data, popular] = await Promise.all([
-          getAnimeDetails(animeId),
+          fetchAnimeDetails(animeId),
           getTrendingAnime(1, 10),
         ]);
 

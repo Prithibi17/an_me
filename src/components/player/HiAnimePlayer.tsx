@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { Anime } from "@/lib/anilist/types";
 import { EpisodeItem, AVAILABLE_SERVERS, getPlaybackProvider } from "@/lib/providers";
+import { choosePlaybackServer, nextPlaybackServer } from "@/lib/providers/decision";
 import { saveWatchProgress } from "@/lib/storage/watch-history";
 import { isAnimeInList, toggleAnimeInList } from "@/lib/storage/anime-list";
 import { useAnimeNameLanguage } from "@/lib/storage/language";
@@ -69,12 +70,13 @@ export function HiAnimePlayer({
   const [availability, setAvailability] = useState<{ sub: number[]; dub: number[] } | null>(null);
   const [anikotoSource, setAnikotoSource] = useState<AnikotoSource | null>(null);
   const [isAnikotoLoading, setIsAnikotoLoading] = useState(false);
+  const preferredServerRef = useRef<string | null>(null);
   const currentDubAvailable = Boolean(availability?.dub.includes(currentEpisode) || anikotoSource?.dubUrl);
 
   useEffect(() => {
     if (anime.countryOfOrigin !== "CN") {
       setAnikotoSource(null);
-      setSelectedServer((server) => server === "anikoto" ? "megaplay" : server);
+      setSelectedServer(choosePlaybackServer(preferredServerRef.current, false));
       return;
     }
     let active = true;
@@ -86,17 +88,18 @@ export function HiAnimePlayer({
         if (!active) return;
         const source = result.source as AnikotoSource | null;
         setAnikotoSource(source);
-        if (!source) setSelectedServer((server) => server === "anikoto" ? "megaplay" : server);
+        const sourceForTrack = Boolean(track === "dub" ? source?.dubUrl : source?.subUrl);
+        setSelectedServer(choosePlaybackServer(preferredServerRef.current, sourceForTrack));
       })
       .catch(() => {
         if (active) {
           setAnikotoSource(null);
-          setSelectedServer((server) => server === "anikoto" ? "megaplay" : server);
+          setSelectedServer(choosePlaybackServer(preferredServerRef.current, false));
         }
       })
       .finally(() => { if (active) setIsAnikotoLoading(false); });
     return () => { active = false; };
-  }, [anime.countryOfOrigin, anime.id, currentEpisode]);
+  }, [anime.countryOfOrigin, anime.id, currentEpisode, track]);
 
   useEffect(() => {
     if (episodes.length === 0) { setAvailability({ sub: [], dub: [] }); return; }
@@ -121,6 +124,7 @@ export function HiAnimePlayer({
         setTrack(savedTrack);
       }
       const savedServer = localStorage.getItem("kumo_preferred_server");
+      preferredServerRef.current = savedServer;
       if (savedServer) {
         setSelectedServer(savedServer);
       }
@@ -146,6 +150,7 @@ export function HiAnimePlayer({
     if (serverId === "anikoto" && !anikotoSource) return;
     if (forcedTrack === "dub" && !currentDubAvailable) return;
     setSelectedServer(serverId);
+    preferredServerRef.current = serverId;
     if (forcedTrack) {
       setTrack(forcedTrack);
       try {
@@ -266,6 +271,16 @@ export function HiAnimePlayer({
         asi: autoSkipIntro,
         autonext: autoNext,
       });
+
+  const tryNextServer = useCallback(() => {
+    const hasChineseSource = Boolean(track === "dub" ? anikotoSource?.dubUrl : anikotoSource?.subUrl);
+    const next = nextPlaybackServer(selectedServer, hasChineseSource);
+    setSelectedServer(next);
+    preferredServerRef.current = next;
+    setHasError(false);
+    setReloadKey((key) => key + 1);
+    try { localStorage.setItem("kumo_preferred_server", next); } catch {}
+  }, [anikotoSource, selectedServer, track]);
 
   // PostMessage sender
   const send = useCallback((msg: Record<string, any>) => {
@@ -632,8 +647,7 @@ export function HiAnimePlayer({
             ) : hasError ? (
               <PlayerError
                 onRetry={() => {
-                  setHasError(false);
-                  setReloadKey((k) => k + 1);
+                  tryNextServer();
                 }}
                 message={selectedServer === "anikoto"
                   ? "Server 3 is currently unavailable. Try Server 1 or Server 2."
@@ -650,6 +664,7 @@ export function HiAnimePlayer({
                 referrerPolicy={selectedServer === "anikoto" ? "strict-origin-when-cross-origin" : undefined}
                 allowFullScreen
                 className="w-full h-full border-0"
+                onError={() => setHasError(true)}
               />
             )}
           </div>

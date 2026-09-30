@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getAnimeDetails } from "@/lib/anilist/client";
+import { fetchAnimeDetails } from "@/lib/data/client";
 import type { Anime } from "@/lib/anilist/types";
 import { getDefaultPlaybackProvider, type EpisodeItem } from "@/lib/providers";
 import { getAnimeWatchProgress } from "@/lib/storage/watch-history";
@@ -28,7 +28,7 @@ export default function AnimeDetailsPage({ params }: { params: Promise<{ id: str
     let active = true;
     async function load() {
       try {
-        const data = await getAnimeDetails(animeId);
+        const data = await fetchAnimeDetails(animeId);
         if (!data || !active) return;
         setAnime(data);
         const list = await getDefaultPlaybackProvider().getEpisodes(

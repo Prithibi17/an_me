@@ -85,6 +85,7 @@ export interface Anime {
   latestAiredEpisode?: number | null;
   airingAt?: number | null;
   rank?: number;
+  dataSources?: string[];
 }
 
 export interface PageInfo {
