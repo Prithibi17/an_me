@@ -37,8 +37,13 @@ export function useWatchTogether(roomCode: string | null, onRemoteControl: (cont
         socket.addEventListener("message", (event) => {
           const data = JSON.parse(event.data);
           if (data.type === "joined" || data.type === "room-state") {
-            setRoom(data.room); setStatus("connected"); setError(""); attempts = 0;
-            if (data.type === "joined") callbackRef.current({ action: "sync", episode: data.room.episode, currentTime: data.room.currentTime, playing: data.room.playing });
+            setRoom((previous) => {
+              if (data.type === "joined" || !previous || previous.episode !== data.room.episode || previous.playing !== data.room.playing || Math.abs(previous.currentTime - data.room.currentTime) > 2.5) {
+                callbackRef.current({ action: "sync", episode: data.room.episode, currentTime: data.room.currentTime, playing: data.room.playing });
+              }
+              return data.room;
+            });
+            setStatus("connected"); setError(""); attempts = 0;
           } else if (data.type === "control") {
             setRoom((previous) => previous ? { ...previous, episode: data.episode, currentTime: data.currentTime, playing: data.playing } : previous);
             callbackRef.current(data);

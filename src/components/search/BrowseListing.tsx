@@ -14,7 +14,7 @@ import { HiAnimeTop10 } from "@/components/home/HiAnimeTop10";
 
 function listingTitle(params: Record<string, string | undefined>) {
   if (params.q) return `Search results for “${params.q}”`;
-  if (params.view === "latest") return "Latest Episode";
+  if (params.view === "latest") return "Latest Episodes";
   if (params.view === "new") return "New on An:me";
   if (params.genres) return `${params.genres.split(",")[0]} Anime`;
   if (params.status === "NOT_YET_RELEASED") return "Top Upcoming";

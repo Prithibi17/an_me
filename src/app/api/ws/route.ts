@@ -4,6 +4,7 @@ import {
   type WebSocket as VercelWebSocket,
   type WebSocketData,
 } from "@vercel/functions";
+import { Redis } from "@upstash/redis";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -41,6 +42,10 @@ type Room = {
   createdAt: number;
 };
 
+type StoredRoom = Omit<Room, "participants"> & {
+  participants: Array<Omit<Participant, "socket" | "disconnectTimer">>;
+};
+
 type RoomSocket = VercelWebSocket & {
   room?: Room;
   participantId?: string;
@@ -52,7 +57,40 @@ type ClientMessage = Record<string, unknown> & { type?: string };
 
 const globalRooms = globalThis as typeof globalThis & { __anmeWatchRooms?: Map<string, Room> };
 const rooms = globalRooms.__anmeWatchRooms ??= new Map<string, Room>();
+const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN ? Redis.fromEnv() : null;
 const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const roomKey = (code: string) => `anme:watch-room:${code}`;
+
+function serializeRoom(room: Room): StoredRoom {
+  return {
+    ...room,
+    participants: [...room.participants.values()].map(({ id, name, avatar, connected }) => ({ id, name, avatar, connected })),
+  };
+}
+
+function hydrateRoom(stored: StoredRoom, existing?: Room): Room {
+  const localParticipants = existing?.participants || new Map<string, Participant>();
+  const participants = new Map<string, Participant>();
+  for (const person of stored.participants) {
+    const local = localParticipants.get(person.id);
+    participants.set(person.id, { ...person, socket: local?.socket || null, disconnectTimer: local?.disconnectTimer });
+  }
+  const room = { ...stored, participants };
+  rooms.set(room.code, room);
+  for (const member of participants.values()) if (member.socket) member.socket.room = room;
+  return room;
+}
+
+async function loadRoom(code: string) {
+  if (!redis) return rooms.get(code);
+  const stored = await redis.get<StoredRoom>(roomKey(code));
+  return stored ? hydrateRoom(stored, rooms.get(code)) : undefined;
+}
+
+async function saveRoom(room: Room) {
+  rooms.set(room.code, room);
+  if (redis) await redis.set(roomKey(room.code), serializeRoom(room), { ex: 6 * 60 * 60 });
+}
 
 function identityFromToken(token: unknown): Identity | null {
   if (typeof token !== "string") return null;
@@ -119,9 +157,10 @@ function systemMessage(room: Room, text: string) {
   broadcast(room, { type: "chat", message });
 }
 
-function destroyRoom(room: Room, message?: string) {
+async function destroyRoom(room: Room, message?: string) {
   if (message) broadcast(room, { type: "ended", message });
   rooms.delete(room.code);
+  if (redis) await redis.del(roomKey(room.code));
   for (const member of room.participants.values()) {
     if (member.disconnectTimer) clearTimeout(member.disconnectTimer);
     if (member.socket) {
@@ -137,10 +176,10 @@ function destroyRoom(room: Room, message?: string) {
   room.playing = false;
 }
 
-function pruneExpiredRooms() {
+async function pruneExpiredRooms() {
   const cutoff = Date.now() - 6 * 60 * 60 * 1000;
   for (const room of rooms.values()) {
-    if (room.createdAt < cutoff) destroyRoom(room, "Room expired.");
+    if (room.createdAt < cutoff) await destroyRoom(room, "Room expired.");
   }
 }
 
@@ -154,28 +193,32 @@ function rateOkay(socket: RoomSocket, key: string, limit: number, windowMs: numb
   return true;
 }
 
-function removeDisconnectedMember(room: Room, member: Participant) {
-  if (member.connected) return;
-  room.participants.delete(member.id);
-  systemMessage(room, `${member.name} left the room.`);
-  if (room.participants.size === 0) {
-    destroyRoom(room);
+async function removeDisconnectedMember(room: Room, member: Participant) {
+  const latest = await loadRoom(room.code);
+  if (!latest) return;
+  const currentMember = latest.participants.get(member.id);
+  if (!currentMember || currentMember.connected) return;
+  latest.participants.delete(currentMember.id);
+  systemMessage(latest, `${currentMember.name} left the room.`);
+  if (latest.participants.size === 0) {
+    await destroyRoom(latest);
     return;
   }
-  if (room.hostId === member.id) {
-    const nextHost = [...room.participants.values()].find((item) => item.connected);
+  if (latest.hostId === currentMember.id) {
+    const nextHost = [...latest.participants.values()].find((item) => item.connected);
     if (nextHost) {
-      room.hostId = nextHost.id;
-      systemMessage(room, `${nextHost.name} is now the host.`);
+      latest.hostId = nextHost.id;
+      systemMessage(latest, `${nextHost.name} is now the host.`);
     } else {
-      destroyRoom(room, "The room ended because the host left.");
+      await destroyRoom(latest, "The room ended because the host left.");
       return;
     }
   }
-  broadcastState(room);
+  broadcastState(latest);
+  await saveRoom(latest);
 }
 
-function handleMessage(socket: RoomSocket, raw: WebSocketData) {
+async function handleMessage(socket: RoomSocket, raw: WebSocketData) {
   let data: ClientMessage;
   try {
     data = JSON.parse(raw.toString()) as ClientMessage;
@@ -192,7 +235,7 @@ function handleMessage(socket: RoomSocket, raw: WebSocketData) {
     const identity = identityFromToken(data.token);
     if (!identity) return send(socket, { type: "error", message: "Invalid or expired identity." });
     const code = data.type === "create" ? createRoomCode() : String(data.roomCode || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
-    let room = rooms.get(code);
+    let room = await loadRoom(code);
     if (data.type === "create") {
       const animeId = Number(data.animeId);
       const episode = Number(data.episode);
@@ -204,6 +247,7 @@ function handleMessage(socket: RoomSocket, raw: WebSocketData) {
         updatedAt: Date.now(), participants: new Map(), messages: [], createdAt: Date.now(),
       };
       rooms.set(code, room);
+      await saveRoom(room);
     }
     if (!room) return send(socket, { type: "error", message: "Room not found or it has expired." });
     if (room.participants.size >= 10 && !room.participants.has(identity.id)) return send(socket, { type: "error", message: "Room is full." });
@@ -223,6 +267,7 @@ function handleMessage(socket: RoomSocket, raw: WebSocketData) {
     send(socket, { type: data.type === "create" ? "created" : "joined", room: publicRoom(room) });
     if (!existing) systemMessage(room, `${member.name} joined the room.`);
     broadcastState(room);
+    await saveRoom(room);
     return;
   }
 
@@ -255,6 +300,7 @@ function handleMessage(socket: RoomSocket, raw: WebSocketData) {
       type: "control", action: data.action, episode: room.episode, currentTime: room.currentTime,
       playing: room.playing, serverTime: room.updatedAt,
     }, participantId);
+    await saveRoom(room);
     return;
   }
   if (data.type === "chat") {
@@ -267,6 +313,7 @@ function handleMessage(socket: RoomSocket, raw: WebSocketData) {
     };
     room.messages.push(message);
     broadcast(room, { type: "chat", message });
+    await saveRoom(room);
     return;
   }
   if (data.type === "transfer-host") {
@@ -276,29 +323,51 @@ function handleMessage(socket: RoomSocket, raw: WebSocketData) {
     room.hostId = target.id;
     systemMessage(room, `${target.name} is now the host.`);
     broadcastState(room);
+    await saveRoom(room);
     return;
   }
   if (data.type === "end-room") {
     if (!isHost) return send(socket, { type: "error", message: "Only the host can end the room." });
-    destroyRoom(room, "The host ended the room.");
+    await destroyRoom(room, "The host ended the room.");
     return;
   }
   if (data.type === "leave") socket.close();
 }
 
 export async function GET() {
-  pruneExpiredRooms();
+  await pruneExpiredRooms();
   return experimental_upgradeWebSocket((rawSocket) => {
     const socket = rawSocket as RoomSocket;
-    socket.on("message", (data) => handleMessage(socket, data));
-    socket.on("close", () => {
-      const room = socket.room;
-      const member = room?.participants.get(socket.participantId || "");
-      if (!room || !member || member.socket !== socket) return;
+    socket.on("message", (data) => { void handleMessage(socket, data); });
+    socket.on("close", async () => {
+      clearInterval(syncTimer);
+      const localRoom = socket.room;
+      if (!localRoom) return;
+      const room = await loadRoom(localRoom.code) || localRoom;
+      const member = room.participants.get(socket.participantId || "");
+      if (!member) return;
       member.connected = false;
       member.socket = null;
       broadcastState(room);
-      member.disconnectTimer = setTimeout(() => removeDisconnectedMember(room, member), 15_000);
+      await saveRoom(room);
+      member.disconnectTimer = setTimeout(() => { void removeDisconnectedMember(room, member); }, 15_000);
     });
+    const syncTimer = setInterval(async () => {
+      if (!socket.room || !socket.participantId || socket.readyState !== 1) return;
+      const latest = await loadRoom(socket.room.code);
+      if (!latest) {
+        send(socket, { type: "ended", message: "The room ended or expired." });
+        socket.close();
+        return;
+      }
+      const member = latest.participants.get(socket.participantId);
+      if (member) {
+        member.connected = true;
+        member.socket = socket;
+        socket.room = latest;
+        await saveRoom(latest);
+      }
+      send(socket, { type: "room-state", room: publicRoom(latest) });
+    }, 1000);
   }, { maxPayload: 8 * 1024 });
 }

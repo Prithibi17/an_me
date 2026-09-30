@@ -22,10 +22,11 @@ Import the repository into Vercel with the standard Next.js preset and set:
 - `TURSO_DATABASE_URL`
 - `TURSO_AUTH_TOKEN`
 - `WATCH_TOGETHER_SECRET` — a long random secret used to sign room identities
+- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` — shared Watch Together room state across Vercel instances
 
 Vercel uses the standard `next build` and `next start` scripts. Fluid compute must remain enabled for WebSocket Functions. The client connects to the same deployment at `/api/ws`; no Render, Railway, or public WebSocket URL is needed.
 
-Watch Together rooms are held in the Vercel Function instance's memory. They can reset when a function restarts or a new deployment begins, and new connections are not guaranteed to reach an existing room if Vercel scales the app to multiple instances. Durable multi-instance rooms require shared pub/sub storage; this version intentionally has no external realtime dependency.
+Watch Together room state is mirrored to Upstash Redis with a six-hour TTL so reconnects and host transfers continue across Vercel Function instances. Ending a room deletes its Redis key immediately.
 
 ## Watch Together security
 

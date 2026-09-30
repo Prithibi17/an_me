@@ -18,6 +18,7 @@ import { GenresCard } from "@/components/home/GenresCard";
 import { HiAnimeTop10 } from "@/components/home/HiAnimeTop10";
 import { TrendingPosts } from "@/components/home/TrendingPosts";
 import { ContinueWatching } from "@/components/home/ContinueWatching";
+import { LiveLatestEpisodes } from "@/components/home/LiveLatestEpisodes";
 
 export const revalidate = 180; // ISR cache 3 minutes
 
@@ -69,12 +70,7 @@ export default async function HomePage() {
           {/* Left Column (~75% width on desktop) */}
           <div className="lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
             {/* Latest Episode - Strictly real aired episodes with airingAt <= now */}
-            <AnimeSectionGrid
-              title="Latest Episode"
-              items={recentlyAired}
-              viewMoreHref="/search?view=latest"
-              isLatestSection={true}
-            />
+            <LiveLatestEpisodes initialItems={recentlyAired} />
 
             {/* New on An:me */}
             <AnimeSectionGrid
