@@ -147,7 +147,6 @@ export function HiAnimePlayer({
   }, [anikotoSource, currentDubAvailable, selectedServer]);
 
   const handleSelectServer = useCallback((serverId: string, forcedTrack?: "sub" | "dub") => {
-    if (serverId === "anikoto" && !anikotoSource) return;
     if (forcedTrack === "dub" && !currentDubAvailable) return;
     setSelectedServer(serverId);
     preferredServerRef.current = serverId;
@@ -644,7 +643,7 @@ export function HiAnimePlayer({
                   <UpcomingCountdown nextAiringEpisode={anime.nextAiringEpisode} />
                 </div>
               </div>
-            ) : hasError ? (
+            ) : hasError || (selectedServer === "anikoto" && !embedUrl) ? (
               <PlayerError
                 onRetry={() => {
                   tryNextServer();
@@ -859,20 +858,20 @@ export function HiAnimePlayer({
                     ZokoAnime
                   </button>
 
-                  {anikotoSource?.subUrl && (
-                    <button
-                      onClick={() => handleSelectServer("anikoto", "sub")}
-                      className={cn(
-                        "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
-                        selectedServer === "anikoto" && track === "sub"
-                          ? "bg-gradient-to-r from-[#ff2f6d] to-[#7c3cff] text-white shadow-sm"
-                          : "bg-[#1f222d] hover:bg-[#2a2e3d] text-white/80"
-                      )}
-                      title="Anikoto source for this Chinese episode"
-                    >
-                      Server 3
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleSelectServer("anikoto", "sub")}
+                    className={cn(
+                      "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
+                      selectedServer === "anikoto" && track === "sub"
+                        ? "bg-gradient-to-r from-[#ff2f6d] to-[#7c3cff] text-white shadow-sm"
+                        : "bg-[#1f222d] hover:bg-[#2a2e3d] text-white/80"
+                    )}
+                    title={anikotoSource?.subUrl
+                      ? "Server 3 SUB source is available for this episode"
+                      : "Server 3 has no SUB source for this episode yet"}
+                  >
+                    Server 3
+                  </button>
                   {isAnikotoLoading && anime.countryOfOrigin === "CN" && (
                     <span className="px-2 text-[10px] text-white/40">Checking Server 3…</span>
                   )}

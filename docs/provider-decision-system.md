@@ -16,7 +16,7 @@ The application uses two deliberately small decision chains.
 
 `valid saved choice → exact Chinese Server 3 → Server 1 → Server 2`
 
-- Server 3 exists only when the exact episode and SUB/DUB track has a validated Anikoto embed.
-- Non-Chinese anime never receive Server 3.
+- Server 3 is always shown in the SUB server row. It plays only when the exact episode has a validated Anikoto embed; otherwise it reports that the source is unavailable instead of loading an unsafe or invented URL.
+- DUB Server 3 remains hidden until that exact episode has a confirmed DUB source.
 - A failed server advances to the next available server without changing the episode.
 - Embed URLs are generated or accepted only through provider-specific validation; arbitrary iframe URLs are rejected.
