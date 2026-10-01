@@ -19,6 +19,9 @@ export function LiveLatestEpisodes({ initialItems }: { initialItems: Anime[] }) 
   }, []);
 
   useEffect(() => {
+    // Replace potentially stale ISR data as soon as the client hydrates. The
+    // endpoint is uncached and already includes current provider availability.
+    void refresh();
     const interval = window.setInterval(refresh, 60_000);
     const onVisible = () => { if (document.visibilityState === "visible") void refresh(); };
     window.addEventListener("focus", refresh);
