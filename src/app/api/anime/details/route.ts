@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
   const [jikan, anikoto] = await Promise.all([
     anime.idMal ? getJikanAnime(anime.idMal) : Promise.resolve(null),
-    anime.countryOfOrigin === "CN" ? getAnikotoAnimeMetadata(anime.id) : Promise.resolve(null),
+    getAnikotoAnimeMetadata(anime.id),
   ]);
   const merged = applyEpisodeAvailability(mergeAnimeMetadata(anime, jikan), anikoto);
   return NextResponse.json({ anime: merged }, {

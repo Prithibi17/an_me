@@ -71,18 +71,17 @@ export function HiAnimePlayer({
   const [anikotoSource, setAnikotoSource] = useState<AnikotoSource | null>(null);
   const [isAnikotoLoading, setIsAnikotoLoading] = useState(false);
   const preferredServerRef = useRef<string | null>(null);
-  const currentDubAvailable = Boolean(availability?.dub.includes(currentEpisode) || anikotoSource?.dubUrl);
+  const confirmedSubCount = Math.max(anime.subEpisodeCount || 0, availability?.sub.length || 0);
+  const confirmedDubCount = Math.max(anime.dubEpisodeCount || 0, availability?.dub.length || 0);
+  const currentDubAvailable = Boolean(
+    confirmedDubCount >= currentEpisode || availability?.dub.includes(currentEpisode) || anikotoSource?.dubUrl
+  );
 
   useEffect(() => {
-    if (anime.countryOfOrigin !== "CN") {
-      setAnikotoSource(null);
-      setSelectedServer(choosePlaybackServer(preferredServerRef.current, false));
-      return;
-    }
     let active = true;
     setIsAnikotoLoading(true);
     setAnikotoSource(null);
-    fetch(`/api/anikoto/episode?animeId=${anime.id}&episode=${currentEpisode}&origin=CN`)
+    fetch(`/api/anikoto/episode?animeId=${anime.id}&episode=${currentEpisode}`)
       .then((response) => response.ok ? response.json() : Promise.reject())
       .then((result) => {
         if (!active) return;
@@ -99,7 +98,7 @@ export function HiAnimePlayer({
       })
       .finally(() => { if (active) setIsAnikotoLoading(false); });
     return () => { active = false; };
-  }, [anime.countryOfOrigin, anime.id, currentEpisode, track]);
+  }, [anime.id, currentEpisode, track]);
 
   useEffect(() => {
     if (episodes.length === 0) { setAvailability({ sub: [], dub: [] }); return; }
@@ -839,7 +838,7 @@ export function HiAnimePlayer({
                       "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                       selectedServer === "megaplay" && track === "sub"
                         ? "bg-gradient-to-r from-[#ff2f6d] to-[#ff72a1] text-white shadow-sm font-extrabold"
-                        : "bg-[#2a1721] border border-[#ff4f86]/35 hover:bg-[#3a1b2a] text-[#ff9cbb]"
+                        : "bg-gradient-to-r from-[#ff2f6d]/20 to-[#ff9f43]/20 border border-[#ff6b81]/45 hover:from-[#ff2f6d]/35 hover:to-[#ff9f43]/35 text-[#ff9eb9]"
                     )}
                   >
                     HD-1
@@ -852,7 +851,7 @@ export function HiAnimePlayer({
                       "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                       selectedServer === "zokoanime" && track === "sub"
                         ? "bg-gradient-to-r from-[#5b5ff7] to-[#8b5cf6] text-white shadow-sm font-extrabold"
-                        : "bg-[#1a1b35] border border-[#7778ff]/35 hover:bg-[#22234a] text-[#aaa9ff]"
+                        : "bg-gradient-to-r from-[#3b82f6]/20 to-[#8b5cf6]/20 border border-[#7778ff]/45 hover:from-[#3b82f6]/35 hover:to-[#8b5cf6]/35 text-[#b5b4ff]"
                     )}
                   >
                     ZokoAnime
@@ -864,7 +863,7 @@ export function HiAnimePlayer({
                       "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                       selectedServer === "anikoto" && track === "sub"
                         ? "bg-gradient-to-r from-[#ff2f6d] to-[#7c3cff] text-white shadow-sm"
-                        : "bg-[#27172f] border border-[#b45cff]/35 hover:bg-[#351d42] text-[#d5a2ff]"
+                        : "bg-gradient-to-r from-[#a855f7]/20 to-[#ec4899]/20 border border-[#c05cff]/45 hover:from-[#a855f7]/35 hover:to-[#ec4899]/35 text-[#e0b1ff]"
                     )}
                     title={anikotoSource?.subUrl
                       ? "Server 3 SUB source is available for this episode"
@@ -872,7 +871,7 @@ export function HiAnimePlayer({
                   >
                     Server 3
                   </button>
-                  {isAnikotoLoading && anime.countryOfOrigin === "CN" && (
+                  {isAnikotoLoading && (
                     <span className="px-2 text-[10px] text-white/40">Checking Server 3…</span>
                   )}
                 </div>
@@ -892,7 +891,7 @@ export function HiAnimePlayer({
                       "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                       selectedServer === "megaplay" && track === "dub"
                         ? "bg-gradient-to-r from-[#16a46d] to-[#34d399] text-[#06140e] shadow-sm font-extrabold"
-                        : "bg-[#132a22] border border-[#34d399]/35 hover:bg-[#19392d] text-[#7ee5bd]"
+                        : "bg-gradient-to-r from-[#16a34a]/20 to-[#84cc16]/20 border border-[#4ade80]/45 hover:from-[#16a34a]/35 hover:to-[#84cc16]/35 text-[#8de7ae]"
                     )}
                   >
                     HD-1
@@ -905,7 +904,7 @@ export function HiAnimePlayer({
                       "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                       selectedServer === "zokoanime" && track === "dub"
                         ? "bg-gradient-to-r from-[#0891b2] to-[#22d3ee] text-[#041418] shadow-sm font-extrabold"
-                        : "bg-[#10282e] border border-[#22d3ee]/35 hover:bg-[#143740] text-[#74dfef]"
+                        : "bg-gradient-to-r from-[#06b6d4]/20 to-[#3b82f6]/20 border border-[#38bdf8]/45 hover:from-[#06b6d4]/35 hover:to-[#3b82f6]/35 text-[#83e6f5]"
                     )}
                   >
                     ZokoAnime
@@ -917,7 +916,7 @@ export function HiAnimePlayer({
                         "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                         selectedServer === "anikoto" && track === "dub"
                           ? "bg-gradient-to-r from-[#f59e0b] to-[#f97316] text-[#1a0b02] shadow-sm"
-                          : "bg-[#302114] border border-[#f59e0b]/35 hover:bg-[#422b16] text-[#f8c66c]"
+                          : "bg-gradient-to-r from-[#f59e0b]/20 to-[#ef4444]/20 border border-[#f59e0b]/45 hover:from-[#f59e0b]/35 hover:to-[#ef4444]/35 text-[#ffd078]"
                       )}
                     >
                       Server 3
@@ -973,12 +972,12 @@ export function HiAnimePlayer({
                   <>
                     <span className="px-1.5 py-0.5 rounded bg-[#22c55e]/20 text-[#4ade80] text-[10px] font-bold flex items-center gap-0.5" title="Confirmed subtitle episodes">
                       <Subtitles className="w-2.5 h-2.5" />
-                      <span>{availability?.sub.length ?? episodes.length}</span>
+                      <span>{confirmedSubCount || episodes.length}</span>
                     </span>
-                    <span className="px-1.5 py-0.5 rounded bg-[#06b6d4]/20 text-[#22d3ee] text-[10px] font-bold flex items-center gap-0.5" title="Confirmed dubbed episodes">
+                    {confirmedDubCount > 0 && <span className="px-1.5 py-0.5 rounded bg-[#06b6d4]/20 text-[#22d3ee] text-[10px] font-bold flex items-center gap-0.5" title="Confirmed dubbed episodes">
                       <Mic className="w-2.5 h-2.5" />
-                      <span>{availability?.dub.length ?? 0}</span>
-                    </span>
+                      <span>{confirmedDubCount}</span>
+                    </span>}
                   </>
                 ) : (
                   <span className="px-1.5 py-0.5 rounded bg-[#ff2f6d]/20 text-[#ff2f6d] text-[10px] font-extrabold uppercase">
@@ -1016,7 +1015,7 @@ export function HiAnimePlayer({
           <p className="text-[11px] text-white/50 leading-relaxed">
             An:me is the best site to watch{" "}
             <strong className="text-white/80">{title}</strong> SUB online
-            {(availability?.dub.length || 0) > 0 && <> or watch <strong className="text-white/80">{title} DUB</strong> where available</>} in HD quality.
+            {confirmedDubCount > 0 && <> or watch <strong className="text-white/80">{title} DUB</strong> where available</>} in HD quality.
             You can also find related anime on An:me.
           </p>
 

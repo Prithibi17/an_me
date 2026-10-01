@@ -24,7 +24,7 @@ export function mergeAnimeMetadata(primary: Anime, fallback: Partial<Anime> | nu
 
 /**
  * Episode availability is stronger evidence than a stale "not yet released"
- * label. Anikoto is only admitted after an exact AniList-ID match, so it may
+ * label. Anikoto is admitted only after an exact AniList-ID match, so it may
  * correct release state without replacing AniList's identity or artwork.
  */
 export function applyEpisodeAvailability(

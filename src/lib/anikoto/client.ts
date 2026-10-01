@@ -60,12 +60,18 @@ async function getCatalogMap() {
   if (catalogCache && catalogCache.expiresAt > Date.now()) return catalogCache.byAniListId;
 
   const responses = await Promise.all(
-    Array.from({ length: CATALOG_PAGES }, (_, index) =>
-      fetchJson<CatalogResponse>(`/recent-anime?page=${index + 1}&per_page=${PER_PAGE}`, 300)
-    )
+    Array.from({ length: CATALOG_PAGES }, async (_, index) => {
+      const path = `/recent-anime?page=${index + 1}&per_page=${PER_PAGE}`;
+      return await fetchJson<CatalogResponse>(path, 300)
+        ?? await fetchJson<CatalogResponse>(path, 300);
+    })
   );
+  const successfulResponses = responses.filter((response): response is CatalogResponse => Boolean(response?.ok));
+  if (successfulResponses.length < CATALOG_PAGES && catalogCache?.byAniListId.size) {
+    return catalogCache.byAniListId;
+  }
   const byAniListId = new Map<number, CatalogRow>();
-  for (const response of responses) {
+  for (const response of successfulResponses) {
     for (const row of response?.data || []) {
       const aniListId = Number(row.ani_id);
       if (Number.isInteger(aniListId) && aniListId > 0 && Number.isInteger(row.id)) {
@@ -82,7 +88,7 @@ function positiveInteger(value: unknown) {
   return Number.isInteger(number) && number > 0 ? number : null;
 }
 
-/** Availability evidence for a Chinese title, matched only by its exact AniList ID. */
+/** Provider availability matched only by its exact AniList ID. */
 export async function getAnikotoAnimeMetadata(aniListId: number): Promise<AnikotoAnimeMetadata | null> {
   if (!Number.isInteger(aniListId) || aniListId < 1) return null;
   const row = (await getCatalogMap()).get(aniListId);
