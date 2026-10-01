@@ -1,6 +1,6 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import { getTrendingAnime, searchAnime } from "@/lib/anilist/client";
+import { getRecentlyAiredAnimePage, getTrendingAnime, searchAnime } from "@/lib/anilist/client";
 import type { AnimePageResult } from "@/lib/anilist/types";
 import { BrowseListing } from "@/components/search/BrowseListing";
 import { enrichAnimeAvailability } from "@/lib/anikoto/client";
@@ -13,13 +13,23 @@ interface PageProps {
 
 export default async function FilterPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const page = parseInt(params.page || "1", 10);
+  const parsedPage = parseInt(params.page || "1", 10);
+  const page = Number.isFinite(parsedPage) ? Math.max(1, parsedPage) : 1;
   const sort = params.view === "new" ? "START_DATE_DESC" : params.sort || "TRENDING_DESC";
   const genres = params.genres ? params.genres.split(",").filter(Boolean) : undefined;
   const format = params.type && params.type !== "All" ? (params.type as any) : undefined;
   const status = params.status && params.status !== "All" ? params.status : undefined;
   const season = params.season && params.season !== "All" ? (params.season as any) : undefined;
   const today = Number(new Date().toISOString().slice(0, 10).replaceAll("-", ""));
+
+  if (params.view === "latest" && page > 100) {
+    const corrected = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value && key !== "page") corrected.set(key, value);
+    });
+    corrected.set("page", "100");
+    redirect(`/search?${corrected.toString()}`);
+  }
 
   let score: number | undefined;
   if (params.score && params.score !== "All") {
@@ -32,12 +42,7 @@ export default async function FilterPage({ searchParams }: PageProps) {
   }
 
   const dataPromise: Promise<AnimePageResult> = params.view === "latest"
-    ? searchAnime({
-        sort: "UPDATED_AT_DESC",
-        startDate_lesser: today,
-        page,
-        perPage: 24,
-      })
+    ? getRecentlyAiredAnimePage(page, 24)
     : searchAnime({
     query: params.q?.trim() || undefined,
     sort: sort as any,

@@ -108,67 +108,47 @@ export async function getTopRatedAnime(page = 1, perPage = 10): Promise<Anime[]>
 
 export async function getRecentlyAiredAnimePage(page = 1, perPage = 18): Promise<AnimePageResult> {
   try {
-    // A five-minute boundary keeps Next's fetch cache useful instead of making
-    // every request unique by including the current second in the cache key.
     const now = Math.floor(Date.now() / 300_000) * 300;
-    const targetEnd = page * perPage;
-    const uniqueAnime: Anime[] = [];
+    // One UI page maps to one AniList airing-schedule page. This preserves the
+    // provider's exact first/previous/next/last page boundaries without using
+    // a guessed ratio of repeated episode events to unique anime.
+    const data = await anilistRequest<{
+      Page: {
+        pageInfo: { total: number; lastPage: number; hasNextPage: boolean };
+        airingSchedules: any[];
+      };
+    }>(RECENTLY_AIRED_QUERY, {
+      page,
+      perPage: 50,
+      airingAt_lesser: now,
+    });
+
     const seenMediaIds = new Set<number>();
-    let sourceLastPage = Number.MAX_SAFE_INTEGER;
-    let apiPage = 1;
-
-    // AniList pages airing events, not anime. Build one stable, globally
-    // deduplicated stream first so an anime cannot move onto multiple UI pages.
-    while (uniqueAnime.length < targetEnd + perPage && apiPage <= sourceLastPage) {
-      // Keep this sequential. Four concurrent schedule requests regularly hit
-      // AniList's burst limiter and previously turned valid pages into an empty
-      // "No anime found" state.
-      const pages = [apiPage];
-      const results = [await anilistRequest<{ Page: { pageInfo: { total: number; lastPage: number; hasNextPage: boolean }; airingSchedules: any[] } }>(RECENTLY_AIRED_QUERY, {
-        page: apiPage,
-        perPage: 50,
-        airingAt_lesser: now,
-      })];
-
-      for (const data of results) {
-        const batch = data.Page?.airingSchedules || [];
-        sourceLastPage = data.Page?.pageInfo?.lastPage || sourceLastPage;
-
-        for (const schedule of batch) {
-          if (!schedule.media || seenMediaIds.has(schedule.media.id)) continue;
-          if (!schedule.media.title?.english && !schedule.media.title?.romaji) continue;
-          seenMediaIds.add(schedule.media.id);
-          const normalized = normalizeAnime({
-            ...schedule.media,
-            // A past official airing event is stronger evidence than a stale
-            // NOT_YET_RELEASED flag on the media record.
-            status: schedule.media.status === "NOT_YET_RELEASED"
-              ? "RELEASING"
-              : schedule.media.status,
-            airingAt: schedule.airingAt,
-            latestEpisode: schedule.episode,
-          });
-          if (isAllowedAnime(normalized)) uniqueAnime.push(normalized);
-        }
-      }
-
-      apiPage += pages.length;
-    }
-
-    const start = (page - 1) * perPage;
-    const media = uniqueAnime.slice(start, start + perPage);
-    // Do not estimate a last page from the event-to-title ratio. Airing events
-    // contain repeats and the site-wide content filter is applied after each
-    // event is normalized, so that estimate can advertise pages which contain
-    // no cards. `uniqueAnime` includes one look-ahead UI page, giving us only
-    // page numbers that are already proven to contain allowed titles.
-    const knownTotal = uniqueAnime.length;
-    const lastPage = Math.max(1, Math.ceil(knownTotal / perPage));
+    const media = (data.Page?.airingSchedules || [])
+      .flatMap((schedule) => {
+        if (!schedule.media || seenMediaIds.has(schedule.media.id)) return [];
+        if (!schedule.media.title?.english && !schedule.media.title?.romaji) return [];
+        seenMediaIds.add(schedule.media.id);
+        const normalized = normalizeAnime({
+          ...schedule.media,
+          status: schedule.media.status === "NOT_YET_RELEASED"
+            ? "RELEASING"
+            : schedule.media.status,
+          airingAt: schedule.airingAt,
+          latestEpisode: schedule.episode,
+        });
+        return isAllowedAnime(normalized) ? [normalized] : [];
+      })
+      .slice(0, perPage);
+    // AniList occasionally reports page 101 even though it rejects schedule
+    // requests deeper than 5,000 entries. With 50 events per source page, 100
+    // is therefore the final reachable page.
+    const lastPage = Math.min(100, Math.max(1, data.Page?.pageInfo?.lastPage || 1));
 
     return {
       media,
       pageInfo: {
-        total: knownTotal,
+        total: data.Page?.pageInfo?.total || media.length,
         perPage,
         currentPage: page,
         lastPage,
