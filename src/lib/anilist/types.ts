@@ -83,6 +83,8 @@ export interface Anime {
   streamingEpisodes?: StreamingEpisode[];
   nextAiringEpisode?: NextAiringEpisode | null;
   latestAiredEpisode?: number | null;
+  subEpisodeCount?: number | null;
+  dubEpisodeCount?: number | null;
   airingAt?: number | null;
   rank?: number;
   dataSources?: string[];

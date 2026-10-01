@@ -573,10 +573,10 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
                       <Subtitles className="w-2.5 h-2.5" />
                       <span>{counts.sub}</span>
                     </span>
-                    <span className="px-1.5 py-0.5 rounded bg-[#06b6d4]/25 text-[#22d3ee] text-[10px] font-extrabold flex items-center gap-0.5 backdrop-blur-xs">
+                    {counts.dub > 0 && <span className="px-1.5 py-0.5 rounded bg-[#06b6d4]/25 text-[#22d3ee] text-[10px] font-extrabold flex items-center gap-0.5 backdrop-blur-xs">
                       <Mic className="w-2.5 h-2.5" />
                       <span>{counts.dub}</span>
-                    </span>
+                    </span>}
                     <span className="px-1.5 py-0.5 rounded bg-black/60 text-white/80 text-[10px] font-bold backdrop-blur-xs">
                       {counts.total ?? "?"}
                     </span>

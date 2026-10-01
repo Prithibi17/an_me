@@ -91,7 +91,7 @@ export function BrowseListing({ data, params, topAnime }: { data: AnimePageResul
                       <span className="absolute left-1.5 top-1.5 rounded bg-black/65 px-1.5 py-0.5 text-[9px] font-black">HD</span>
                       <div className="absolute bottom-1.5 left-1.5 flex gap-1 text-[9px] font-bold text-black">
                         <span className="flex items-center gap-0.5 rounded bg-[#57d889] px-1.5 py-0.5"><Subtitles className="h-2.5 w-2.5" />{counts.sub}</span>
-                        <span className="flex items-center gap-0.5 rounded bg-[#48cce9] px-1.5 py-0.5"><Mic className="h-2.5 w-2.5" />{counts.dub}</span>
+                        {counts.dub > 0 && <span className="flex items-center gap-0.5 rounded bg-[#48cce9] px-1.5 py-0.5"><Mic className="h-2.5 w-2.5" />{counts.dub}</span>}
                         <span className="rounded bg-black/70 px-1.5 py-0.5 text-white">{counts.total ?? "?"}</span>
                       </div>
                     </div>

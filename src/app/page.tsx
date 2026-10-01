@@ -19,12 +19,13 @@ import { HiAnimeTop10 } from "@/components/home/HiAnimeTop10";
 import { TrendingPosts } from "@/components/home/TrendingPosts";
 import { ContinueWatching } from "@/components/home/ContinueWatching";
 import { LiveLatestEpisodes } from "@/components/home/LiveLatestEpisodes";
+import { enrichAnimeAvailability } from "@/lib/anikoto/client";
 
 export const revalidate = 180; // ISR cache 3 minutes
 
 export default async function HomePage() {
   const today = Number(new Date().toISOString().slice(0, 10).replaceAll("-", ""));
-  const [trending, popularSeason, topRated, upcoming, completed, recentlyAired, newAnimePage, weeklySchedule] =
+  const [rawTrending, rawPopularSeason, rawTopRated, rawUpcoming, rawCompleted, rawRecentlyAired, newAnimePage, weeklySchedule] =
     await Promise.all([
       getTrendingAnime(1, 10),
       getPopularSeasonAnime(1, 12),
@@ -35,6 +36,20 @@ export default async function HomePage() {
       searchAnime({ sort: "START_DATE_DESC", startDate_lesser: today, page: 1, perPage: 12 }),
       getAiringSchedule(),
     ]);
+
+  const combined = await enrichAnimeAvailability([
+    ...rawTrending, ...rawPopularSeason, ...rawTopRated, ...rawUpcoming,
+    ...rawCompleted, ...rawRecentlyAired, ...newAnimePage.media,
+  ]);
+  const byId = new Map(combined.map((anime) => [anime.id, anime]));
+  const enrich = (items: typeof rawTrending) => items.map((anime) => byId.get(anime.id) || anime);
+  const trending = enrich(rawTrending);
+  const popularSeason = enrich(rawPopularSeason);
+  const topRated = enrich(rawTopRated);
+  const upcoming = enrich(rawUpcoming);
+  const completed = enrich(rawCompleted);
+  const recentlyAired = enrich(rawRecentlyAired);
+  newAnimePage.media = enrich(newAnimePage.media);
 
   // Filter spotlight candidates to ensure each item has an official widescreen bannerImage
   const spotlightCandidates = [...trending, ...popularSeason].filter(

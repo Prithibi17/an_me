@@ -60,10 +60,10 @@ export function RecommendedSection({
                     <Subtitles className="w-2.5 h-2.5" />
                     <span>{counts.sub}</span>
                   </span>
-                  <span className="px-1.5 py-0.5 rounded bg-[#06b6d4]/90 text-black text-[9px] font-bold flex items-center gap-0.5">
+                  {counts.dub > 0 && <span className="px-1.5 py-0.5 rounded bg-[#06b6d4]/90 text-black text-[9px] font-bold flex items-center gap-0.5">
                     <Mic className="w-2.5 h-2.5" />
                     <span>{counts.dub}</span>
-                  </span>
+                  </span>}
                   <span className="px-1.5 py-0.5 rounded bg-black/75 text-white text-[9px] font-bold">
                     {counts.total ?? "?"}
                   </span>

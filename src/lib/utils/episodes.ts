@@ -17,8 +17,8 @@ export function getEpisodeCounts(anime: Anime): EpisodeCounts {
         ? total
         : 0;
 
-  // AniList does not publish a separate dub episode count. Until a provider
-  // supplies one, use the known available episode boundary rather than the
-  // planned total so upcoming titles never appear to have released episodes.
-  return { sub: released, dub: released, total };
+  const sub = typeof anime.subEpisodeCount === "number" ? anime.subEpisodeCount : released;
+  // Never infer DUB from SUB. A missing provider count means no confirmed dub.
+  const dub = typeof anime.dubEpisodeCount === "number" ? anime.dubEpisodeCount : 0;
+  return { sub, dub, total };
 }

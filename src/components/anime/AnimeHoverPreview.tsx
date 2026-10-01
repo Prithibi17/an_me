@@ -49,7 +49,7 @@ export function AnimeHoverPreview({ anime, side = "right" }: { anime: Anime; sid
           <span className="mr-1 flex items-center gap-1 text-white/70"><Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />{formatScore(anime.score)}</span>
           <span className="rounded bg-[#ffabd3] px-1.5 py-0.5 text-black">HD</span>
           <span title="Subtitle episodes" className="flex items-center gap-1 rounded bg-[#a7e9b3] px-1.5 py-0.5 text-black"><Subtitles className="h-2.5 w-2.5" />{counts.sub}</span>
-          <span title="Dub episodes" className="flex items-center gap-1 rounded bg-[#a7ddf6] px-1.5 py-0.5 text-black"><Mic className="h-2.5 w-2.5" />{counts.dub}</span>
+          {counts.dub > 0 && <span title="Dub episodes" className="flex items-center gap-1 rounded bg-[#a7ddf6] px-1.5 py-0.5 text-black"><Mic className="h-2.5 w-2.5" />{counts.dub}</span>}
           <span title="Total episodes" className="rounded bg-black/70 px-1.5 py-0.5 text-white">{counts.total ?? "?"}</span>
           <Link href={`/search?type=${encodeURIComponent(anime.format || "TV")}`} className="ml-auto rounded bg-[#ffabd3] px-1.5 py-0.5 text-black hover:bg-white">
             {anime.format || "TV"}

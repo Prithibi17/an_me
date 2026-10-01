@@ -69,10 +69,10 @@ export function MostPopularSidebar({ animeList }: { animeList: Anime[] }) {
                       <Subtitles className="w-2.5 h-2.5" />
                       <span>{counts.sub}</span>
                     </span>
-                    <span className="px-1.5 py-0.2 rounded bg-[#06b6d4]/20 text-[#22d3ee] font-bold flex items-center gap-0.5">
+                    {counts.dub > 0 && <span className="px-1.5 py-0.2 rounded bg-[#06b6d4]/20 text-[#22d3ee] font-bold flex items-center gap-0.5">
                       <Mic className="w-2.5 h-2.5" />
                       <span>{counts.dub}</span>
-                    </span>
+                    </span>}
                     <span className="px-1 py-0.2 rounded bg-white/10 text-white/70 font-bold">{counts.total ?? "?"}</span>
                     <span className="text-white/40 font-semibold">• {item.format || "TV"}</span>
                   </div>

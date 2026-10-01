@@ -97,10 +97,10 @@ export function HiAnimeSpotlight({ spotlightList }: { spotlightList: Anime[] }) 
               <Subtitles className="w-3 h-3" />
               <span>{counts.sub}</span>
             </span>
-            <span className="px-1.5 py-0.5 rounded bg-[#06b6d4]/20 text-[#22d3ee] text-[11px] font-bold flex items-center gap-1">
+            {counts.dub > 0 && <span className="px-1.5 py-0.5 rounded bg-[#06b6d4]/20 text-[#22d3ee] text-[11px] font-bold flex items-center gap-1">
               <Mic className="w-3 h-3" />
               <span>{counts.dub}</span>
-            </span>
+            </span>}
             <span className="flex items-center gap-1 text-white/50 text-[11px] ml-1">
               <Clock className="w-3 h-3" />
               <span>{current.duration || 24}m</span>

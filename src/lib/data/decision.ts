@@ -38,6 +38,8 @@ export function applyEpisodeAvailability(
     episodes: anime.episodes || availability.episodes,
     status: availability.status,
     latestAiredEpisode: Math.max(anime.latestAiredEpisode || 0, availability.latestAiredEpisode),
+    subEpisodeCount: availability.latestAiredEpisode,
+    dubEpisodeCount: availability.dubbedEpisodes,
     dataSources: Array.from(new Set([...(anime.dataSources || ["AniList"]), availability.provider])),
   };
 }

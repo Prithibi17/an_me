@@ -8,6 +8,7 @@ type CatalogRow = {
   id: number;
   ani_id?: string | number | null;
   is_sub?: string | number | null;
+  is_dub?: string | number | null;
   episodes?: string | number | null;
   status?: string | null;
 };
@@ -35,6 +36,7 @@ export type AnikotoAnimeMetadata = {
   provider: "Anikoto";
   episodes: number | null;
   latestAiredEpisode: number;
+  dubbedEpisodes: number;
   status: "RELEASING" | "FINISHED";
 };
 
@@ -89,13 +91,26 @@ export async function getAnikotoAnimeMetadata(aniListId: number): Promise<Anikot
   const latestAiredEpisode = positiveInteger(row.is_sub);
   if (!latestAiredEpisode) return null;
   const episodes = positiveInteger(row.episodes);
+  const dubbedEpisodes = positiveInteger(row.is_dub) || 0;
   const finished = /finished|completed/i.test(row.status || "");
   return {
     provider: "Anikoto",
     episodes,
     latestAiredEpisode,
+    dubbedEpisodes,
     status: finished ? "FINISHED" : "RELEASING",
   };
+}
+
+export async function enrichAnimeAvailability<T extends { id: number }>(items: T[]): Promise<T[]> {
+  const catalog = await getCatalogMap();
+  return items.map((item) => {
+    const row = catalog.get(item.id);
+    if (!row) return item;
+    const subEpisodeCount = positiveInteger(row.is_sub) || 0;
+    const dubEpisodeCount = positiveInteger(row.is_dub) || 0;
+    return { ...item, subEpisodeCount, dubEpisodeCount };
+  });
 }
 
 function trustedEmbedUrl(value: unknown, track: "sub" | "dub") {
