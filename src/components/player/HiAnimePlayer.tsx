@@ -838,8 +838,8 @@ export function HiAnimePlayer({
                     className={cn(
                       "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                       selectedServer === "megaplay" && track === "sub"
-                        ? "bg-[#ff4f86] text-[#111] shadow-sm font-extrabold"
-                        : "bg-[#1f222d] hover:bg-[#2a2e3d] text-white/80"
+                        ? "bg-gradient-to-r from-[#ff2f6d] to-[#ff72a1] text-white shadow-sm font-extrabold"
+                        : "bg-[#2a1721] border border-[#ff4f86]/35 hover:bg-[#3a1b2a] text-[#ff9cbb]"
                     )}
                   >
                     HD-1
@@ -851,8 +851,8 @@ export function HiAnimePlayer({
                     className={cn(
                       "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                       selectedServer === "zokoanime" && track === "sub"
-                        ? "bg-[#ff4f86] text-[#111] shadow-sm font-extrabold"
-                        : "bg-[#1f222d] hover:bg-[#2a2e3d] text-white/80"
+                        ? "bg-gradient-to-r from-[#5b5ff7] to-[#8b5cf6] text-white shadow-sm font-extrabold"
+                        : "bg-[#1a1b35] border border-[#7778ff]/35 hover:bg-[#22234a] text-[#aaa9ff]"
                     )}
                   >
                     ZokoAnime
@@ -864,7 +864,7 @@ export function HiAnimePlayer({
                       "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                       selectedServer === "anikoto" && track === "sub"
                         ? "bg-gradient-to-r from-[#ff2f6d] to-[#7c3cff] text-white shadow-sm"
-                        : "bg-[#1f222d] hover:bg-[#2a2e3d] text-white/80"
+                        : "bg-[#27172f] border border-[#b45cff]/35 hover:bg-[#351d42] text-[#d5a2ff]"
                     )}
                     title={anikotoSource?.subUrl
                       ? "Server 3 SUB source is available for this episode"
@@ -891,8 +891,8 @@ export function HiAnimePlayer({
                     className={cn(
                       "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                       selectedServer === "megaplay" && track === "dub"
-                        ? "bg-[#ff4f86] text-[#111] shadow-sm font-extrabold"
-                        : "bg-[#1f222d] hover:bg-[#2a2e3d] text-white/80"
+                        ? "bg-gradient-to-r from-[#16a46d] to-[#34d399] text-[#06140e] shadow-sm font-extrabold"
+                        : "bg-[#132a22] border border-[#34d399]/35 hover:bg-[#19392d] text-[#7ee5bd]"
                     )}
                   >
                     HD-1
@@ -904,8 +904,8 @@ export function HiAnimePlayer({
                     className={cn(
                       "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                       selectedServer === "zokoanime" && track === "dub"
-                        ? "bg-[#ff4f86] text-[#111] shadow-sm font-extrabold"
-                        : "bg-[#1f222d] hover:bg-[#2a2e3d] text-white/80"
+                        ? "bg-gradient-to-r from-[#0891b2] to-[#22d3ee] text-[#041418] shadow-sm font-extrabold"
+                        : "bg-[#10282e] border border-[#22d3ee]/35 hover:bg-[#143740] text-[#74dfef]"
                     )}
                   >
                     ZokoAnime
@@ -916,8 +916,8 @@ export function HiAnimePlayer({
                       className={cn(
                         "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
                         selectedServer === "anikoto" && track === "dub"
-                          ? "bg-gradient-to-r from-[#ff2f6d] to-[#7c3cff] text-white shadow-sm"
-                          : "bg-[#1f222d] hover:bg-[#2a2e3d] text-white/80"
+                          ? "bg-gradient-to-r from-[#f59e0b] to-[#f97316] text-[#1a0b02] shadow-sm"
+                          : "bg-[#302114] border border-[#f59e0b]/35 hover:bg-[#422b16] text-[#f8c66c]"
                       )}
                     >
                       Server 3
