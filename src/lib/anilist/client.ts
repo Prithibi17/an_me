@@ -114,31 +114,25 @@ export async function getRecentlyAiredAnimePage(page = 1, perPage = 18): Promise
     const targetEnd = page * perPage;
     const uniqueAnime: Anime[] = [];
     const seenMediaIds = new Set<number>();
-    let sourceTotal = 0;
     let sourceLastPage = Number.MAX_SAFE_INTEGER;
-    let sourceEventsRead = 0;
     let apiPage = 1;
 
     // AniList pages airing events, not anime. Build one stable, globally
     // deduplicated stream first so an anime cannot move onto multiple UI pages.
     while (uniqueAnime.length < targetEnd + perPage && apiPage <= sourceLastPage) {
-      const pages = Array.from(
-        { length: Math.min(4, sourceLastPage - apiPage + 1) },
-        (_, index) => apiPage + index,
-      );
-      const results = await Promise.all(pages.map((sourcePage) =>
-        anilistRequest<{ Page: { pageInfo: { total: number; lastPage: number; hasNextPage: boolean }; airingSchedules: any[] } }>(RECENTLY_AIRED_QUERY, {
-          page: sourcePage,
-          perPage: 50,
-          airingAt_lesser: now,
-        })
-      ));
+      // Keep this sequential. Four concurrent schedule requests regularly hit
+      // AniList's burst limiter and previously turned valid pages into an empty
+      // "No anime found" state.
+      const pages = [apiPage];
+      const results = [await anilistRequest<{ Page: { pageInfo: { total: number; lastPage: number; hasNextPage: boolean }; airingSchedules: any[] } }>(RECENTLY_AIRED_QUERY, {
+        page: apiPage,
+        perPage: 50,
+        airingAt_lesser: now,
+      })];
 
       for (const data of results) {
         const batch = data.Page?.airingSchedules || [];
-        sourceTotal = data.Page?.pageInfo?.total || sourceTotal;
         sourceLastPage = data.Page?.pageInfo?.lastPage || sourceLastPage;
-        sourceEventsRead += batch.length;
 
         for (const schedule of batch) {
           if (!schedule.media || seenMediaIds.has(schedule.media.id)) continue;
@@ -163,25 +157,29 @@ export async function getRecentlyAiredAnimePage(page = 1, perPage = 18): Promise
 
     const start = (page - 1) * perPage;
     const media = uniqueAnime.slice(start, start + perPage);
-    const uniqueRatio = sourceEventsRead > 0 ? uniqueAnime.length / sourceEventsRead : 1;
-    const estimatedUniqueTotal = Math.max(uniqueAnime.length, Math.floor(sourceTotal * uniqueRatio));
-    const lastPage = Math.max(page, Math.ceil(estimatedUniqueTotal / perPage));
+    // Do not estimate a last page from the event-to-title ratio. Airing events
+    // contain repeats and the site-wide content filter is applied after each
+    // event is normalized, so that estimate can advertise pages which contain
+    // no cards. `uniqueAnime` includes one look-ahead UI page, giving us only
+    // page numbers that are already proven to contain allowed titles.
+    const knownTotal = uniqueAnime.length;
+    const lastPage = Math.max(1, Math.ceil(knownTotal / perPage));
 
     return {
       media,
       pageInfo: {
-        total: estimatedUniqueTotal,
+        total: knownTotal,
         perPage,
         currentPage: page,
         lastPage,
-        hasNextPage: page < lastPage && (media.length === perPage || apiPage <= sourceLastPage),
+        hasNextPage: page < lastPage,
       },
     };
   } catch (err) {
     console.error("Failed to fetch recently aired anime:", err);
     return {
       media: [],
-      pageInfo: { total: 0, perPage, currentPage: page, lastPage: page, hasNextPage: false },
+      pageInfo: { total: 0, perPage, currentPage: page, lastPage: 1, hasNextPage: false },
     };
   }
 }

@@ -1,4 +1,5 @@
 import React from "react";
+import { redirect } from "next/navigation";
 import { getRecentlyAiredAnimePage, getTrendingAnime, searchAnime } from "@/lib/anilist/client";
 import type { AnimePageResult } from "@/lib/anilist/types";
 import { BrowseListing } from "@/components/search/BrowseListing";
@@ -46,11 +47,18 @@ export default async function FilterPage({ searchParams }: PageProps) {
   });
 
   const [initialData, rawTopAnime] = await Promise.all([dataPromise, getTrendingAnime(1, 10)]);
+  if (params.view === "latest" && initialData.media.length === 0 && page > initialData.pageInfo.lastPage) {
+    const corrected = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value && key !== "page") corrected.set(key, value);
+    });
+    corrected.set("page", String(initialData.pageInfo.lastPage));
+    redirect(`/search?${corrected.toString()}`);
+  }
   const enriched = await enrichAnimeAvailability([...initialData.media, ...rawTopAnime]);
   const byId = new Map(enriched.map((anime) => [anime.id, anime]));
   initialData.media = initialData.media
-    .map((anime) => byId.get(anime.id) || anime)
-    .filter((anime) => params.view !== "latest" || anime.subEpisodeCount !== 0);
+    .map((anime) => byId.get(anime.id) || anime);
   const topAnime = rawTopAnime.map((anime) => byId.get(anime.id) || anime);
 
   return (
