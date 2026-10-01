@@ -109,22 +109,28 @@ export async function getTopRatedAnime(page = 1, perPage = 10): Promise<Anime[]>
 export async function getRecentlyAiredAnimePage(page = 1, perPage = 18): Promise<AnimePageResult> {
   try {
     const now = Math.floor(Date.now() / 300_000) * 300;
-    // One UI page maps to one AniList airing-schedule page. This preserves the
-    // provider's exact first/previous/next/last page boundaries without using
-    // a guessed ratio of repeated episode events to unique anime.
-    const data = await anilistRequest<{
+    // Two non-overlapping schedule pages provide enough unique allowed titles
+    // for a complete 6 x 6 grid after repeated episodes and blocked shorts are
+    // removed. UI page 1 uses source pages 1-2, page 2 uses 3-4, and so on.
+    type SchedulePage = {
       Page: {
         pageInfo: { total: number; lastPage: number; hasNextPage: boolean };
         airingSchedules: any[];
       };
-    }>(RECENTLY_AIRED_QUERY, {
-      page,
-      perPage: 50,
-      airingAt_lesser: now,
-    });
+    };
+    const firstSourcePage = (page - 1) * 2 + 1;
+    const sourcePages: SchedulePage[] = [];
+    for (const sourcePage of [firstSourcePage, firstSourcePage + 1]) {
+      sourcePages.push(await anilistRequest<SchedulePage>(RECENTLY_AIRED_QUERY, {
+        page: sourcePage,
+        perPage: 50,
+        airingAt_lesser: now,
+      }));
+    }
 
     const seenMediaIds = new Set<number>();
-    const media = (data.Page?.airingSchedules || [])
+    const media = sourcePages
+      .flatMap((data) => data.Page?.airingSchedules || [])
       .flatMap((schedule) => {
         if (!schedule.media || seenMediaIds.has(schedule.media.id)) return [];
         if (!schedule.media.title?.english && !schedule.media.title?.romaji) return [];
@@ -140,15 +146,13 @@ export async function getRecentlyAiredAnimePage(page = 1, perPage = 18): Promise
         return isAllowedAnime(normalized) ? [normalized] : [];
       })
       .slice(0, perPage);
-    // AniList occasionally reports page 101 even though it rejects schedule
-    // requests deeper than 5,000 entries. With 50 events per source page, 100
-    // is therefore the final reachable page.
-    const lastPage = Math.min(100, Math.max(1, data.Page?.pageInfo?.lastPage || 1));
+    const sourceLastPage = Math.min(100, Math.max(1, sourcePages[0]?.Page?.pageInfo?.lastPage || 1));
+    const lastPage = Math.ceil(sourceLastPage / 2);
 
     return {
       media,
       pageInfo: {
-        total: data.Page?.pageInfo?.total || media.length,
+        total: sourcePages[0]?.Page?.pageInfo?.total || media.length,
         perPage,
         currentPage: page,
         lastPage,

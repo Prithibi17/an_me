@@ -22,12 +22,12 @@ export default async function FilterPage({ searchParams }: PageProps) {
   const season = params.season && params.season !== "All" ? (params.season as any) : undefined;
   const today = Number(new Date().toISOString().slice(0, 10).replaceAll("-", ""));
 
-  if (params.view === "latest" && page > 100) {
+  if (params.view === "latest" && page > 50) {
     const corrected = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value && key !== "page") corrected.set(key, value);
     });
-    corrected.set("page", "100");
+    corrected.set("page", "50");
     redirect(`/search?${corrected.toString()}`);
   }
 
@@ -42,7 +42,7 @@ export default async function FilterPage({ searchParams }: PageProps) {
   }
 
   const dataPromise: Promise<AnimePageResult> = params.view === "latest"
-    ? getRecentlyAiredAnimePage(page, 24)
+    ? getRecentlyAiredAnimePage(page, 36)
     : searchAnime({
     query: params.q?.trim() || undefined,
     sort: sort as any,
