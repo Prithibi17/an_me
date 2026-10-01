@@ -32,7 +32,7 @@ export default async function HomePage() {
       getTopRatedAnime(1, 10),
       getUpcomingAnime(1, 12),
       getCompletedAnime(1, 10),
-      getRecentlyAiredAnime(1, 12),
+      getRecentlyAiredAnime(1, 18),
       searchAnime({ sort: "START_DATE_DESC", startDate_lesser: today, page: 1, perPage: 12 }),
       getAiringSchedule(),
     ]);
@@ -48,7 +48,9 @@ export default async function HomePage() {
   const topRated = enrich(rawTopRated);
   const upcoming = enrich(rawUpcoming);
   const completed = enrich(rawCompleted);
-  const recentlyAired = enrich(rawRecentlyAired);
+  const recentlyAired = enrich(rawRecentlyAired)
+    .filter((anime) => anime.subEpisodeCount !== 0)
+    .slice(0, 12);
   newAnimePage.media = enrich(newAnimePage.media);
 
   // Filter spotlight candidates to ensure each item has an official widescreen bannerImage

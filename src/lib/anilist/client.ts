@@ -146,6 +146,11 @@ export async function getRecentlyAiredAnimePage(page = 1, perPage = 18): Promise
           seenMediaIds.add(schedule.media.id);
           const normalized = normalizeAnime({
             ...schedule.media,
+            // A past official airing event is stronger evidence than a stale
+            // NOT_YET_RELEASED flag on the media record.
+            status: schedule.media.status === "NOT_YET_RELEASED"
+              ? "RELEASING"
+              : schedule.media.status,
             airingAt: schedule.airingAt,
             latestEpisode: schedule.episode,
           });

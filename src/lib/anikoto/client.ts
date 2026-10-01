@@ -61,7 +61,7 @@ async function getCatalogMap() {
 
   const responses = await Promise.all(
     Array.from({ length: CATALOG_PAGES }, (_, index) =>
-      fetchJson<CatalogResponse>(`/recent-anime?page=${index + 1}&per_page=${PER_PAGE}`, 21600)
+      fetchJson<CatalogResponse>(`/recent-anime?page=${index + 1}&per_page=${PER_PAGE}`, 300)
     )
   );
   const byAniListId = new Map<number, CatalogRow>();
@@ -73,7 +73,7 @@ async function getCatalogMap() {
       }
     }
   }
-  catalogCache = { expiresAt: Date.now() + 6 * 60 * 60 * 1000, byAniListId };
+  catalogCache = { expiresAt: Date.now() + 5 * 60 * 1000, byAniListId };
   return byAniListId;
 }
 

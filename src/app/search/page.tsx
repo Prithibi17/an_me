@@ -2,6 +2,7 @@ import React from "react";
 import { getRecentlyAiredAnimePage, getTrendingAnime, searchAnime } from "@/lib/anilist/client";
 import type { AnimePageResult } from "@/lib/anilist/types";
 import { BrowseListing } from "@/components/search/BrowseListing";
+import { enrichAnimeAvailability } from "@/lib/anikoto/client";
 
 export const revalidate = 180;
 
@@ -44,7 +45,13 @@ export default async function FilterPage({ searchParams }: PageProps) {
     perPage: 24,
   });
 
-  const [initialData, topAnime] = await Promise.all([dataPromise, getTrendingAnime(1, 10)]);
+  const [initialData, rawTopAnime] = await Promise.all([dataPromise, getTrendingAnime(1, 10)]);
+  const enriched = await enrichAnimeAvailability([...initialData.media, ...rawTopAnime]);
+  const byId = new Map(enriched.map((anime) => [anime.id, anime]));
+  initialData.media = initialData.media
+    .map((anime) => byId.get(anime.id) || anime)
+    .filter((anime) => params.view !== "latest" || anime.subEpisodeCount !== 0);
+  const topAnime = rawTopAnime.map((anime) => byId.get(anime.id) || anime);
 
   return (
     <BrowseListing data={initialData} params={params} topAnime={topAnime} />
