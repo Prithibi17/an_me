@@ -88,7 +88,9 @@ export async function getRealEpisodes(
                   episodesMap.set(num, {
                     number: num,
                     title: canonicalTitle || existing?.title || "Episode " + num,
-                    thumbnail: thumb || existing?.thumbnail || undefined,
+                    // TMDB/AniList is already present in `existing`; Kitsu is
+                    // the per-episode fallback, not an override.
+                    thumbnail: existing?.thumbnail || thumb || undefined,
                     duration: item.attributes?.length || 24,
                   });
                 }

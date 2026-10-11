@@ -39,6 +39,20 @@ interface VideoFile {
   published_at?: string;
 }
 
+interface TmdbSeasonSummary {
+  season_number: number;
+  air_date?: string | null;
+  episode_count?: number;
+  name?: string;
+}
+
+interface TmdbEpisode {
+  episode_number: number;
+  name?: string;
+  still_path?: string | null;
+  runtime?: number | null;
+}
+
 function normalize(value?: string | null) {
   return (value || "")
     .normalize("NFKD")
@@ -133,7 +147,70 @@ function chooseTrailer(videos: VideoFile[] | undefined) {
   })[0] || null;
 }
 
-export async function enrichAnimeWithTmdb(anime: Anime): Promise<Anime> {
+function explicitSeasonNumber(anime: Anime) {
+  const value = [anime.title.english, anime.title.romaji].filter(Boolean).join(" ");
+  const match = value.match(/(?:season|series)\s*(\d+)|(?:^|\s)(\d+)(?:st|nd|rd|th)\s+season/i);
+  return Number(match?.[1] || match?.[2]) || null;
+}
+
+function chooseTmdbSeason(anime: Anime, seasons: TmdbSeasonSummary[]) {
+  const regular = seasons.filter((season) => season.season_number > 0);
+  if (!regular.length) return null;
+
+  const explicit = explicitSeasonNumber(anime);
+  if (explicit && regular.some((season) => season.season_number === explicit)) return explicit;
+
+  const best = [...regular].sort((a, b) => {
+    const yearA = a.air_date ? Number(a.air_date.slice(0, 4)) : 0;
+    const yearB = b.air_date ? Number(b.air_date.slice(0, 4)) : 0;
+    const yearDistanceA = anime.seasonYear && yearA ? Math.abs(anime.seasonYear - yearA) : 99;
+    const yearDistanceB = anime.seasonYear && yearB ? Math.abs(anime.seasonYear - yearB) : 99;
+    const countDistanceA = anime.episodes && a.episode_count ? Math.abs(anime.episodes - a.episode_count) : 99;
+    const countDistanceB = anime.episodes && b.episode_count ? Math.abs(anime.episodes - b.episode_count) : 99;
+    return yearDistanceA - yearDistanceB || countDistanceA - countDistanceB || b.season_number - a.season_number;
+  })[0];
+  if (!best) return null;
+
+  // Do not force a season match for continuously numbered, long-running shows
+  // that TMDB divides into smaller seasons (for example, One Piece). An
+  // incorrect still is worse than falling back to AniList/Kitsu artwork.
+  if (regular.length > 1) {
+    if (!anime.episodes || !best.episode_count) return null;
+    const allowedDifference = Math.max(2, Math.ceil(anime.episodes * 0.2));
+    if (Math.abs(anime.episodes - best.episode_count) > allowedDifference) return null;
+  }
+
+  return best.season_number;
+}
+
+function mergeEpisodeStills(anime: Anime, episodes: TmdbEpisode[]) {
+  const byNumber = new Map<number, NonNullable<Anime["streamingEpisodes"]>[number]>();
+  for (const episode of anime.streamingEpisodes || []) {
+    const number = Number(episode.title.match(/Episode\s+(\d+)/i)?.[1]);
+    if (Number.isInteger(number) && number > 0) byNumber.set(number, episode);
+  }
+  for (const episode of episodes) {
+    if (!Number.isInteger(episode.episode_number) || episode.episode_number < 1) continue;
+    const existing = byNumber.get(episode.episode_number);
+    // Leave an entry absent when neither provider has a still. The episode
+    // pipeline can then ask Kitsu for that individual missing preview.
+    if (!episode.still_path && !existing) continue;
+    byNumber.set(episode.episode_number, {
+      ...existing,
+      title: `Episode ${episode.episode_number}${episode.name ? ` - ${episode.name}` : ""}`,
+      // TMDB is first choice; the existing AniList/Crunchyroll still remains
+      // when TMDB has not published an episode image.
+      thumbnail: episode.still_path ? `${IMAGE_ROOT}${episode.still_path}` : existing?.thumbnail,
+      site: episode.still_path ? "TMDB" : existing?.site,
+    });
+  }
+  return Array.from(byNumber.entries()).sort(([a], [b]) => a - b).map(([, episode]) => episode);
+}
+
+export async function enrichAnimeWithTmdb(
+  anime: Anime,
+  options: { includeEpisodeStills?: boolean } = {},
+): Promise<Anime> {
   if (!process.env.TMDB_API_READ_TOKEN?.trim()) return anime;
 
   const mediaType: MediaType = anime.format === "MOVIE" ? "movie" : "tv";
@@ -158,11 +235,14 @@ export async function enrichAnimeWithTmdb(anime: Anime): Promise<Anime> {
     .sort((a, b) => b.score - a.score)[0]?.result;
   if (!match) return anime;
 
-  const [images, videos] = await Promise.all([
+  const [images, videos, tvDetails] = await Promise.all([
     tmdbFetch<{ backdrops?: ImageFile[]; posters?: ImageFile[]; logos?: ImageFile[] }>(
       `/${mediaType}/${match.id}/images?include_image_language=en,ja,zh,null`
     ),
     tmdbFetch<{ results?: VideoFile[] }>(`/${mediaType}/${match.id}/videos`),
+    mediaType === "tv" && options.includeEpisodeStills
+      ? tmdbFetch<{ seasons?: TmdbSeasonSummary[] }>(`/tv/${match.id}`)
+      : Promise.resolve(null),
   ]);
   const logoPath = chooseImage(images?.logos, ["en", "ja", "zh", null], "logo");
   // A null image language normally indicates artwork without baked-in text,
@@ -170,12 +250,21 @@ export async function enrichAnimeWithTmdb(anime: Anime): Promise<Anime> {
   const backdropPath = chooseImage(images?.backdrops, [null, "ja", "en", "zh"], "landscape");
   const posterPath = chooseImage(images?.posters, ["en", null, "ja", "zh"], "portrait");
   const trailer = chooseTrailer(videos?.results);
+  const tmdbSeasonNumber = mediaType === "tv" && tvDetails?.seasons
+    ? chooseTmdbSeason(anime, tvDetails.seasons)
+    : null;
+  const seasonDetails = tmdbSeasonNumber
+    ? await tmdbFetch<{ episodes?: TmdbEpisode[] }>(`/tv/${match.id}/season/${tmdbSeasonNumber}`)
+    : null;
 
   return {
     ...anime,
     coverImage: posterPath ? `${IMAGE_ROOT}${posterPath}` : anime.coverImage,
     bannerImage: backdropPath ? `${IMAGE_ROOT}${backdropPath}` : anime.bannerImage,
     titleLogo: logoPath ? `${IMAGE_ROOT}${logoPath}` : anime.titleLogo,
+    streamingEpisodes: seasonDetails?.episodes?.length
+      ? mergeEpisodeStills(anime, seasonDetails.episodes)
+      : anime.streamingEpisodes,
     trailer: trailer ? {
       youtubeId: trailer.key,
       name: trailer.name || `${titles[0]} official trailer`,

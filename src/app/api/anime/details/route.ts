@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     getAnikotoAnimeMetadata(anime.id),
   ]);
   const merged = applyEpisodeAvailability(mergeAnimeMetadata(anime, jikan), anikoto);
-  const enriched = await enrichAnimeWithTmdb(merged);
+  const enriched = await enrichAnimeWithTmdb(merged, { includeEpisodeStills: true });
   return NextResponse.json({ anime: enriched }, {
     headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
   });

@@ -61,7 +61,9 @@ export default async function HomePage() {
   );
   const baseSpotlightList =
     spotlightCandidates.length >= 5 ? spotlightCandidates.slice(0, 10) : trending;
-  const spotlightList = await Promise.all(baseSpotlightList.slice(0, 10).map(enrichAnimeWithTmdb));
+  const spotlightList = await Promise.all(
+    baseSpotlightList.slice(0, 10).map((anime) => enrichAnimeWithTmdb(anime)),
+  );
 
   return (
     <div className="w-full flex flex-col bg-[#0a0b0e] text-[#F5F7FA]">
