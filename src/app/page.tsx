@@ -20,6 +20,7 @@ import { TrendingPosts } from "@/components/home/TrendingPosts";
 import { ContinueWatching } from "@/components/home/ContinueWatching";
 import { LiveLatestEpisodes } from "@/components/home/LiveLatestEpisodes";
 import { enrichAnimeAvailability } from "@/lib/anikoto/client";
+import { enrichAnimeWithTmdb } from "@/lib/tmdb/client";
 
 export const revalidate = 180; // ISR cache 3 minutes
 
@@ -58,8 +59,9 @@ export default async function HomePage() {
     (item, idx, self) =>
       Boolean(item.bannerImage) && self.findIndex((a) => a.id === item.id) === idx
   );
-  const spotlightList =
+  const baseSpotlightList =
     spotlightCandidates.length >= 5 ? spotlightCandidates.slice(0, 10) : trending;
+  const spotlightList = await Promise.all(baseSpotlightList.slice(0, 10).map(enrichAnimeWithTmdb));
 
   return (
     <div className="w-full flex flex-col bg-[#0a0b0e] text-[#F5F7FA]">

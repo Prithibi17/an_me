@@ -3,6 +3,7 @@ import { getAnimeDetails } from "@/lib/anilist/client";
 import { getJikanAnime } from "@/lib/jikan/client";
 import { getAnikotoAnimeMetadata } from "@/lib/anikoto/client";
 import { applyEpisodeAvailability, mergeAnimeMetadata } from "@/lib/data/decision";
+import { enrichAnimeWithTmdb } from "@/lib/tmdb/client";
 
 export async function GET(request: NextRequest) {
   const id = Number(request.nextUrl.searchParams.get("id"));
@@ -17,7 +18,8 @@ export async function GET(request: NextRequest) {
     getAnikotoAnimeMetadata(anime.id),
   ]);
   const merged = applyEpisodeAvailability(mergeAnimeMetadata(anime, jikan), anikoto);
-  return NextResponse.json({ anime: merged }, {
+  const enriched = await enrichAnimeWithTmdb(merged);
+  return NextResponse.json({ anime: enriched }, {
     headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
   });
 }

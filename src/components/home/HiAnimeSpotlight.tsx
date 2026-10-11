@@ -96,10 +96,23 @@ export function HiAnimeSpotlight({ spotlightList }: { spotlightList: Anime[] }) 
             </span>
           </div>
 
-          {/* Large Title */}
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight line-clamp-2 drop-shadow-md">
-            {title}
-          </h1>
+          {/* TMDB title artwork when available, with an accessible text fallback. */}
+          {current.titleLogo ? (
+            <div className="relative h-16 w-full max-w-[390px] sm:h-20 md:h-24">
+              <Image
+                src={current.titleLogo}
+                alt={title}
+                fill
+                sizes="390px"
+                className="object-contain object-left drop-shadow-[0_5px_18px_rgba(0,0,0,.9)]"
+              />
+              <h1 className="sr-only">{title}</h1>
+            </div>
+          ) : (
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight line-clamp-2 drop-shadow-md">
+              {title}
+            </h1>
+          )}
 
           {/* Metadata Badges */}
           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-white/80 pt-1">

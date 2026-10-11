@@ -77,9 +77,22 @@ export function AnimeHero({ anime, currentEpisode = 1, onWatchClick }: AnimeHero
           </nav>
 
           <div className="flex flex-col">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#F5F7FA] tracking-tight leading-tight">
-              {title}
-            </h1>
+            {anime.titleLogo ? (
+              <div className="relative h-20 w-full max-w-[430px] sm:h-24 md:h-28">
+                <Image
+                  src={anime.titleLogo}
+                  alt={title}
+                  fill
+                  sizes="430px"
+                  className="object-contain object-left drop-shadow-[0_4px_16px_rgba(0,0,0,.8)]"
+                />
+                <h1 className="sr-only">{title}</h1>
+              </div>
+            ) : (
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-[#F5F7FA] tracking-tight leading-tight">
+                {title}
+              </h1>
+            )}
             {subtitle && (
               <h2 className="text-xs sm:text-sm text-[#9CA3AF] font-medium mt-1">
                 {subtitle}

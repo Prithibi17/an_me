@@ -6,7 +6,6 @@ import { fetchAnimeDetails } from "@/lib/data/client";
 import type { Anime } from "@/lib/anilist/types";
 import { getDefaultPlaybackProvider, type EpisodeItem } from "@/lib/providers";
 import { getAnimeWatchProgress } from "@/lib/storage/watch-history";
-import { getPreferredTitle } from "@/lib/utils/title";
 import { AnimeHero } from "@/components/details/AnimeHero";
 import { CharactersList } from "@/components/details/CharactersList";
 import { DetailsTabs, type DetailTab } from "@/components/details/DetailsTabs";
@@ -14,15 +13,17 @@ import { EpisodeSection } from "@/components/details/EpisodeSection";
 import { Overview } from "@/components/details/Overview";
 import { RelatedList } from "@/components/details/RelatedList";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { AnimeTrailer } from "@/components/details/AnimeTrailer";
 
 export default function AnimeDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const animeId = Number(id);
+  const validAnimeId = Number.isFinite(animeId) && animeId > 0;
   const router = useRouter();
   const [anime, setAnime] = useState<Anime | null>(null);
   const [episodes, setEpisodes] = useState<EpisodeItem[]>([]);
   const [activeTab, setActiveTab] = useState<DetailTab>("overview");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(validAnimeId);
 
   useEffect(() => {
     let active = true;
@@ -46,10 +47,9 @@ export default function AnimeDetailsPage({ params }: { params: Promise<{ id: str
         if (active) setLoading(false);
       }
     }
-    if (Number.isFinite(animeId) && animeId > 0) load();
-    else setLoading(false);
+    if (validAnimeId) load();
     return () => { active = false; };
-  }, [animeId]);
+  }, [animeId, validAnimeId]);
 
   if (loading) {
     return <div className="max-w-[1360px] mx-auto p-6"><Skeleton className="w-full h-[520px] rounded-xl" /></div>;
@@ -61,8 +61,6 @@ export default function AnimeDetailsPage({ params }: { params: Promise<{ id: str
   const continueEpisode = savedEpisode && episodes.some((episode) => episode.number === savedEpisode)
     ? savedEpisode
     : latestEpisode;
-  const title = getPreferredTitle(anime.title);
-
   return (
     <main className="min-h-screen bg-[#080A0D] text-[#F5F7FA] pb-16">
       <AnimeHero
@@ -72,6 +70,7 @@ export default function AnimeDetailsPage({ params }: { params: Promise<{ id: str
       />
 
       <section className="max-w-[1360px] mx-auto px-4 sm:px-6 mt-8">
+        <AnimeTrailer trailer={anime.trailer} />
         <DetailsTabs
           activeTab={activeTab}
           onChange={setActiveTab}

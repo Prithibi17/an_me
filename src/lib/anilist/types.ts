@@ -88,6 +88,17 @@ export interface Anime {
   airingAt?: number | null;
   rank?: number;
   dataSources?: string[];
+  titleLogo?: string | null;
+  trailer?: {
+    youtubeId: string;
+    name: string;
+    type: "Trailer" | "Teaser" | "Clip" | "Featurette" | string;
+    official: boolean;
+  } | null;
+  tmdb?: {
+    id: number;
+    mediaType: "tv" | "movie";
+  } | null;
 }
 
 export interface PageInfo {
