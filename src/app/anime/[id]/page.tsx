@@ -4,7 +4,6 @@ import React, { useState, useEffect, use, Suspense } from "react";
 import Link from "next/link";
 import { notFound, useSearchParams, useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { getTrendingAnime } from "@/lib/anilist/client";
 import { fetchAnimeDetails } from "@/lib/data/client";
 import { Anime } from "@/lib/anilist/types";
 import { getDefaultPlaybackProvider, EpisodeItem } from "@/lib/providers";
@@ -13,9 +12,7 @@ import { getPreferredTitle } from "@/lib/utils/title";
 import { HiAnimePlayer } from "@/components/player/HiAnimePlayer";
 import { CommentsSection } from "@/components/watch/CommentsSection";
 import { RecommendedSection } from "@/components/watch/RecommendedSection";
-import { MostPopularSidebar } from "@/components/watch/MostPopularSidebar";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { cn } from "@/lib/utils";
 
 function AnimePageContent({
   params,
@@ -28,7 +25,6 @@ function AnimePageContent({
   const router = useRouter();
 
   const [anime, setAnime] = useState<Anime | null>(null);
-  const [popularList, setPopularList] = useState<Anime[]>([]);
   const [episodes, setEpisodes] = useState<EpisodeItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLightOff, setIsLightOff] = useState(false);
@@ -50,10 +46,7 @@ function AnimePageContent({
     async function loadData() {
       setIsLoading(true);
       try {
-        const [data, popular] = await Promise.all([
-          fetchAnimeDetails(animeId),
-          getTrendingAnime(1, 10),
-        ]);
+        const data = await fetchAnimeDetails(animeId);
 
         if (!isMounted) return;
 
@@ -63,8 +56,6 @@ function AnimePageContent({
         }
 
         setAnime(data);
-        setPopularList(popular);
-
         // Load episodes with strict real AniList airing boundaries
         const provider = getDefaultPlaybackProvider();
         const eps = await provider.getEpisodes(
@@ -177,25 +168,22 @@ function AnimePageContent({
         />
       </div>
 
-      {/* Lower 2-Column Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start mt-4 lg:mt-6">
-        {/* Left Column (Comments + Recommended For You) */}
-        <div className="lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
+      {/* Compact community panel on the right, matching the theater layout. */}
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6">
+        <aside className="lg:col-span-4 lg:col-start-9 xl:col-span-3 xl:col-start-10">
           <CommentsSection
             animeId={anime.id}
             currentEpisode={currentEpisode}
             totalEpisodes={totalEps}
             onSelectEpisode={handleSelectEpisode}
+            maxVisible={2}
+            compact
           />
-
-          <RecommendedSection recommendations={anime.recommendations} />
-        </div>
-
-        {/* Right Column (Most Popular Sidebar) */}
-        <div className="hidden lg:block lg:col-span-4 xl:col-span-3">
-          <MostPopularSidebar animeList={popularList} />
-        </div>
+        </aside>
       </div>
+
+      {/* Similar titles stay below the complete viewing and discussion area. */}
+      <RecommendedSection recommendations={anime.recommendations} title="Similar Anime" />
 
     </div>
   );

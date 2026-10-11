@@ -11,8 +11,10 @@ import { getEpisodeCounts } from "@/lib/utils/episodes";
 
 export function RecommendedSection({
   recommendations,
+  title = "Recommended For You",
 }: {
   recommendations?: Anime[];
+  title?: string;
 }) {
   if (!recommendations || recommendations.length === 0) {
     return null;
@@ -22,7 +24,7 @@ export function RecommendedSection({
 
   return (
     <div className="w-full flex flex-col gap-4 select-none mt-6">
-      <h3 className="text-base font-black text-white">Recommended For You</h3>
+      <h3 className="text-lg font-black text-white">{title}</h3>
 
       {/* Grid of anime cards matching HiAnime */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">

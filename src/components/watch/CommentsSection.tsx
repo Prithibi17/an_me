@@ -20,11 +20,15 @@ export function CommentsSection({
   currentEpisode,
   totalEpisodes,
   onSelectEpisode,
+  maxVisible,
+  compact = false,
 }: {
   animeId: number;
   currentEpisode: number;
   totalEpisodes: number;
   onSelectEpisode: (ep: number) => void;
+  maxVisible?: number;
+  compact?: boolean;
 }) {
   const [commentText, setCommentText] = useState("");
   const [isSpoiler, setIsSpoiler] = useState(false);
@@ -95,19 +99,21 @@ export function CommentsSection({
     }));
   };
 
+  const visibleComments = typeof maxVisible === "number" ? comments.slice(0, maxVisible) : comments;
+
   return (
-    <div className="w-full bg-[#13151b] rounded-lg border border-white/5 p-4 sm:p-5 flex flex-col gap-4 select-none">
+    <div className="w-full bg-[#13151b] rounded-xl border border-white/[0.07] p-4 sm:p-5 flex flex-col gap-4 select-none shadow-[0_18px_48px_rgba(0,0,0,.18)]">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
         <div className="flex items-center gap-3">
           <h3 className="text-base font-black text-white">Comments</h3>
-          <span className="px-2 py-0.5 rounded bg-white/10 text-[10px] font-bold text-white/80">
+          {!compact && <span className="px-2 py-0.5 rounded bg-white/10 text-[10px] font-bold text-white/80">
             Community Guidelines <span className="text-[#ff2f6d] ml-1">NEW</span>
-          </span>
+          </span>}
         </div>
 
         {/* Controls: Episode Filter, Count, Sort */}
-        <div className="flex items-center gap-4 text-xs font-semibold text-white/70">
+        {!compact && <div className="flex items-center gap-4 text-xs font-semibold text-white/70">
           {/* Episode selector */}
           <select
             value={currentEpisode}
@@ -132,7 +138,7 @@ export function CommentsSection({
           >
             Sort by ⇅ ({sortBy === "top" ? "Top" : "Newest"})
           </button>
-        </div>
+        </div>}
       </div>
 
       {/* Comment Form */}
@@ -188,12 +194,12 @@ export function CommentsSection({
 
       {/* Comments List */}
       <div className="flex flex-col divide-y divide-white/5 pt-2">
-        {comments.length === 0 && (
+        {!compact && comments.length === 0 && (
           <div className="py-8 text-center text-xs text-white/45">
             No comments yet. Be the first to start the discussion.
           </div>
         )}
-        {comments.map((comment) => {
+        {visibleComments.map((comment) => {
           const isRevealed = unblurredSpoilers[comment.id];
           return (
             <div key={comment.id} className="py-3 flex gap-3 text-xs">
@@ -250,6 +256,11 @@ export function CommentsSection({
             </div>
           );
         })}
+        {typeof maxVisible === "number" && comments.length > maxVisible && (
+          <div className="pt-3 text-center text-[11px] font-semibold text-white/45">
+            Showing the latest {maxVisible} of {comments.length} comments
+          </div>
+        )}
       </div>
     </div>
   );
