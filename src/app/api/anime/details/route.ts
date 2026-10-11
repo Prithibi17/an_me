@@ -12,13 +12,28 @@ export async function GET(request: NextRequest) {
   }
   const anime = await getAnimeDetails(id);
   if (!anime) return NextResponse.json({ error: "Anime not found." }, { status: 404 });
+  if (request.nextUrl.searchParams.get("core") === "1") {
+    return NextResponse.json({ anime }, {
+      headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
+    });
+  }
 
-  const [jikan, anikoto] = await Promise.all([
+  const [jikan, anikoto, tmdbAnime] = await Promise.all([
     anime.idMal ? getJikanAnime(anime.idMal) : Promise.resolve(null),
     getAnikotoAnimeMetadata(anime.id),
+    enrichAnimeWithTmdb(anime, { includeEpisodeStills: true }),
   ]);
   const merged = applyEpisodeAvailability(mergeAnimeMetadata(anime, jikan), anikoto);
-  const enriched = await enrichAnimeWithTmdb(merged, { includeEpisodeStills: true });
+  const enriched = {
+    ...merged,
+    coverImage: tmdbAnime.coverImage,
+    bannerImage: tmdbAnime.bannerImage,
+    titleLogo: tmdbAnime.titleLogo,
+    trailer: tmdbAnime.trailer,
+    streamingEpisodes: tmdbAnime.streamingEpisodes,
+    tmdb: tmdbAnime.tmdb,
+    dataSources: Array.from(new Set([...(merged.dataSources || []), ...(tmdbAnime.dataSources || [])])),
+  };
   return NextResponse.json({ anime: enriched }, {
     headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
   });

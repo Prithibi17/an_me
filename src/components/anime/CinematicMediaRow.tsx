@@ -21,15 +21,17 @@ export function CinematicMediaRow({ anime, rank, className }: CinematicMediaRowP
 
   return (
     <article className={cn("cinematic-row group", className)}>
-      <div className="cinematic-row__backdrop" aria-hidden="true">
-        <Image
-          src={anime.bannerImage || anime.coverImage}
-          alt=""
-          fill
-          sizes="420px"
-          className="object-cover object-center"
-        />
-      </div>
+      {anime.bannerImage && (
+        <div className="cinematic-row__backdrop" aria-hidden="true">
+          <Image
+            src={anime.bannerImage}
+            alt=""
+            fill
+            sizes="420px"
+            className="object-cover object-center"
+          />
+        </div>
+      )}
       <div className="cinematic-row__scrim" aria-hidden="true" />
 
       {typeof rank === "number" && (

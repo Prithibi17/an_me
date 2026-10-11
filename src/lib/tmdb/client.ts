@@ -72,6 +72,7 @@ async function tmdbFetch<T>(path: string): Promise<T | null> {
         Accept: "application/json",
       },
       next: { revalidate: 86_400 },
+      signal: AbortSignal.timeout(6_000),
     });
     if (!response.ok) return null;
     return await response.json() as T;
@@ -223,7 +224,7 @@ function mergeEpisodeStills(anime: Anime, episodes: TmdbEpisode[]) {
 
 export async function enrichAnimeWithTmdb(
   anime: Anime,
-  options: { includeEpisodeStills?: boolean } = {},
+  options: { includeEpisodeStills?: boolean; posterOnly?: boolean } = {},
 ): Promise<Anime> {
   if (!process.env.TMDB_API_READ_TOKEN?.trim()) return anime;
 
@@ -254,7 +255,9 @@ export async function enrichAnimeWithTmdb(
     tmdbFetch<{ backdrops?: ImageFile[]; posters?: ImageFile[]; logos?: ImageFile[] }>(
       `/${mediaType}/${match.id}/images?include_image_language=en,ja,zh,null`
     ),
-    tmdbFetch<{ results?: VideoFile[] }>(`/${mediaType}/${match.id}/videos`),
+    options.posterOnly
+      ? Promise.resolve(null)
+      : tmdbFetch<{ results?: VideoFile[] }>(`/${mediaType}/${match.id}/videos`),
     mediaType === "tv" && (options.includeEpisodeStills || Boolean(numberedSeason))
       ? tmdbFetch<{ seasons?: TmdbSeasonSummary[] }>(`/tv/${match.id}`)
       : Promise.resolve(null),
@@ -276,7 +279,9 @@ export async function enrichAnimeWithTmdb(
         tmdbFetch<{ posters?: ImageFile[] }>(
           `/tv/${match.id}/season/${tmdbSeasonNumber}/images?include_image_language=en,ja,zh,null`
         ),
-        tmdbFetch<{ results?: VideoFile[] }>(`/tv/${match.id}/season/${tmdbSeasonNumber}/videos`),
+        options.posterOnly
+          ? Promise.resolve(null)
+          : tmdbFetch<{ results?: VideoFile[] }>(`/tv/${match.id}/season/${tmdbSeasonNumber}/videos`),
       ])
     : [null, null, null];
 
@@ -300,17 +305,17 @@ export async function enrichAnimeWithTmdb(
   return {
     ...anime,
     coverImage: posterPath ? `${IMAGE_ROOT}${posterPath}` : anime.coverImage,
-    bannerImage: backdropPath ? `${IMAGE_ROOT}${backdropPath}` : anime.bannerImage,
-    titleLogo: logoPath ? `${IMAGE_ROOT}${logoPath}` : anime.titleLogo,
+    bannerImage: !options.posterOnly && backdropPath ? `${IMAGE_ROOT}${backdropPath}` : anime.bannerImage,
+    titleLogo: !options.posterOnly && logoPath ? `${IMAGE_ROOT}${logoPath}` : anime.titleLogo,
     streamingEpisodes: seasonDetails?.episodes?.length
       ? mergeEpisodeStills(anime, seasonDetails.episodes)
       : anime.streamingEpisodes,
-    trailer: trailer ? {
+    trailer: !options.posterOnly && trailer ? {
       youtubeId: trailer.key,
       name: trailer.name || `${titles[0]} official trailer`,
       type: trailer.type,
       official: Boolean(trailer.official),
-    } : numberedSeason ? null : anime.trailer,
+    } : options.posterOnly ? anime.trailer : numberedSeason ? null : anime.trailer,
     tmdb: { id: match.id, mediaType },
     dataSources: Array.from(new Set([...(anime.dataSources || ["AniList"]), "TMDB"])),
   };

@@ -195,6 +195,20 @@ export function HiAnimePlayer({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const epListRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    try {
+      const savedView = localStorage.getItem("kumo_episode_view");
+      if (savedView === "list" || savedView === "grid") {
+        queueMicrotask(() => setEpisodeView(savedView));
+      }
+    } catch {}
+  }, []);
+
+  const selectEpisodeView = useCallback((view: "list" | "grid") => {
+    setEpisodeView(view);
+    try { localStorage.setItem("kumo_episode_view", view); } catch {}
+  }, []);
+
   const title = getPreferredTitle(anime.title, langPreference);
   const synopsis = anime.description
     ? anime.description.replace(/<[^>]*>/g, "")
@@ -564,7 +578,7 @@ export function HiAnimePlayer({
               <div className="flex items-center rounded-md border border-white/10 bg-[#0e1015] p-0.5" aria-label="Episode layout">
                 <button
                   type="button"
-                  onClick={() => setEpisodeView("list")}
+                  onClick={() => selectEpisodeView("list")}
                   aria-label="Show episodes as a list"
                   aria-pressed={episodeView === "list"}
                   title="List view"
@@ -577,7 +591,7 @@ export function HiAnimePlayer({
                 </button>
                 <button
                   type="button"
-                  onClick={() => setEpisodeView("grid")}
+                  onClick={() => selectEpisodeView("grid")}
                   aria-label="Show episodes in a three-column grid"
                   aria-pressed={episodeView === "grid"}
                   title="Grid view"

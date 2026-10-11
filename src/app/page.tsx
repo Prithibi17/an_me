@@ -64,6 +64,13 @@ export default async function HomePage() {
   const spotlightList = await Promise.all(
     baseSpotlightList.slice(0, 10).map((anime) => enrichAnimeWithTmdb(anime)),
   );
+  const top10Source = [...recentlyAired, ...trending, ...topRated];
+  const top10Posters = await Promise.all(
+    Array.from(new Map(top10Source.map((anime) => [anime.id, anime])).values())
+      .map((anime) => enrichAnimeWithTmdb(anime, { posterOnly: true })),
+  );
+  const top10ById = new Map(top10Posters.map((anime) => [anime.id, anime]));
+  const withTmdbPoster = (items: typeof trending) => items.map((anime) => top10ById.get(anime.id) || anime);
 
   return (
     <div className="w-full flex flex-col bg-[#0a0b0e] text-[#F5F7FA]">
@@ -118,7 +125,11 @@ export default async function HomePage() {
             <GenresCard />
 
             {/* Top 10 Ranked Widget with Today / Week / Month Tabs */}
-            <HiAnimeTop10 animeList={trending} />
+            <HiAnimeTop10 lists={{
+              today: withTmdbPoster(recentlyAired),
+              week: withTmdbPoster(trending),
+              month: withTmdbPoster(topRated),
+            }} />
 
             {/* Community Discussions / Trending Posts */}
             <TrendingPosts />

@@ -1,9 +1,10 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import { getRecentlyAiredAnimePage, getTrendingAnime, searchAnime } from "@/lib/anilist/client";
+import { getRecentlyAiredAnime, getRecentlyAiredAnimePage, getTopRatedAnime, getTrendingAnime, searchAnime } from "@/lib/anilist/client";
 import type { AnimePageResult } from "@/lib/anilist/types";
 import { BrowseListing } from "@/components/search/BrowseListing";
 import { enrichAnimeAvailability } from "@/lib/anikoto/client";
+import { enrichAnimeWithTmdb } from "@/lib/tmdb/client";
 
 export const revalidate = 180;
 
@@ -47,7 +48,12 @@ export default async function FilterPage({ searchParams }: PageProps) {
     perPage: 24,
   });
 
-  const [initialData, rawTopAnime] = await Promise.all([dataPromise, getTrendingAnime(1, 10)]);
+  const [initialData, rawToday, rawWeek, rawMonth] = await Promise.all([
+    dataPromise,
+    getRecentlyAiredAnime(1, 10),
+    getTrendingAnime(1, 10),
+    getTopRatedAnime(1, 10),
+  ]);
   if (params.view === "latest" && initialData.media.length === 0 && page > initialData.pageInfo.lastPage) {
     const corrected = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
@@ -56,11 +62,23 @@ export default async function FilterPage({ searchParams }: PageProps) {
     corrected.set("page", String(initialData.pageInfo.lastPage));
     redirect(`/search?${corrected.toString()}`);
   }
-  const enriched = await enrichAnimeAvailability([...initialData.media, ...rawTopAnime]);
+  const enriched = await enrichAnimeAvailability([...initialData.media, ...rawToday, ...rawWeek, ...rawMonth]);
   const byId = new Map(enriched.map((anime) => [anime.id, anime]));
   initialData.media = initialData.media
     .map((anime) => byId.get(anime.id) || anime);
-  const topAnime = rawTopAnime.map((anime) => byId.get(anime.id) || anime);
+  const mapEnriched = (items: typeof rawWeek) => items.map((anime) => byId.get(anime.id) || anime);
+  const topSource = [...mapEnriched(rawToday), ...mapEnriched(rawWeek), ...mapEnriched(rawMonth)];
+  const posterItems = await Promise.all(
+    Array.from(new Map(topSource.map((anime) => [anime.id, anime])).values())
+      .map((anime) => enrichAnimeWithTmdb(anime, { posterOnly: true })),
+  );
+  const posterById = new Map(posterItems.map((anime) => [anime.id, anime]));
+  const withTmdbPoster = (items: typeof rawWeek) => items.map((anime) => posterById.get(anime.id) || anime);
+  const topAnime = {
+    today: withTmdbPoster(mapEnriched(rawToday)),
+    week: withTmdbPoster(mapEnriched(rawWeek)),
+    month: withTmdbPoster(mapEnriched(rawMonth)),
+  };
 
   return (
     <BrowseListing data={initialData} params={params} topAnime={topAnime} />

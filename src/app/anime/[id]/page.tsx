@@ -46,15 +46,28 @@ function AnimePageContent({
     async function loadData() {
       setIsLoading(true);
       try {
-        const data = await fetchAnimeDetails(animeId);
+        const coreData = await fetchAnimeDetails(animeId, { core: true });
 
         if (!isMounted) return;
 
-        if (!data) {
+        if (!coreData) {
           notFound();
           return;
         }
 
+        setAnime(coreData);
+        const quickCount = coreData.latestAiredEpisode || (coreData.status === "FINISHED" ? coreData.episodes : 0) || 0;
+        if (quickCount > 0) {
+          setEpisodes(Array.from({ length: quickCount }, (_, index) => ({
+            number: index + 1,
+            title: `Episode ${index + 1}`,
+            duration: coreData.duration || 24,
+          })));
+        }
+        setIsLoading(false);
+
+        const data = await fetchAnimeDetails(animeId) || coreData;
+        if (!isMounted) return;
         setAnime(data);
         // Load episodes with strict real AniList airing boundaries
         const provider = getDefaultPlaybackProvider();
@@ -116,9 +129,15 @@ function AnimePageContent({
       <div className="w-full min-h-screen flex flex-col pt-6 max-w-[1720px] mx-auto px-4 sm:px-6 gap-6 select-none">
         <Skeleton className="w-48 h-4 rounded" />
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <Skeleton className="lg:col-span-3 h-[500px] rounded-lg" />
-          <Skeleton className="lg:col-span-6 h-[500px] rounded-lg" />
-          <Skeleton className="lg:col-span-3 h-[500px] rounded-lg" />
+          <div className="lg:col-span-9 space-y-3">
+            <Skeleton className="w-full aspect-video rounded-lg" />
+            <Skeleton className="w-full h-12 rounded-lg" />
+          </div>
+          <div className="lg:col-span-3 space-y-2 rounded-lg border border-white/5 bg-[#13151b] p-3">
+            <Skeleton className="h-5 w-32 rounded" />
+            <Skeleton className="h-8 w-full rounded" />
+            {Array.from({ length: 8 }).map((_, index) => <Skeleton key={index} className="h-10 w-full rounded" />)}
+          </div>
         </div>
       </div>
     );

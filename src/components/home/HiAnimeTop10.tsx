@@ -4,8 +4,11 @@ import type { Anime } from "@/lib/anilist/types";
 import { cn } from "@/lib/utils";
 import { CinematicMediaRow } from "@/components/anime/CinematicMediaRow";
 
-export function HiAnimeTop10({ animeList }: { animeList: Anime[] }) {
+type Top10Lists = { today: Anime[]; week: Anime[]; month: Anime[] };
+
+export function HiAnimeTop10({ lists }: { lists: Top10Lists }) {
   const [activeTab, setActiveTab] = useState<"Today" | "Week" | "Month">("Today");
+  const animeList = activeTab === "Today" ? lists.today : activeTab === "Week" ? lists.week : lists.month;
   return <section className="my-4 flex w-full flex-col gap-3 rounded-xl border border-white/[0.07] bg-[#0f1218]/90 p-3.5 shadow-[0_18px_48px_rgba(0,0,0,.18)]">
     <div className="flex items-center justify-between border-b border-white/[0.07] pb-2.5">
       <h3 className="text-base font-black uppercase tracking-[.08em] text-white">Top 10</h3>

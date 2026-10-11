@@ -28,8 +28,21 @@ export default function AnimeDetailsPage({ params }: { params: Promise<{ id: str
     let active = true;
     async function load() {
       try {
-        const data = await fetchAnimeDetails(animeId);
-        if (!data || !active) return;
+        const coreData = await fetchAnimeDetails(animeId, { core: true });
+        if (!coreData || !active) return;
+        setAnime(coreData);
+        const quickCount = coreData.latestAiredEpisode || (coreData.status === "FINISHED" ? coreData.episodes : 0) || 0;
+        if (quickCount > 0) {
+          setEpisodes(Array.from({ length: quickCount }, (_, index) => ({
+            number: index + 1,
+            title: `Episode ${index + 1}`,
+            duration: coreData.duration || 24,
+          })));
+        }
+        setLoading(false);
+
+        const data = await fetchAnimeDetails(animeId) || coreData;
+        if (!active) return;
         setAnime(data);
         const list = await getDefaultPlaybackProvider().getEpisodes(
           data.id,
@@ -51,7 +64,27 @@ export default function AnimeDetailsPage({ params }: { params: Promise<{ id: str
   }, [animeId, validAnimeId]);
 
   if (loading) {
-    return <div className="max-w-[1360px] mx-auto p-6"><Skeleton className="w-full h-[520px] rounded-xl" /></div>;
+    return (
+      <div className="min-h-screen bg-[#080A0D]">
+        <div className="relative min-h-[520px] overflow-hidden">
+          <Skeleton className="absolute inset-0 rounded-none" />
+          <div className="relative mx-auto flex max-w-[1360px] items-end gap-8 px-6 pb-12 pt-24">
+            <Skeleton className="hidden aspect-[2/3] w-56 shrink-0 rounded-xl sm:block" />
+            <div className="w-full max-w-2xl space-y-4">
+              <Skeleton className="h-5 w-52 rounded" />
+              <Skeleton className="h-14 w-4/5 rounded" />
+              <Skeleton className="h-5 w-44 rounded" />
+              <Skeleton className="h-20 w-full rounded" />
+              <div className="flex gap-3"><Skeleton className="h-12 w-44 rounded-lg" /><Skeleton className="h-12 w-36 rounded-lg" /></div>
+            </div>
+          </div>
+        </div>
+        <div className="mx-auto max-w-[1360px] space-y-4 px-6 pt-8">
+          <Skeleton className="h-12 w-full rounded" />
+          <Skeleton className="h-48 w-full rounded-xl" />
+        </div>
+      </div>
+    );
   }
   if (!anime) return <div className="min-h-[60vh] grid place-items-center text-white/60">Anime not found.</div>;
 

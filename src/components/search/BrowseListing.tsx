@@ -42,7 +42,7 @@ function pageHref(params: Record<string, string | undefined>, page: number) {
   return `/search?${query.toString()}`;
 }
 
-export function BrowseListing({ data, params, topAnime }: { data: AnimePageResult; params: Record<string, string | undefined>; topAnime: Anime[] }) {
+export function BrowseListing({ data, params, topAnime }: { data: AnimePageResult; params: Record<string, string | undefined>; topAnime: { today: Anime[]; week: Anime[]; month: Anime[] } }) {
   const router = useRouter();
   const [isChangingPage, startTransition] = useTransition();
   const currentPage = data.pageInfo.currentPage || 1;
@@ -161,7 +161,7 @@ export function BrowseListing({ data, params, topAnime }: { data: AnimePageResul
 
         <aside className="lg:col-span-4 xl:col-span-3 flex flex-col gap-5 lg:sticky lg:top-20">
           <GenresCard />
-          <HiAnimeTop10 animeList={topAnime} />
+          <HiAnimeTop10 lists={topAnime} />
         </aside>
       </div>
     </main>
