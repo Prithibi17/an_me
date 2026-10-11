@@ -1,6 +1,6 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import { getRecentlyAiredAnimePage, getTrendingAnime, searchAnime } from "@/lib/anilist/client";
+import { getTrendingAnime, searchAnime } from "@/lib/anilist/client";
 import type { AnimePageResult } from "@/lib/anilist/types";
 import { BrowseListing } from "@/components/search/BrowseListing";
 import { enrichAnimeAvailability } from "@/lib/anikoto/client";
@@ -22,15 +22,6 @@ export default async function FilterPage({ searchParams }: PageProps) {
   const season = params.season && params.season !== "All" ? (params.season as any) : undefined;
   const today = Number(new Date().toISOString().slice(0, 10).replaceAll("-", ""));
 
-  if (params.view === "latest" && page > 50) {
-    const corrected = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value && key !== "page") corrected.set(key, value);
-    });
-    corrected.set("page", "50");
-    redirect(`/search?${corrected.toString()}`);
-  }
-
   let score: number | undefined;
   if (params.score && params.score !== "All") {
     if (params.score.includes("10")) score = 90;
@@ -42,7 +33,12 @@ export default async function FilterPage({ searchParams }: PageProps) {
   }
 
   const dataPromise: Promise<AnimePageResult> = params.view === "latest"
-    ? getRecentlyAiredAnimePage(page, 36)
+    ? searchAnime({
+        sort: "START_DATE_DESC",
+        startDate_lesser: today,
+        page,
+        perPage: 36,
+      })
     : searchAnime({
     query: params.q?.trim() || undefined,
     sort: sort as any,
