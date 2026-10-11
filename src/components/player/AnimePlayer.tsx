@@ -16,6 +16,7 @@ import {
   EpisodeItem,
   AVAILABLE_SERVERS,
   getPlaybackProvider,
+  getServerOption,
 } from "@/lib/providers";
 import { saveWatchProgress } from "@/lib/storage/watch-history";
 import { getPreferredTitle } from "@/lib/utils/title";
@@ -37,7 +38,7 @@ export function AnimePlayer({
   onSelectEpisode,
   onClosePlayer,
 }: AnimePlayerProps) {
-  const [selectedServer, setSelectedServer] = useState<string>("megaplay");
+  const [selectedServer, setSelectedServer] = useState<string>("megaplay-ani");
   const [track, setTrack] = useState<"sub" | "dub">("sub");
 
   useEffect(() => {
@@ -86,12 +87,14 @@ export function AnimePlayer({
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const provider = getPlaybackProvider(selectedServer);
+  const selectedServerOption = getServerOption(selectedServer);
+  const publicServers = AVAILABLE_SERVERS.filter((server) => server.source !== "mal" || anime.idMal);
   const title = getPreferredTitle(anime.title);
 
   // Generate embed URL from current provider
   const embedUrl = provider.getEmbedUrl({
-    source: "anilist",
-    animeId: anime.id,
+    source: selectedServerOption?.source || "anilist",
+    animeId: selectedServerOption?.source === "mal" ? anime.idMal || anime.id : anime.id,
     episode: currentEpisode,
     track,
     accentColor: "7657FF",
@@ -275,7 +278,7 @@ export function AnimePlayer({
             <span className="hidden sm:flex items-center gap-1 px-2 text-[#6B7280]">
               <Server className="w-3 h-3" />
             </span>
-            {AVAILABLE_SERVERS.map((srv) => {
+            {publicServers.map((srv) => {
               const isActive = selectedServer === srv.id;
               return (
                 <button

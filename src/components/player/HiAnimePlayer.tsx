@@ -25,7 +25,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Anime } from "@/lib/anilist/types";
-import { EpisodeItem, AVAILABLE_SERVERS, getPlaybackProvider } from "@/lib/providers";
+import { EpisodeItem, AVAILABLE_SERVERS, getPlaybackProvider, getServerOption } from "@/lib/providers";
 import { choosePlaybackServer, nextPlaybackServer } from "@/lib/providers/decision";
 import { saveWatchProgress } from "@/lib/storage/watch-history";
 import { isAnimeInList, toggleAnimeInList } from "@/lib/storage/anime-list";
@@ -69,7 +69,7 @@ export function HiAnimePlayer({
   belowPlayer,
   belowEpisodes,
 }: HiAnimePlayerProps) {
-  const [selectedServer, setSelectedServer] = useState<string>("megaplay");
+  const [selectedServer, setSelectedServer] = useState<string>("megaplay-ani");
   const [track, setTrack] = useState<"sub" | "dub">("sub");
   const [availability, setAvailability] = useState<{ sub: number[]; dub: number[] } | null>(null);
   const [anikotoSource, setAnikotoSource] = useState<AnikotoSource | null>(null);
@@ -92,17 +92,17 @@ export function HiAnimePlayer({
         const source = result.source as AnikotoSource | null;
         setAnikotoSource(source);
         const sourceForTrack = Boolean(track === "dub" ? source?.dubUrl : source?.subUrl);
-        setSelectedServer(choosePlaybackServer(preferredServerRef.current, sourceForTrack));
+        setSelectedServer(choosePlaybackServer(preferredServerRef.current, sourceForTrack, Boolean(anime.idMal)));
       })
       .catch(() => {
         if (active) {
           setAnikotoSource(null);
-          setSelectedServer(choosePlaybackServer(preferredServerRef.current, false));
+          setSelectedServer(choosePlaybackServer(preferredServerRef.current, false, Boolean(anime.idMal)));
         }
       })
       .finally(() => { if (active) setIsAnikotoLoading(false); });
     return () => { active = false; };
-  }, [anime.id, currentEpisode, track]);
+  }, [anime.id, anime.idMal, currentEpisode, track]);
 
   useEffect(() => {
     if (episodes.length === 0) { setAvailability({ sub: [], dub: [] }); return; }
@@ -197,6 +197,8 @@ export function HiAnimePlayer({
     ? anime.description.replace(/<[^>]*>/g, "")
     : "No summary available for this title.";
   const provider = getPlaybackProvider(selectedServer);
+  const selectedServerOption = getServerOption(selectedServer);
+  const publicServers = AVAILABLE_SERVERS.filter((server) => server.source !== "mal" || anime.idMal);
 
   // Sync bookmark and playback options from localStorage
   useEffect(() => {
@@ -264,8 +266,8 @@ export function HiAnimePlayer({
   const embedUrl = selectedServer === "anikoto"
     ? (track === "dub" ? anikotoSource?.dubUrl : anikotoSource?.subUrl) || ""
     : provider.getEmbedUrl({
-        source: "anilist",
-        animeId: anime.id,
+        source: selectedServerOption?.source || "anilist",
+        animeId: selectedServerOption?.source === "mal" ? anime.idMal || anime.id : anime.id,
         episode: currentEpisode,
         track,
         accentColor: "ff5c8a",
@@ -276,13 +278,13 @@ export function HiAnimePlayer({
 
   const tryNextServer = useCallback(() => {
     const hasChineseSource = Boolean(track === "dub" ? anikotoSource?.dubUrl : anikotoSource?.subUrl);
-    const next = nextPlaybackServer(selectedServer, hasChineseSource);
+    const next = nextPlaybackServer(selectedServer, hasChineseSource, Boolean(anime.idMal));
     setSelectedServer(next);
     preferredServerRef.current = next;
     setHasError(false);
     setReloadKey((key) => key + 1);
     try { localStorage.setItem("kumo_preferred_server", next); } catch {}
-  }, [anikotoSource, selectedServer, track]);
+  }, [anime.idMal, anikotoSource, selectedServer, setHasError, setReloadKey, track]);
 
   // PostMessage sender
   const send = useCallback((msg: Record<string, any>) => {
@@ -835,31 +837,25 @@ export function HiAnimePlayer({
                   <span>SUB:</span>
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5">
-                  {/* Server 1: HD-1 (MegaPlay) */}
-                  <button
-                    onClick={() => handleSelectServer("megaplay", "sub")}
-                    className={cn(
-                      "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
-                      selectedServer === "megaplay" && track === "sub"
-                        ? "bg-gradient-to-r from-[#ff2f6d] to-[#ff72a1] text-white shadow-sm font-extrabold"
-                        : "bg-gradient-to-r from-[#ff2f6d]/20 to-[#ff9f43]/20 border border-[#ff6b81]/45 hover:from-[#ff2f6d]/35 hover:to-[#ff9f43]/35 text-[#ff9eb9]"
-                    )}
-                  >
-                    HD-1
-                  </button>
-
-                  {/* Server 2: ZokoAnime */}
-                  <button
-                    onClick={() => handleSelectServer("zokoanime", "sub")}
-                    className={cn(
-                      "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
-                      selectedServer === "zokoanime" && track === "sub"
-                        ? "bg-gradient-to-r from-[#5b5ff7] to-[#8b5cf6] text-white shadow-sm font-extrabold"
-                        : "bg-gradient-to-r from-[#3b82f6]/20 to-[#8b5cf6]/20 border border-[#7778ff]/45 hover:from-[#3b82f6]/35 hover:to-[#8b5cf6]/35 text-[#b5b4ff]"
-                    )}
-                  >
-                    ZokoAnime
-                  </button>
+                  {publicServers.map((server) => (
+                    <button
+                      key={`sub-${server.id}`}
+                      onClick={() => handleSelectServer(server.id, "sub")}
+                      className={cn(
+                        "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer border",
+                        selectedServer === server.id && track === "sub"
+                          ? server.providerId === "megaplay"
+                            ? "bg-gradient-to-r from-[#ff2f6d] to-[#ff72a1] border-transparent text-white shadow-sm"
+                            : "bg-gradient-to-r from-[#5b5ff7] to-[#8b5cf6] border-transparent text-white shadow-sm"
+                          : server.providerId === "megaplay"
+                            ? "bg-gradient-to-r from-[#ff2f6d]/20 to-[#ff9f43]/20 border-[#ff6b81]/45 text-[#ff9eb9]"
+                            : "bg-gradient-to-r from-[#3b82f6]/20 to-[#8b5cf6]/20 border-[#7778ff]/45 text-[#b5b4ff]"
+                      )}
+                      title={server.name}
+                    >
+                      {server.badge}
+                    </button>
+                  ))}
 
                   <button
                     onClick={() => handleSelectServer("anikoto", "sub")}
@@ -888,31 +884,25 @@ export function HiAnimePlayer({
                   <span>DUB:</span>
                 </div>
                 <div className="flex flex-wrap items-center gap-1.5">
-                  {/* Server 1: HD-1 (MegaPlay) */}
-                  <button
-                    onClick={() => handleSelectServer("megaplay", "dub")}
-                    className={cn(
-                      "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
-                      selectedServer === "megaplay" && track === "dub"
-                        ? "bg-gradient-to-r from-[#16a46d] to-[#34d399] text-[#06140e] shadow-sm font-extrabold"
-                        : "bg-gradient-to-r from-[#16a34a]/20 to-[#84cc16]/20 border border-[#4ade80]/45 hover:from-[#16a34a]/35 hover:to-[#84cc16]/35 text-[#8de7ae]"
-                    )}
-                  >
-                    HD-1
-                  </button>
-
-                  {/* Server 2: ZokoAnime */}
-                  <button
-                    onClick={() => handleSelectServer("zokoanime", "dub")}
-                    className={cn(
-                      "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer",
-                      selectedServer === "zokoanime" && track === "dub"
-                        ? "bg-gradient-to-r from-[#0891b2] to-[#22d3ee] text-[#041418] shadow-sm font-extrabold"
-                        : "bg-gradient-to-r from-[#06b6d4]/20 to-[#3b82f6]/20 border border-[#38bdf8]/45 hover:from-[#06b6d4]/35 hover:to-[#3b82f6]/35 text-[#83e6f5]"
-                    )}
-                  >
-                    ZokoAnime
-                  </button>
+                  {publicServers.map((server) => (
+                    <button
+                      key={`dub-${server.id}`}
+                      onClick={() => handleSelectServer(server.id, "dub")}
+                      className={cn(
+                        "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer border",
+                        selectedServer === server.id && track === "dub"
+                          ? server.providerId === "megaplay"
+                            ? "bg-gradient-to-r from-[#16a46d] to-[#34d399] border-transparent text-[#06140e] shadow-sm"
+                            : "bg-gradient-to-r from-[#0891b2] to-[#22d3ee] border-transparent text-[#041418] shadow-sm"
+                          : server.providerId === "megaplay"
+                            ? "bg-gradient-to-r from-[#16a34a]/20 to-[#84cc16]/20 border-[#4ade80]/45 text-[#8de7ae]"
+                            : "bg-gradient-to-r from-[#06b6d4]/20 to-[#3b82f6]/20 border-[#38bdf8]/45 text-[#83e6f5]"
+                      )}
+                      title={server.name}
+                    >
+                      {server.badge}
+                    </button>
+                  ))}
                   {anikotoSource?.dubUrl && (
                     <button
                       onClick={() => handleSelectServer("anikoto", "dub")}

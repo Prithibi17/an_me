@@ -10,11 +10,15 @@ export interface ServerOption {
   id: string;
   name: string;
   badge: string;
+  providerId: "megaplay" | "zokoanime";
+  source: "anilist" | "mal";
 }
 
 export const AVAILABLE_SERVERS: ServerOption[] = [
-  { id: "megaplay", name: "Server 1 (MegaPlay)", badge: "HD-1" },
-  { id: "zokoanime", name: "Server 2 (Zoko)", badge: "HD-2" },
+  { id: "megaplay-ani", name: "MegaPlay · AniList", badge: "Mega A" , providerId: "megaplay", source: "anilist" },
+  { id: "megaplay-mal", name: "MegaPlay · MAL", badge: "Mega M", providerId: "megaplay", source: "mal" },
+  { id: "zokoanime-ani", name: "Zoko · AniList", badge: "Zoko A", providerId: "zokoanime", source: "anilist" },
+  { id: "zokoanime-mal", name: "Zoko · MAL", badge: "Zoko M", providerId: "zokoanime", source: "mal" },
 ];
 
 const providers: Record<string, PlaybackProvider> = {
@@ -27,5 +31,10 @@ export function getDefaultPlaybackProvider(): PlaybackProvider {
 }
 
 export function getPlaybackProvider(id: string): PlaybackProvider {
-  return providers[id] || megaplayProvider;
+  const providerId = AVAILABLE_SERVERS.find((server) => server.id === id)?.providerId || id;
+  return providers[providerId] || megaplayProvider;
+}
+
+export function getServerOption(id: string): ServerOption | null {
+  return AVAILABLE_SERVERS.find((server) => server.id === id) || null;
 }
