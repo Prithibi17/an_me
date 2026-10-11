@@ -74,10 +74,9 @@ export default async function HomePage() {
         {/* 2. Trending Horizontal Strip with Rotated Vertical Ranks */}
         <HiAnimeTrendingStrip items={trending} />
 
-        {/* 3. 4-Column Highlights Row: Top Airing, Most Popular, Most Favorite, Latest Completed */}
+        {/* 3. Highlights Row: Top Airing, Most Favorite, Latest Completed */}
         <HiAnimeFourColumns
           topAiring={popularSeason}
-          mostPopular={trending}
           mostFavorite={topRated}
           latestCompleted={completed}
         />

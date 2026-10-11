@@ -2,9 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { CalendarDays, Check, Mic, Plus, Star, Subtitles } from "lucide-react";
+import { CalendarDays, Mic, Star, Subtitles } from "lucide-react";
 import type { Anime } from "@/lib/anilist/types";
-import { useAnimeList } from "@/hooks/useAnimeList";
 import { getPreferredTitle } from "@/lib/utils/title";
 import { formatScore } from "@/lib/utils/format";
 import { getEpisodeCounts } from "@/lib/utils/episodes";
@@ -13,25 +12,12 @@ import { cn } from "@/lib/utils";
 interface CinematicMediaRowProps {
   anime: Anime;
   rank?: number;
-  showAction?: boolean;
   className?: string;
 }
 
-export function CinematicMediaRow({ anime, rank, showAction = true, className }: CinematicMediaRowProps) {
-  const { inList, toggle } = useAnimeList(anime.id);
+export function CinematicMediaRow({ anime, rank, className }: CinematicMediaRowProps) {
   const title = getPreferredTitle(anime.title);
   const counts = getEpisodeCounts(anime);
-
-  const toggleList = () => {
-    toggle({
-      animeId: anime.id,
-      title,
-      coverImage: anime.coverImage,
-      score: anime.score,
-      format: anime.format,
-      year: anime.seasonYear,
-    });
-  };
 
   return (
     <article className={cn("cinematic-row group", className)}>
@@ -92,17 +78,6 @@ export function CinematicMediaRow({ anime, rank, showAction = true, className }:
         </div>
       </div>
 
-      {showAction && (
-        <button
-          type="button"
-          onClick={toggleList}
-          className="cinematic-row__action"
-          aria-label={inList ? `Remove ${title} from my list` : `Add ${title} to my list`}
-          title={inList ? "Remove from list" : "Add to list"}
-        >
-          {inList ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-        </button>
-      )}
     </article>
   );
 }

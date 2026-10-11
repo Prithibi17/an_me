@@ -13,6 +13,6 @@ export function HiAnimeTop10({ animeList }: { animeList: Anime[] }) {
         {(["Today", "Week", "Month"] as const).map((tab) => <button key={tab} type="button" role="tab" aria-selected={activeTab === tab} onClick={() => setActiveTab(tab)} className={cn("rounded-md px-2 py-1 transition-colors", activeTab === tab ? "bg-gradient-to-br from-[#ff2f6d] to-[#7c3cff] text-white" : "text-white/50 hover:text-white")}>{tab}</button>)}
       </div>
     </div>
-    <div className="flex flex-col gap-2">{animeList.slice(0, 10).map((item, index) => <CinematicMediaRow key={item.id} anime={item} rank={index + 1} showAction={false} />)}</div>
+    <div className="flex flex-col gap-2">{animeList.slice(0, 10).map((item, index) => <CinematicMediaRow key={item.id} anime={item} rank={index + 1} />)}</div>
   </section>;
 }

@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react";
 import type { Anime } from "@/lib/anilist/types";
 import { CinematicMediaRow } from "@/components/anime/CinematicMediaRow";
 
-interface FourColumnsProps { topAiring: Anime[]; mostPopular: Anime[]; mostFavorite: Anime[]; latestCompleted: Anime[]; }
+interface FourColumnsProps { topAiring: Anime[]; mostFavorite: Anime[]; latestCompleted: Anime[]; }
 
 function ColumnBlock({ title, items, viewMoreHref }: { title: string; items: Anime[]; viewMoreHref: string }) {
   return <section className="rounded-xl border border-white/[0.07] bg-[#0f1218]/90 p-3.5 shadow-[0_18px_48px_rgba(0,0,0,.18)]">
@@ -16,10 +16,9 @@ function ColumnBlock({ title, items, viewMoreHref }: { title: string; items: Ani
   </section>;
 }
 
-export function HiAnimeFourColumns({ topAiring, mostPopular, mostFavorite, latestCompleted }: FourColumnsProps) {
-  return <div className="my-4 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+export function HiAnimeFourColumns({ topAiring, mostFavorite, latestCompleted }: FourColumnsProps) {
+  return <div className="my-4 grid w-full grid-cols-1 gap-4 md:grid-cols-3">
     <ColumnBlock title="Top Airing" items={topAiring} viewMoreHref="/search?sort=POPULARITY_DESC&status=RELEASING" />
-    <ColumnBlock title="Most Popular" items={mostPopular} viewMoreHref="/search?sort=POPULARITY_DESC" />
     <ColumnBlock title="Most Favorite" items={mostFavorite} viewMoreHref="/search?sort=SCORE_DESC" />
     <ColumnBlock title="Latest Completed" items={latestCompleted} viewMoreHref="/search?sort=SCORE_DESC&status=FINISHED" />
   </div>;
