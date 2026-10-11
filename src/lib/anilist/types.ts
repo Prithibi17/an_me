@@ -83,6 +83,7 @@ export interface Anime {
   streamingEpisodes?: StreamingEpisode[];
   nextAiringEpisode?: NextAiringEpisode | null;
   latestAiredEpisode?: number | null;
+  latestReleasedEpisodeAt?: number | null;
   subEpisodeCount?: number | null;
   dubEpisodeCount?: number | null;
   airingAt?: number | null;
@@ -112,6 +113,7 @@ export interface PageInfo {
 export interface AnimePageResult {
   pageInfo: PageInfo;
   media: Anime[];
+  error?: string;
 }
 
 export type AnimeSeason = "WINTER" | "SPRING" | "SUMMER" | "FALL";

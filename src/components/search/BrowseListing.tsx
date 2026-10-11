@@ -12,6 +12,12 @@ import { AnimeHoverPreview } from "@/components/anime/AnimeHoverPreview";
 import { GenresCard } from "@/components/home/GenresCard";
 import { HiAnimeTop10 } from "@/components/home/HiAnimeTop10";
 
+function releaseRecency(timestamp?: number | null) {
+  if (!timestamp) return null;
+  return new Intl.DateTimeFormat("en", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" })
+    .format(new Date(timestamp * 1000));
+}
+
 function listingTitle(params: Record<string, string | undefined>) {
   if (params.q) return `Search results for “${params.q}”`;
   if (params.view === "latest") return "Latest Episodes";
@@ -41,6 +47,7 @@ export function BrowseListing({ data, params, topAnime }: { data: AnimePageResul
   const [isChangingPage, startTransition] = useTransition();
   const currentPage = data.pageInfo.currentPage || 1;
   const lastPage = Math.max(data.pageInfo.lastPage || 1, 1);
+  const isLatest = params.view === "latest";
   const visiblePages = (() => {
     if (lastPage <= 7) return Array.from({ length: lastPage }, (_, index) => index + 1);
     if (currentPage <= 4) return [1, 2, 3, 4, 5];
@@ -78,14 +85,25 @@ export function BrowseListing({ data, params, topAnime }: { data: AnimePageResul
         <section className="lg:col-span-8 xl:col-span-9">
           <h1 className="mb-5 text-xl sm:text-2xl font-black text-[#ff4f86]">{listingTitle(params)}</h1>
 
+          {data.error && (
+            <div role="alert" className="mb-5 rounded-xl border border-red-400/25 bg-red-400/10 px-4 py-3 text-sm text-red-100">
+              {data.error}
+            </div>
+          )}
+
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6 gap-x-3 gap-y-5">
             {data.media.map((anime, index) => {
               const title = getPreferredTitle(anime.title);
               const counts = getEpisodeCounts(anime);
+              const latestEpisode = anime.latestAiredEpisode || counts.sub;
+              const recency = releaseRecency(anime.latestReleasedEpisodeAt);
+              const detailsHref = isLatest && latestEpisode > 0
+                ? `/anime/${anime.id}?ep=${latestEpisode}`
+                : `/anime/${anime.id}/details`;
               return (
                 <article key={anime.id} className="group relative min-w-0">
                   <AnimeHoverPreview anime={anime} side={index % 6 < 3 ? "right" : "left"} />
-                  <Link href={`/anime/${anime.id}/details`} className="block">
+                  <Link href={detailsHref} className="block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff2f6d]">
                     <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-[#161822]">
                       <Image src={anime.coverImage} alt={title} fill sizes="(max-width:640px) 50vw, 16vw" className="object-cover" />
                       <span className="absolute left-1.5 top-1.5 rounded bg-black/65 px-1.5 py-0.5 text-[9px] font-black">HD</span>
@@ -94,12 +112,24 @@ export function BrowseListing({ data, params, topAnime }: { data: AnimePageResul
                         {counts.dub > 0 && <span className="flex items-center gap-0.5 rounded bg-[#48cce9] px-1.5 py-0.5"><Mic className="h-2.5 w-2.5" />{counts.dub}</span>}
                         <span className="rounded bg-black/70 px-1.5 py-0.5 text-white">{counts.total ?? "?"}</span>
                       </div>
+                      {isLatest && latestEpisode > 0 && (
+                        <span className="absolute bottom-1.5 right-1.5 rounded bg-black/80 px-2 py-1 text-[9px] font-extrabold text-white backdrop-blur-sm">
+                          EP {latestEpisode}
+                        </span>
+                      )}
                     </div>
                     <h2 className="mt-2 truncate text-xs font-bold group-hover:text-[#ff2f6d]">{title}</h2>
                   </Link>
-                  <div className="mt-1 flex gap-1.5 text-[10px] text-white/45">
+                  <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] text-white/45">
                     <Link href={`/search?type=${anime.format || "TV"}`} className="hover:text-[#ff2f6d]">{anime.format || "TV"}</Link>
-                    <span>•</span><span>{anime.duration ? `${anime.duration}m` : "Unknown"}</span>
+                    {isLatest ? (
+                      <>
+                        <span>•</span><span className="text-white/65">{recency || "Release time unavailable"}</span>
+                        <span className={`rounded px-1.5 py-0.5 font-bold ${anime.status === "RELEASING" ? "bg-emerald-400/15 text-emerald-300" : anime.status === "FINISHED" ? "bg-white/10 text-white/55" : "bg-amber-400/15 text-amber-200"}`}>
+                          {anime.status === "RELEASING" ? "Airing" : anime.status === "FINISHED" ? "Completed" : "Other"}
+                        </span>
+                      </>
+                    ) : anime.duration ? <><span>•</span><span>{anime.duration}m</span></> : null}
                   </div>
                 </article>
               );

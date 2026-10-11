@@ -107,6 +107,7 @@ export function normalizeAnime(raw: any, rank?: number): Anime {
     streamingEpisodes: raw.streamingEpisodes || undefined,
     nextAiringEpisode,
     latestAiredEpisode,
+    latestReleasedEpisodeAt: raw.latestReleasedEpisodeAt || raw.airingAt || null,
     airingAt: raw.airingAt || null,
     rank,
   };

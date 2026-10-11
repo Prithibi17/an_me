@@ -17,6 +17,7 @@ interface SearchResult {
   release_date?: string;
   origin_country?: string[];
   original_language?: string;
+  genre_ids?: number[];
 }
 
 interface ImageFile {
@@ -64,6 +65,8 @@ async function tmdbFetch<T>(path: string): Promise<T | null> {
 }
 
 function candidateScore(anime: Anime, result: SearchResult) {
+  // TMDB genre 16 is Animation. Reject similarly named live-action matches.
+  if (!result.genre_ids?.includes(16)) return -1;
   const wanted = [anime.title.english, anime.title.romaji, anime.title.native]
     .map(normalize)
     .filter(Boolean);
