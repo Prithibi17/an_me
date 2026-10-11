@@ -42,18 +42,18 @@ export function CinematicMediaRow({ anime, rank, className }: CinematicMediaRowP
         <Image src={anime.coverImage} alt="" fill sizes="64px" className="object-cover" />
       </Link>
 
-      <div className="relative z-10 min-w-0 flex-1 py-2.5">
+      <div className="relative z-10 min-w-0 flex-1 py-3">
         <div className="flex items-start gap-2">
           <span className="mt-[0.48rem] h-2 w-2 shrink-0 rounded-full bg-cyan-400 shadow-[0_0_12px_rgba(34,211,238,.65)]" />
           <Link
             href={`/anime/${anime.id}/details`}
-            className="line-clamp-1 text-sm font-bold text-white transition-colors group-hover:text-[var(--accent)] focus-visible:text-[var(--accent)]"
+            className="line-clamp-2 text-base font-semibold leading-snug text-white transition-colors group-hover:text-[var(--accent)] focus-visible:text-[var(--accent)]"
           >
             {title}
           </Link>
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-4 text-[10px] font-bold text-white/55">
+        <div className="mt-2.5 flex flex-wrap items-center gap-1.5 pl-4 text-[11px] font-bold text-white/55">
           <span className="rounded bg-white/[0.06] px-1.5 py-0.5">{anime.format || "TV"}</span>
           {anime.seasonYear && (
             <span className="inline-flex items-center gap-1 rounded bg-white/[0.06] px-1.5 py-0.5">
