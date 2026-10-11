@@ -109,31 +109,32 @@ export async function getTopRatedAnime(page = 1, perPage = 10): Promise<Anime[]>
 export async function getRecentlyAiredAnimePage(page = 1, perPage = 18): Promise<AnimePageResult> {
   try {
     const now = Math.floor(Date.now() / 300_000) * 300;
-    // Two non-overlapping schedule pages provide enough unique allowed titles
-    // for a complete 6 x 6 grid after repeated episodes and blocked shorts are
-    // removed. UI page 1 uses source pages 1-2, page 2 uses 3-4, and so on.
+    const targetEnd = page * perPage;
     type SchedulePage = {
       Page: {
         pageInfo: { total: number; lastPage: number; hasNextPage: boolean };
         airingSchedules: any[];
       };
     };
-    const firstSourcePage = (page - 1) * 2 + 1;
-    const sourcePages: SchedulePage[] = [];
-    for (const sourcePage of [firstSourcePage, firstSourcePage + 1]) {
-      sourcePages.push(await anilistRequest<SchedulePage>(RECENTLY_AIRED_QUERY, {
+
+    const uniqueAnime: Anime[] = [];
+    const seenMediaIds = new Set<number>();
+    let sourcePage = 1;
+    let sourceLastPage = 100;
+
+    // Always start at the newest event and deduplicate before slicing. The old
+    // implementation deduplicated each pair of source pages independently,
+    // so the same weekly title appeared again on later website pages.
+    while (uniqueAnime.length < targetEnd && sourcePage <= sourceLastPage) {
+      const data = await anilistRequest<SchedulePage>(RECENTLY_AIRED_QUERY, {
         page: sourcePage,
         perPage: 50,
         airingAt_lesser: now,
-      }));
-    }
-
-    const seenMediaIds = new Set<number>();
-    const media = sourcePages
-      .flatMap((data) => data.Page?.airingSchedules || [])
-      .flatMap((schedule) => {
-        if (!schedule.media || seenMediaIds.has(schedule.media.id)) return [];
-        if (!schedule.media.title?.english && !schedule.media.title?.romaji) return [];
+      });
+      sourceLastPage = Math.min(100, Math.max(1, data.Page?.pageInfo?.lastPage || 1));
+      for (const schedule of data.Page?.airingSchedules || []) {
+        if (!schedule.media || seenMediaIds.has(schedule.media.id)) continue;
+        if (!schedule.media.title?.english && !schedule.media.title?.romaji) continue;
         seenMediaIds.add(schedule.media.id);
         const normalized = normalizeAnime({
           ...schedule.media,
@@ -143,16 +144,21 @@ export async function getRecentlyAiredAnimePage(page = 1, perPage = 18): Promise
           airingAt: schedule.airingAt,
           latestEpisode: schedule.episode,
         });
-        return isAllowedAnime(normalized) ? [normalized] : [];
-      })
-      .slice(0, perPage);
-    const sourceLastPage = Math.min(100, Math.max(1, sourcePages[0]?.Page?.pageInfo?.lastPage || 1));
-    const lastPage = Math.ceil(sourceLastPage / 2);
+        if (isAllowedAnime(normalized)) uniqueAnime.push(normalized);
+      }
+      sourcePage += 1;
+    }
+
+    const start = (page - 1) * perPage;
+    const media = uniqueAnime.slice(start, start + perPage);
+    // The provider exposes at most 100 source pages. Two source pages are
+    // normally needed for a complete 36-card UI page after deduplication.
+    const lastPage = 50;
 
     return {
       media,
       pageInfo: {
-        total: sourcePages[0]?.Page?.pageInfo?.total || media.length,
+        total: lastPage * perPage,
         perPage,
         currentPage: page,
         lastPage,
