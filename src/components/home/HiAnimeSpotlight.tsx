@@ -69,10 +69,26 @@ export function HiAnimeSpotlight({ spotlightList }: { spotlightList: Anime[] }) 
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0b0e] via-transparent to-[#0a0b0e]/30" />
       </div>
 
-      {/* Foreground Content: Text on Left (No poster, wide banner only) */}
+      {/* Foreground Content: official poster artwork paired with title and actions */}
       <div className="relative z-10 w-full h-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-6">
-        {/* Left Side: Info & Actions */}
-        <div className="max-w-xl lg:max-w-2xl flex flex-col gap-3 py-6">
+        <div className="flex max-w-3xl items-center gap-4 sm:gap-6 py-6">
+          <Link
+            href={`/anime/${current.id}/details`}
+            className="relative hidden h-[220px] w-[150px] shrink-0 overflow-hidden rounded-xl border border-white/15 bg-[#11151b] shadow-[0_20px_55px_rgba(0,0,0,.55)] sm:block lg:h-[250px] lg:w-[170px]"
+            aria-label={`View ${title}`}
+          >
+            <Image
+              src={current.coverImage}
+              alt={`${title} poster`}
+              fill
+              sizes="170px"
+              className="object-cover transition-transform duration-300 hover:scale-[1.035]"
+            />
+            <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
+          </Link>
+
+          {/* Title, metadata and actions */}
+          <div className="max-w-xl lg:max-w-2xl flex flex-col gap-3 rounded-2xl border border-white/[0.06] bg-black/10 p-3 backdrop-blur-[2px] sm:p-4">
           {/* Spotlight Rank */}
           <div className="flex items-center gap-2">
             <span className="text-xs sm:text-sm font-extrabold text-[#ff2f6d] tracking-wide">
@@ -139,6 +155,7 @@ export function HiAnimeSpotlight({ spotlightList }: { spotlightList: Anime[] }) 
               <span>Detail</span>
               <ChevronRight className="w-4 h-4 text-white/50" />
             </Link>
+          </div>
           </div>
         </div>
       </div>
