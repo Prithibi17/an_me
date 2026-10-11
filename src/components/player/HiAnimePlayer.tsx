@@ -544,7 +544,7 @@ export function HiAnimePlayer({
   return (
     <div className={cn("w-full select-none transition-all duration-300", isExpanded && "max-w-none")}>
       {/* Theater grid: wide player left, episodes right, anime information below. */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+      <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
         {/* ========================================================================= */}
         {/* EPISODE LIST: right rail on desktop */}
         {/* ========================================================================= */}
@@ -1106,7 +1106,7 @@ export function HiAnimePlayer({
         </div>}
 
         {belowEpisodes && (
-          <div className="order-4 lg:col-span-3 lg:col-start-10 lg:row-start-2">
+          <div className="order-4 lg:absolute lg:right-0 lg:top-[596px] lg:w-[calc(25%_-_0.75rem)]">
             {belowEpisodes}
           </div>
         )}
