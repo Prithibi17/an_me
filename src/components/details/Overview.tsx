@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Anime } from "@/lib/anilist/types";
 import { cleanDescription, formatDuration } from "@/lib/utils/format";
+import { AnimeTrailer } from "./AnimeTrailer";
 
 interface OverviewProps {
   anime: Anime;
@@ -54,6 +55,8 @@ export function Overview({ anime }: OverviewProps) {
             </div>
           </div>
         )}
+
+        <AnimeTrailer trailer={anime.trailer} />
       </div>
 
       <div className="w-full md:w-72 shrink-0 p-5 rounded-xl bg-[#11151B] border border-white/5 flex flex-col gap-3.5">

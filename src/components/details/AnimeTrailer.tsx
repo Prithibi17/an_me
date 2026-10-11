@@ -2,7 +2,14 @@ import { Play } from "lucide-react";
 import type { Anime } from "@/lib/anilist/types";
 
 export function AnimeTrailer({ trailer }: { trailer: Anime["trailer"] }) {
-  if (!trailer?.youtubeId) return null;
+  if (!trailer?.youtubeId) {
+    return (
+      <section className="mt-5 rounded-xl border border-white/10 bg-[#11151B] px-5 py-6">
+        <h2 className="font-extrabold text-white">Official Trailer</h2>
+        <p className="mt-1 text-sm text-white/45">No verified trailer is available for this anime season yet.</p>
+      </section>
+    );
+  }
 
   return (
     <section className="mt-8 overflow-hidden rounded-2xl border border-white/10 bg-[#11151B] shadow-[0_18px_50px_rgba(0,0,0,.22)]">

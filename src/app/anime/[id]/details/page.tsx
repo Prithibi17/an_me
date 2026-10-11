@@ -13,7 +13,6 @@ import { EpisodeSection } from "@/components/details/EpisodeSection";
 import { Overview } from "@/components/details/Overview";
 import { RelatedList } from "@/components/details/RelatedList";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { AnimeTrailer } from "@/components/details/AnimeTrailer";
 
 export default function AnimeDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -70,7 +69,6 @@ export default function AnimeDetailsPage({ params }: { params: Promise<{ id: str
       />
 
       <section className="max-w-[1360px] mx-auto px-4 sm:px-6 mt-8">
-        <AnimeTrailer trailer={anime.trailer} />
         <DetailsTabs
           activeTab={activeTab}
           onChange={setActiveTab}

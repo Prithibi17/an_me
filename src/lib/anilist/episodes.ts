@@ -63,7 +63,17 @@ export async function getRealEpisodes(
         const searchJson = await searchRes.json();
         const kitsuAnime = searchJson.data?.[0];
 
-        if (kitsuAnime?.id) {
+        const requestedSeason = Number(animeTitle.match(/(?:season|series)\s*(\d+)/i)?.[1]) || null;
+        const kitsuTitle = [
+          kitsuAnime?.attributes?.canonicalTitle,
+          ...Object.values(kitsuAnime?.attributes?.titles || {}),
+        ].filter((value): value is string => typeof value === "string").join(" ");
+        const kitsuSeason = Number(kitsuTitle.match(/(?:season|series)\s*(\d+)/i)?.[1]) || null;
+        // A generic Kitsu search for "Title Season 2" often returns season 1.
+        // Never use its episode names/stills unless the numbered season agrees.
+        const seasonMatches = !requestedSeason || requestedSeason === kitsuSeason;
+
+        if (kitsuAnime?.id && seasonMatches) {
           // Kitsu caps episode pages at 20. Fetch all confirmed episodes in
           // pages so episode-specific stills are not lost after episode 20.
           const pageSize = 20;

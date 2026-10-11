@@ -99,14 +99,18 @@ function candidateScore(anime: Anime, result: SearchResult) {
   const date = result.first_air_date || result.release_date;
   const year = date ? Number(date.slice(0, 4)) : null;
   const yearDistance = anime.seasonYear && year ? Math.abs(anime.seasonYear - year) : 0;
-  if (yearDistance > 2) return -1;
+  // TMDB stores later TV seasons under the original series, whose first-air
+  // year can be much older. The exact season is validated separately below.
+  const isNumberedTvSeason = anime.format !== "MOVIE" && Boolean(explicitSeasonNumber(anime));
+  if (!isNumberedTvSeason && yearDistance > 2) return -1;
 
   const animeOrigin = anime.countryOfOrigin === "JP" || anime.countryOfOrigin === "CN";
   const matchingOrigin = result.origin_country?.includes(anime.countryOfOrigin || "") ||
     (anime.countryOfOrigin === "JP" && result.original_language === "ja") ||
     (anime.countryOfOrigin === "CN" && result.original_language === "zh");
 
-  return (exact ? 100 : 60) - yearDistance * 12 + (animeOrigin && matchingOrigin ? 8 : 0);
+  return (exact ? 100 : 60) - (isNumberedTvSeason ? 0 : yearDistance * 12) +
+    (animeOrigin && matchingOrigin ? 8 : 0);
 }
 
 function chooseImage(
@@ -158,7 +162,17 @@ function chooseTmdbSeason(anime: Anime, seasons: TmdbSeasonSummary[]) {
   if (!regular.length) return null;
 
   const explicit = explicitSeasonNumber(anime);
-  if (explicit && regular.some((season) => season.season_number === explicit)) return explicit;
+  if (explicit) {
+    const season = regular.find((item) => item.season_number === explicit);
+    if (!season) return null;
+    const airYear = season.air_date ? Number(season.air_date.slice(0, 4)) : null;
+    if (anime.seasonYear && (!airYear || Math.abs(anime.seasonYear - airYear) > 1)) return null;
+    if (anime.episodes && season.episode_count) {
+      const allowedDifference = Math.max(2, Math.ceil(anime.episodes * 0.2));
+      if (Math.abs(anime.episodes - season.episode_count) > allowedDifference) return null;
+    }
+    return season.season_number;
+  }
 
   const best = [...regular].sort((a, b) => {
     const yearA = a.air_date ? Number(a.air_date.slice(0, 4)) : 0;
@@ -235,27 +249,53 @@ export async function enrichAnimeWithTmdb(
     .sort((a, b) => b.score - a.score)[0]?.result;
   if (!match) return anime;
 
+  const numberedSeason = mediaType === "tv" ? explicitSeasonNumber(anime) : null;
   const [images, videos, tvDetails] = await Promise.all([
     tmdbFetch<{ backdrops?: ImageFile[]; posters?: ImageFile[]; logos?: ImageFile[] }>(
       `/${mediaType}/${match.id}/images?include_image_language=en,ja,zh,null`
     ),
     tmdbFetch<{ results?: VideoFile[] }>(`/${mediaType}/${match.id}/videos`),
-    mediaType === "tv" && options.includeEpisodeStills
+    mediaType === "tv" && (options.includeEpisodeStills || Boolean(numberedSeason))
       ? tmdbFetch<{ seasons?: TmdbSeasonSummary[] }>(`/tv/${match.id}`)
       : Promise.resolve(null),
   ]);
-  const logoPath = chooseImage(images?.logos, ["en", "ja", "zh", null], "logo");
-  // A null image language normally indicates artwork without baked-in text,
-  // which is the safest backdrop when a separate title logo is overlaid.
-  const backdropPath = chooseImage(images?.backdrops, [null, "ja", "en", "zh"], "landscape");
-  const posterPath = chooseImage(images?.posters, ["en", null, "ja", "zh"], "portrait");
-  const trailer = chooseTrailer(videos?.results);
   const tmdbSeasonNumber = mediaType === "tv" && tvDetails?.seasons
     ? chooseTmdbSeason(anime, tvDetails.seasons)
     : null;
-  const seasonDetails = tmdbSeasonNumber
-    ? await tmdbFetch<{ episodes?: TmdbEpisode[] }>(`/tv/${match.id}/season/${tmdbSeasonNumber}`)
-    : null;
+
+  // A numbered season must match TMDB's season number and air year before any
+  // TMDB media is accepted. Otherwise series-level trailers and episode stills
+  // commonly belong to an older season.
+  if (numberedSeason && !tmdbSeasonNumber) return anime;
+
+  const [seasonDetails, seasonImages, seasonVideos] = tmdbSeasonNumber
+    ? await Promise.all([
+        options.includeEpisodeStills
+          ? tmdbFetch<{ episodes?: TmdbEpisode[] }>(`/tv/${match.id}/season/${tmdbSeasonNumber}`)
+          : Promise.resolve(null),
+        tmdbFetch<{ posters?: ImageFile[] }>(
+          `/tv/${match.id}/season/${tmdbSeasonNumber}/images?include_image_language=en,ja,zh,null`
+        ),
+        tmdbFetch<{ results?: VideoFile[] }>(`/tv/${match.id}/season/${tmdbSeasonNumber}/videos`),
+      ])
+    : [null, null, null];
+
+  // Logos/backdrops are series-level on TMDB. For a numbered season, retain
+  // the exact-season AniList artwork instead of showing an older season image.
+  const logoPath = numberedSeason
+    ? null
+    : chooseImage(images?.logos, ["en", "ja", "zh", null], "logo");
+  // A null image language normally indicates artwork without baked-in text,
+  // which is the safest backdrop when a separate title logo is overlaid.
+  const backdropPath = numberedSeason
+    ? null
+    : chooseImage(images?.backdrops, [null, "ja", "en", "zh"], "landscape");
+  const posterPath = chooseImage(
+    numberedSeason ? seasonImages?.posters : images?.posters,
+    ["en", null, "ja", "zh"],
+    "portrait",
+  );
+  const trailer = chooseTrailer(numberedSeason ? seasonVideos?.results : videos?.results);
 
   return {
     ...anime,
@@ -270,7 +310,7 @@ export async function enrichAnimeWithTmdb(
       name: trailer.name || `${titles[0]} official trailer`,
       type: trailer.type,
       official: Boolean(trailer.official),
-    } : anime.trailer,
+    } : numberedSeason ? null : anime.trailer,
     tmdb: { id: match.id, mediaType },
     dataSources: Array.from(new Set([...(anime.dataSources || ["AniList"]), "TMDB"])),
   };
