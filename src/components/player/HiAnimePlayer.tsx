@@ -23,6 +23,8 @@ import {
   ThumbsDown,
   Smile,
   Sparkles,
+  List,
+  LayoutGrid,
 } from "lucide-react";
 import { Anime } from "@/lib/anilist/types";
 import { EpisodeItem, AVAILABLE_SERVERS, getPlaybackProvider, getServerOption } from "@/lib/providers";
@@ -179,6 +181,7 @@ export function HiAnimePlayer({
   const [hasError, setHasError] = useState<boolean>(false);
   const [reloadKey, setReloadKey] = useState<number>(0);
   const [epFilter, setEpFilter] = useState<string>("");
+  const [episodeView, setEpisodeView] = useState<"list" | "grid">("list");
   const [isBookmarked, setIsBookmarked] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
@@ -553,10 +556,40 @@ export function HiAnimePlayer({
         <div className="order-2 lg:order-2 lg:col-span-3 lg:col-start-10 lg:row-start-1 bg-[#13151b] rounded-xl lg:rounded-lg border border-white/5 flex flex-col h-auto lg:h-[580px] overflow-hidden">
           {/* Header & Filter */}
           <div className="p-3 sm:p-4 lg:p-3 border-b border-white/5 flex flex-col gap-2 shrink-0 bg-[#161822]">
-            <span className="text-lg lg:text-xs font-black lg:font-bold text-white/90 lg:uppercase lg:tracking-wider">
-              <span className="lg:hidden">Episodes</span>
-              <span className="hidden lg:inline">List of episodes:</span>
-            </span>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-lg lg:text-xs font-black lg:font-bold text-white/90 lg:uppercase lg:tracking-wider">
+                <span className="lg:hidden">Episodes</span>
+                <span className="hidden lg:inline">Episodes:</span>
+              </span>
+              <div className="flex items-center rounded-md border border-white/10 bg-[#0e1015] p-0.5" aria-label="Episode layout">
+                <button
+                  type="button"
+                  onClick={() => setEpisodeView("list")}
+                  aria-label="Show episodes as a list"
+                  aria-pressed={episodeView === "list"}
+                  title="List view"
+                  className={cn(
+                    "grid h-7 w-7 place-items-center rounded transition-colors cursor-pointer",
+                    episodeView === "list" ? "bg-[#ff4f86] text-[#111]" : "text-white/45 hover:text-white",
+                  )}
+                >
+                  <List className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEpisodeView("grid")}
+                  aria-label="Show episodes in a three-column grid"
+                  aria-pressed={episodeView === "grid"}
+                  title="Grid view"
+                  className={cn(
+                    "grid h-7 w-7 place-items-center rounded transition-colors cursor-pointer",
+                    episodeView === "grid" ? "bg-[#ff4f86] text-[#111]" : "text-white/45 hover:text-white",
+                  )}
+                >
+                  <LayoutGrid className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
             <div className="relative hidden lg:flex items-center">
               <Search className="w-3.5 h-3.5 text-white/40 absolute left-2.5 pointer-events-none" />
               <input
@@ -572,10 +605,15 @@ export function HiAnimePlayer({
           {/* Scrollable Episode Items */}
           <div
             ref={epListRef}
-            className="grid grid-cols-6 lg:block flex-1 lg:overflow-y-auto gap-2 lg:gap-0 lg:divide-y lg:divide-white/5 p-3 sm:p-4 lg:p-1 text-xs"
+            className={cn(
+              "flex-1 lg:overflow-y-auto text-xs",
+              episodeView === "grid"
+                ? "grid grid-cols-3 content-start gap-2 p-2.5"
+                : "grid grid-cols-6 lg:block gap-2 lg:gap-0 lg:divide-y lg:divide-white/5 p-3 sm:p-4 lg:p-1",
+            )}
           >
             {episodes.length === 0 ? (
-              <div className="p-4 flex flex-col items-center justify-center gap-2 text-center text-xs text-white/50 h-full">
+              <div className="col-span-full p-4 flex flex-col items-center justify-center gap-2 text-center text-xs text-white/50 h-full">
                 <span className="font-bold text-white/70">No Aired Episodes</span>
                 <span className="text-[11px] text-white/40">
                   {anime.nextAiringEpisode
@@ -584,12 +622,44 @@ export function HiAnimePlayer({
                 </span>
               </div>
             ) : filteredEpisodes.length === 0 ? (
-              <div className="p-4 text-center text-xs text-white/40">
+              <div className="col-span-full p-4 text-center text-xs text-white/40">
                 No episodes found
               </div>
             ) : (
               filteredEpisodes.map((ep) => {
                 const isActive = ep.number === currentEpisode;
+                if (episodeView === "grid") {
+                  const preview = ep.thumbnail || anime.bannerImage || anime.coverImage;
+                  return (
+                    <button
+                      key={ep.number}
+                      data-active={isActive ? "true" : "false"}
+                      onClick={() => selectEpisode(ep.number)}
+                      title={ep.title || `Episode ${ep.number}`}
+                      className={cn(
+                        "group relative aspect-video min-w-0 overflow-hidden rounded-md border bg-[#0e1015] text-left transition-all cursor-pointer",
+                        isActive
+                          ? "border-[#ff4f86] ring-1 ring-[#ff4f86]/70"
+                          : "border-white/10 hover:border-white/35",
+                      )}
+                    >
+                      <Image
+                        src={preview}
+                        alt=""
+                        fill
+                        sizes="(max-width: 1024px) 33vw, 110px"
+                        className="object-cover transition-transform duration-200 group-hover:scale-105"
+                      />
+                      <span className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/15 to-transparent" />
+                      <span className={cn(
+                        "absolute bottom-1 left-1 right-1 truncate text-[10px] font-extrabold",
+                        isActive ? "text-[#ff77a2]" : "text-white",
+                      )}>
+                        EP {ep.number}
+                      </span>
+                    </button>
+                  );
+                }
                 return (
                   <button
                     key={ep.number}
