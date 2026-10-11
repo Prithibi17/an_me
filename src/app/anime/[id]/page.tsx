@@ -165,25 +165,21 @@ function AnimePageContent({
           isLightOff={isLightOff}
           onToggleLight={() => setIsLightOff((prev) => !prev)}
           partyCode={partyCode}
+          belowPlayer={
+            <CommentsSection
+              animeId={anime.id}
+              currentEpisode={currentEpisode}
+              totalEpisodes={totalEps}
+              onSelectEpisode={handleSelectEpisode}
+              maxVisible={2}
+              compact
+            />
+          }
+          belowEpisodes={
+            <RecommendedSection recommendations={anime.recommendations} title="Recommendations" variant="sidebar" />
+          }
         />
       </div>
-
-      {/* Compact community panel on the right, matching the theater layout. */}
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12 lg:gap-6">
-        <aside className="lg:col-span-4 lg:col-start-9 xl:col-span-3 xl:col-start-10">
-          <CommentsSection
-            animeId={anime.id}
-            currentEpisode={currentEpisode}
-            totalEpisodes={totalEps}
-            onSelectEpisode={handleSelectEpisode}
-            maxVisible={2}
-            compact
-          />
-        </aside>
-      </div>
-
-      {/* Similar titles stay below the complete viewing and discussion area. */}
-      <RecommendedSection recommendations={anime.recommendations} title="Similar Anime" />
 
     </div>
   );

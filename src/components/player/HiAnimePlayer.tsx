@@ -45,6 +45,8 @@ interface HiAnimePlayerProps {
   isLightOff: boolean;
   onToggleLight: () => void;
   partyCode?: string | null;
+  belowPlayer?: React.ReactNode;
+  belowEpisodes?: React.ReactNode;
 }
 
 type AnikotoSource = {
@@ -64,6 +66,8 @@ export function HiAnimePlayer({
   isLightOff,
   onToggleLight,
   partyCode = null,
+  belowPlayer,
+  belowEpisodes,
 }: HiAnimePlayerProps) {
   const [selectedServer, setSelectedServer] = useState<string>("megaplay");
   const [track, setTrack] = useState<"sub" | "dub">("sub");
@@ -539,12 +543,12 @@ export function HiAnimePlayer({
 
   return (
     <div className={cn("w-full select-none transition-all duration-300", isExpanded && "max-w-none")}>
-      {/* 3-Column Top Theater Grid */}
+      {/* Theater grid: wide player left, episodes right, anime information below. */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
         {/* ========================================================================= */}
-        {/* COLUMN 1 (LEFT): EPISODE LIST SIDEBAR (~3 cols on desktop) */}
+        {/* EPISODE LIST: right rail on desktop */}
         {/* ========================================================================= */}
-        <div className="order-2 lg:order-1 lg:col-span-3 xl:col-span-2 bg-[#13151b] rounded-xl lg:rounded-lg border border-white/5 flex flex-col h-auto lg:h-[580px] overflow-hidden">
+        <div className="order-2 lg:order-2 lg:col-span-3 lg:col-start-10 lg:row-start-1 bg-[#13151b] rounded-xl lg:rounded-lg border border-white/5 flex flex-col h-auto lg:h-[580px] overflow-hidden">
           {/* Header & Filter */}
           <div className="p-3 sm:p-4 lg:p-3 border-b border-white/5 flex flex-col gap-2 shrink-0 bg-[#161822]">
             <span className="text-lg lg:text-xs font-black lg:font-bold text-white/90 lg:uppercase lg:tracking-wider">
@@ -615,9 +619,9 @@ export function HiAnimePlayer({
         </div>
 
         {/* ========================================================================= */}
-        {/* COLUMN 2 (CENTER): VIDEO PLAYER + UNDER-PLAYER CONTROLS + SERVER CARD */}
+        {/* PLAYER: dominant left column */}
         {/* ========================================================================= */}
-        <div className="order-1 lg:order-2 lg:col-span-6 xl:col-span-7 flex flex-col gap-3">
+        <div className="order-1 lg:order-1 lg:col-span-9 lg:col-start-1 lg:row-start-1 flex flex-col gap-3">
           {/* Video Iframe Container */}
           <div
             id="player-wrap"
@@ -930,7 +934,7 @@ export function HiAnimePlayer({
         </div>
 
         {/* ========================================================================= */}
-        {/* COLUMN 3 (RIGHT): ANIME MINI SIDEBAR (~3 cols on desktop) */}
+        {/* ANIME INFORMATION: below the player, aligned to the left column */}
         {/* ========================================================================= */}
         {partyCode ? (
           <WatchTogetherPanel
@@ -943,7 +947,7 @@ export function HiAnimePlayer({
             onTransfer={watchTogether.transferHost}
             onLeave={watchTogether.leave}
           />
-        ) : <div className="order-3 lg:order-3 lg:col-span-3 xl:col-span-3 bg-[#13151b] rounded-xl lg:rounded-lg border border-white/5 p-4 flex flex-col gap-4 text-xs">
+        ) : <div className="order-3 lg:col-span-9 lg:col-start-1 lg:row-start-2 bg-[#13151b] rounded-xl lg:rounded-lg border border-white/5 p-4 flex flex-col gap-4 text-xs">
           {/* Top: Poster Thumbnail + Title */}
           <div className="flex gap-3">
             <div className="relative w-20 h-28 shrink-0 rounded overflow-hidden shadow-md">
@@ -1100,6 +1104,17 @@ export function HiAnimePlayer({
             </div>
           </div>
         </div>}
+
+        {belowEpisodes && (
+          <div className="order-4 lg:col-span-3 lg:col-start-10 lg:row-start-2">
+            {belowEpisodes}
+          </div>
+        )}
+        {belowPlayer && (
+          <div className="order-5 lg:col-span-9 lg:col-start-1 lg:row-start-3">
+            {belowPlayer}
+          </div>
+        )}
       </div>
 
       {/* Interactive Report Stream Modal */}

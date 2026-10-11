@@ -8,19 +8,33 @@ import { Anime } from "@/lib/anilist/types";
 import { getPreferredTitle } from "@/lib/utils/title";
 import { AnimeHoverPreview } from "@/components/anime/AnimeHoverPreview";
 import { getEpisodeCounts } from "@/lib/utils/episodes";
+import { CinematicMediaRow } from "@/components/anime/CinematicMediaRow";
 
 export function RecommendedSection({
   recommendations,
   title = "Recommended For You",
+  variant = "grid",
 }: {
   recommendations?: Anime[];
   title?: string;
+  variant?: "grid" | "sidebar";
 }) {
   if (!recommendations || recommendations.length === 0) {
     return null;
   }
 
   const items = recommendations.slice(0, 12);
+
+  if (variant === "sidebar") {
+    return (
+      <aside className="w-full rounded-xl border border-white/[0.07] bg-[#0f1218]/90 p-3.5 shadow-[0_18px_48px_rgba(0,0,0,.18)]">
+        <h3 className="mb-3 border-b border-white/[0.07] pb-2.5 text-base font-black uppercase tracking-[.08em] text-white">{title}</h3>
+        <div className="flex flex-col gap-2">
+          {items.slice(0, 6).map((item) => <CinematicMediaRow key={item.id} anime={item} />)}
+        </div>
+      </aside>
+    );
+  }
 
   return (
     <div className="w-full flex flex-col gap-4 select-none mt-6">
