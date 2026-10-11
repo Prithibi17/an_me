@@ -24,7 +24,9 @@ interface ImageFile {
   file_path: string;
   iso_639_1?: string | null;
   vote_average?: number;
+  vote_count?: number;
   width?: number;
+  height?: number;
 }
 
 interface VideoFile {
@@ -93,15 +95,29 @@ function candidateScore(anime: Anime, result: SearchResult) {
   return (exact ? 100 : 60) - yearDistance * 12 + (animeOrigin && matchingOrigin ? 8 : 0);
 }
 
-function chooseImage(files: ImageFile[] | undefined, languages: Array<string | null>) {
+function chooseImage(
+  files: ImageFile[] | undefined,
+  languages: Array<string | null>,
+  orientation: "landscape" | "portrait" | "logo",
+) {
   if (!files?.length) return null;
-  return [...files]
+  const suitable = files.filter((file) => {
+    if (!file.width || !file.height) return true;
+    const ratio = file.width / file.height;
+    if (orientation === "landscape") return ratio >= 1.55;
+    if (orientation === "portrait") return ratio >= 0.55 && ratio <= 0.8;
+    return ratio >= 1.1;
+  });
+  return [...(suitable.length ? suitable : files)]
     .sort((a, b) => {
       const languageA = languages.indexOf(a.iso_639_1 ?? null);
       const languageB = languages.indexOf(b.iso_639_1 ?? null);
       const rankA = languageA === -1 ? languages.length : languageA;
       const rankB = languageB === -1 ? languages.length : languageB;
-      return rankA - rankB || (b.vote_average || 0) - (a.vote_average || 0) || (b.width || 0) - (a.width || 0);
+      return rankA - rankB ||
+        (b.vote_count || 0) - (a.vote_count || 0) ||
+        (b.vote_average || 0) - (a.vote_average || 0) ||
+        (b.width || 0) - (a.width || 0);
     })[0]?.file_path || null;
 }
 
@@ -148,9 +164,11 @@ export async function enrichAnimeWithTmdb(anime: Anime): Promise<Anime> {
     ),
     tmdbFetch<{ results?: VideoFile[] }>(`/${mediaType}/${match.id}/videos`),
   ]);
-  const logoPath = chooseImage(images?.logos, ["en", "ja", "zh", null]);
-  const backdropPath = chooseImage(images?.backdrops, [null, "en", "ja", "zh"]);
-  const posterPath = chooseImage(images?.posters, ["en", null, "ja", "zh"]);
+  const logoPath = chooseImage(images?.logos, ["en", "ja", "zh", null], "logo");
+  // A null image language normally indicates artwork without baked-in text,
+  // which is the safest backdrop when a separate title logo is overlaid.
+  const backdropPath = chooseImage(images?.backdrops, [null, "ja", "en", "zh"], "landscape");
+  const posterPath = chooseImage(images?.posters, ["en", null, "ja", "zh"], "portrait");
   const trailer = chooseTrailer(videos?.results);
 
   return {

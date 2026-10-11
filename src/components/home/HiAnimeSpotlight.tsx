@@ -9,12 +9,6 @@ import { useAnimeNameLanguage } from "@/lib/storage/language";
 import { getPreferredTitle } from "@/lib/utils/title";
 import { getEpisodeCounts } from "@/lib/utils/episodes";
 
-const PROPER_BANNER_OVERRIDES: Record<number, string> = {
-  // Mushoku Tensei Season 3 -> use official high-res landscape franchise banner instead of hair slice
-  178789: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/108465-RgsRpTMhP9Sv.jpg",
-  217434: "https://s4.anilist.co/file/anilistcdn/media/anime/banner/108465-RgsRpTMhP9Sv.jpg",
-};
-
 export function HiAnimeSpotlight({ spotlightList }: { spotlightList: Anime[] }) {
   const [lang] = useAnimeNameLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -35,10 +29,7 @@ export function HiAnimeSpotlight({ spotlightList }: { spotlightList: Anime[] }) 
   const current = list[currentIndex];
   const title = getPreferredTitle(current.title, lang);
   const counts = getEpisodeCounts(current);
-  const bannerUrl =
-    PROPER_BANNER_OVERRIDES[current.id] ||
-    current.bannerImage ||
-    current.coverImage;
+  const bannerUrl = current.bannerImage || current.coverImage;
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev - 1 + list.length) % list.length);
@@ -69,26 +60,11 @@ export function HiAnimeSpotlight({ spotlightList }: { spotlightList: Anime[] }) 
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0b0e] via-transparent to-[#0a0b0e]/30" />
       </div>
 
-      {/* Foreground Content: official poster artwork paired with title and actions */}
+      {/* Foreground Content: title artwork and actions over the clean banner. */}
       <div className="relative z-10 w-full h-full max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-6">
         <div className="flex max-w-3xl items-center gap-4 sm:gap-6 py-6">
-          <Link
-            href={`/anime/${current.id}/details`}
-            className="relative hidden h-[220px] w-[150px] shrink-0 overflow-hidden rounded-xl border border-white/15 bg-[#11151b] shadow-[0_20px_55px_rgba(0,0,0,.55)] sm:block lg:h-[250px] lg:w-[170px]"
-            aria-label={`View ${title}`}
-          >
-            <Image
-              src={current.coverImage}
-              alt={`${title} poster`}
-              fill
-              sizes="170px"
-              className="object-cover transition-transform duration-300 hover:scale-[1.035]"
-            />
-            <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
-          </Link>
-
           {/* Title, metadata and actions */}
-          <div className="max-w-xl lg:max-w-2xl flex flex-col gap-3 rounded-2xl border border-white/[0.06] bg-black/10 p-3 backdrop-blur-[2px] sm:p-4">
+          <div className="max-w-xl lg:max-w-2xl flex flex-col gap-3">
           {/* Spotlight Rank */}
           <div className="flex items-center gap-2">
             <span className="text-xs sm:text-sm font-extrabold text-[#ff2f6d] tracking-wide">
@@ -98,12 +74,12 @@ export function HiAnimeSpotlight({ spotlightList }: { spotlightList: Anime[] }) 
 
           {/* TMDB title artwork when available, with an accessible text fallback. */}
           {current.titleLogo ? (
-            <div className="relative h-16 w-full max-w-[390px] sm:h-20 md:h-24">
+            <div className="relative h-20 w-full max-w-[440px] sm:h-24 md:h-28">
               <Image
                 src={current.titleLogo}
                 alt={title}
                 fill
-                sizes="390px"
+                sizes="440px"
                 className="object-contain object-left drop-shadow-[0_5px_18px_rgba(0,0,0,.9)]"
               />
               <h1 className="sr-only">{title}</h1>
