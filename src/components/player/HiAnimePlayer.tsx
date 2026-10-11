@@ -866,8 +866,8 @@ export function HiAnimePlayer({
                         : "bg-gradient-to-r from-[#a855f7]/20 to-[#ec4899]/20 border border-[#c05cff]/45 hover:from-[#a855f7]/35 hover:to-[#ec4899]/35 text-[#e0b1ff]"
                     )}
                     title={anikotoSource?.subUrl
-                      ? "Server 3 SUB source is available for this episode"
-                      : "Server 3 has no SUB source for this episode yet"}
+                      ? "MegaPlay catalog episode-ID source is available"
+                      : "MegaPlay catalog has no SUB mapping for this episode yet"}
                   >
                     Server 3
                   </button>
@@ -912,6 +912,7 @@ export function HiAnimePlayer({
                           ? "bg-gradient-to-r from-[#f59e0b] to-[#f97316] text-[#1a0b02] shadow-sm"
                           : "bg-gradient-to-r from-[#f59e0b]/20 to-[#ef4444]/20 border border-[#f59e0b]/45 hover:from-[#f59e0b]/35 hover:to-[#ef4444]/35 text-[#ffd078]"
                       )}
+                      title="MegaPlay catalog episode-ID DUB source"
                     >
                       Server 3
                     </button>

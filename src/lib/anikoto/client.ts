@@ -17,6 +17,7 @@ type EpisodeRow = {
   number: number;
   title?: string;
   jp_title?: string;
+  episode_embed_id?: string | number | null;
   embed_url?: { sub?: string; dub?: string };
 };
 
@@ -133,6 +134,11 @@ function trustedEmbedUrl(value: unknown, track: "sub" | "dub") {
   }
 }
 
+function catalogEmbedUrl(episodeEmbedId: unknown, track: "sub" | "dub") {
+  const id = positiveInteger(episodeEmbedId);
+  return id ? `https://megaplay.buzz/stream/s-2/${id}/${track}` : null;
+}
+
 export async function getAnikotoEpisodeSource(aniListId: number, episode: number) {
   if (!Number.isInteger(aniListId) || aniListId < 1 || !Number.isInteger(episode) || episode < 1) return null;
   const catalogRow = (await getCatalogMap()).get(aniListId);
@@ -142,7 +148,14 @@ export async function getAnikotoEpisodeSource(aniListId: number, episode: number
   const row = series?.data?.episodes?.find((item) => Number(item.number) === episode);
   if (!row) return null;
 
-  const subUrl = trustedEmbedUrl(row.embed_url?.sub, "sub");
+  // MegaPlay documents the Anikoto episode embed ID as its most direct
+  // catalog resolver. Prefer the API-provided URL, then construct the
+  // documented /stream/s-2/{episode-id}/{language} form when only the ID is
+  // present. MAL and AniList routes remain player-level fallbacks.
+  const subUrl = trustedEmbedUrl(row.embed_url?.sub, "sub")
+    || catalogEmbedUrl(row.episode_embed_id, "sub");
+  // Do not infer DUB merely because an episode ID exists; the catalog must
+  // explicitly publish a dub URL for this exact episode.
   const dubUrl = trustedEmbedUrl(row.embed_url?.dub, "dub");
   if (!subUrl && !dubUrl) return null;
   return {
