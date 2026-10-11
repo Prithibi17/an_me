@@ -91,20 +91,20 @@ export function AnimeSectionGrid({
                 {/* Bottom Badges */}
                 <div className="absolute bottom-1.5 left-1.5 right-1.5 flex items-center gap-1 flex-wrap">
                   <>
-                      {counts.dub > 0 && <span
+                      {counts.sub > 0 && <span
                         title={`${counts.sub} subtitle episodes available`}
                         className="px-1.5 py-0.5 rounded bg-[#22c55e]/90 text-black text-[9px] font-bold flex items-center gap-0.5"
                       >
                         <Subtitles className="w-2.5 h-2.5" />
                         <span>{counts.sub}</span>
                       </span>}
-                      <span
+                      {counts.dub > 0 && <span
                         title={`${counts.dub} dub episodes available`}
                         className="px-1.5 py-0.5 rounded bg-[#06b6d4]/90 text-black text-[9px] font-bold flex items-center gap-0.5"
                       >
                         <Mic className="w-2.5 h-2.5" />
                         <span>{counts.dub}</span>
-                      </span>
+                      </span>}
                       <span title="Total planned episodes" className="px-1.5 py-0.5 rounded bg-black/75 text-white text-[9px] font-bold">
                         {counts.total ?? "?"}
                       </span>
