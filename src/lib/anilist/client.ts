@@ -112,9 +112,16 @@ export async function getTopRatedAnime(page = 1, perPage = 10): Promise<Anime[]>
 let releaseArchiveCache: { expiresAt: number; media: Anime[] } | null = null;
 let catalogYearCache: { expiresAt: number; counts: Array<{ year: number; total: number }>; total: number } | null = null;
 
+function tomorrowDateInt() {
+  const tomorrow = new Date();
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+  return Number(tomorrow.toISOString().slice(0, 10).replaceAll("-", ""));
+}
+
 async function getCatalogYearIndex() {
   if (catalogYearCache && catalogYearCache.expiresAt > Date.now()) return catalogYearCache;
-  const newestYear = new Date().getUTCFullYear() + 3;
+  const newestYear = new Date().getUTCFullYear();
+  const releasedBefore = tomorrowDateInt();
   const years = Array.from({ length: newestYear - 1909 }, (_, index) => newestYear - index);
   // AniList caps GraphQL complexity at 500, so build the archive index in two
   // cached requests rather than asking for every year in one oversized query.
@@ -124,7 +131,7 @@ async function getCatalogYearIndex() {
     const fields = batch.map((year) => `
       y${year}: Page(page: 1, perPage: 1) {
         pageInfo { total }
-        media(type: ANIME, isAdult: false, startDate_greater: ${(year - 1) * 10000 + 1231}, startDate_lesser: ${(year + 1) * 10000 + 101}) { id }
+        media(type: ANIME, isAdult: false, status_not: NOT_YET_RELEASED, startDate_greater: ${(year - 1) * 10000 + 1231}, startDate_lesser: ${Math.min((year + 1) * 10000 + 101, releasedBefore)}) { id }
       }
     `).join("\n");
     responses.push(await anilistRequest<Record<string, { pageInfo?: { total?: number } }>>(`query FullCatalogYearIndex${index} { ${fields} }`));
@@ -144,12 +151,13 @@ async function getCatalogYearIndex() {
 /** Full AniList catalog, partitioned by release year to bypass its 5,000-item query cap. */
 export async function getFullAnimeCatalogPage(page = 1, perPage = 36): Promise<AnimePageResult> {
   const safePage = Math.max(1, page);
+  const releasedBefore = tomorrowDateInt();
   // Fetch the visible page first. Besides being the cheapest request, this
   // guarantees useful content even when the more expensive year index is
   // temporarily rate-limited. AniList exposes the first 5,000 sorted records
   // directly; pages beyond that limit are served by the year buckets below.
   const directPage = safePage <= Math.ceil(5000 / perPage)
-    ? await searchAnime({ sort: "START_DATE_DESC", page: safePage, perPage })
+    ? await searchAnime({ sort: "START_DATE_DESC", statusNot: "NOT_YET_RELEASED", startDate_lesser: releasedBefore, page: safePage, perPage })
     : null;
   try {
     const index = await getCatalogYearIndex();
@@ -181,8 +189,9 @@ export async function getFullAnimeCatalogPage(page = 1, perPage = 36): Promise<A
         const withinPage = offset % 50;
         const result = await searchAnime({
           sort: "START_DATE_DESC",
+          statusNot: "NOT_YET_RELEASED",
           startDate_greater: (bucket.year - 1) * 10000 + 1231,
-          startDate_lesser: (bucket.year + 1) * 10000 + 101,
+          startDate_lesser: Math.min((bucket.year + 1) * 10000 + 101, releasedBefore),
           page: providerPage,
           perPage: 50,
         });
@@ -213,7 +222,7 @@ export async function getFullAnimeCatalogPage(page = 1, perPage = 36): Promise<A
   } catch (error) {
     console.error("Failed to fetch full anime catalog:", error);
     if (directPage?.media.length) return directPage;
-    return searchAnime({ sort: "START_DATE_DESC", page: safePage, perPage });
+    return searchAnime({ sort: "START_DATE_DESC", statusNot: "NOT_YET_RELEASED", startDate_lesser: releasedBefore, page: safePage, perPage });
   }
 }
 
@@ -473,6 +482,9 @@ export async function searchAnime(params: SearchFilterParams): Promise<AnimePage
   }
   if (params.status) {
     variables.status = params.status;
+  }
+  if (params.statusNot) {
+    variables.status_not = params.statusNot;
   }
   if (params.score) {
     variables.averageScore_greater = params.score;
