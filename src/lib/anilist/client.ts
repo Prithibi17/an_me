@@ -111,6 +111,7 @@ export async function getTopRatedAnime(page = 1, perPage = 10): Promise<Anime[]>
 
 let releaseArchiveCache: { expiresAt: number; media: Anime[] } | null = null;
 let catalogYearCache: { expiresAt: number; counts: Array<{ year: number; total: number }>; total: number } | null = null;
+const RELEASED_CATALOG_STATUSES = ["FINISHED", "RELEASING", "HIATUS"];
 
 function tomorrowDateInt() {
   const tomorrow = new Date();
@@ -131,7 +132,7 @@ async function getCatalogYearIndex() {
     const fields = batch.map((year) => `
       y${year}: Page(page: 1, perPage: 1) {
         pageInfo { total }
-        media(type: ANIME, isAdult: false, status_not: NOT_YET_RELEASED, startDate_greater: ${(year - 1) * 10000 + 1231}, startDate_lesser: ${Math.min((year + 1) * 10000 + 101, releasedBefore)}) { id }
+        media(type: ANIME, isAdult: false, status_in: [FINISHED, RELEASING, HIATUS], startDate_greater: ${(year - 1) * 10000 + 1231}, startDate_lesser: ${Math.min((year + 1) * 10000 + 101, releasedBefore)}) { id }
       }
     `).join("\n");
     responses.push(await anilistRequest<Record<string, { pageInfo?: { total?: number } }>>(`query FullCatalogYearIndex${index} { ${fields} }`));
@@ -157,7 +158,7 @@ export async function getFullAnimeCatalogPage(page = 1, perPage = 36): Promise<A
   // temporarily rate-limited. AniList exposes the first 5,000 sorted records
   // directly; pages beyond that limit are served by the year buckets below.
   const directPage = safePage <= Math.ceil(5000 / perPage)
-    ? await searchAnime({ sort: "START_DATE_DESC", statusNot: "NOT_YET_RELEASED", startDate_lesser: releasedBefore, page: safePage, perPage })
+    ? await searchAnime({ sort: "START_DATE_DESC", statusIn: RELEASED_CATALOG_STATUSES, startDate_lesser: releasedBefore, page: safePage, perPage })
     : null;
   try {
     const index = await getCatalogYearIndex();
@@ -189,7 +190,7 @@ export async function getFullAnimeCatalogPage(page = 1, perPage = 36): Promise<A
         const withinPage = offset % 50;
         const result = await searchAnime({
           sort: "START_DATE_DESC",
-          statusNot: "NOT_YET_RELEASED",
+          statusIn: RELEASED_CATALOG_STATUSES,
           startDate_greater: (bucket.year - 1) * 10000 + 1231,
           startDate_lesser: Math.min((bucket.year + 1) * 10000 + 101, releasedBefore),
           page: providerPage,
@@ -222,7 +223,7 @@ export async function getFullAnimeCatalogPage(page = 1, perPage = 36): Promise<A
   } catch (error) {
     console.error("Failed to fetch full anime catalog:", error);
     if (directPage?.media.length) return directPage;
-    return searchAnime({ sort: "START_DATE_DESC", statusNot: "NOT_YET_RELEASED", startDate_lesser: releasedBefore, page: safePage, perPage });
+    return searchAnime({ sort: "START_DATE_DESC", statusIn: RELEASED_CATALOG_STATUSES, startDate_lesser: releasedBefore, page: safePage, perPage });
   }
 }
 
@@ -485,6 +486,9 @@ export async function searchAnime(params: SearchFilterParams): Promise<AnimePage
   }
   if (params.statusNot) {
     variables.status_not = params.statusNot;
+  }
+  if (params.statusIn?.length) {
+    variables.status_in = params.statusIn;
   }
   if (params.score) {
     variables.averageScore_greater = params.score;

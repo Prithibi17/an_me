@@ -136,6 +136,7 @@ export interface SearchFilterParams {
   format?: AnimeFormat;
   status?: string;
   statusNot?: string;
+  statusIn?: string[];
   score?: number;
   startDate_greater?: number;
   startDate_lesser?: number;
