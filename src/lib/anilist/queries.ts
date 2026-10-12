@@ -100,6 +100,7 @@ export const TOP_RATED_QUERY = `
 
 export const SEARCH_QUERY = `
   query SearchAnime(
+    $id_in: [Int],
     $search: String,
     $genre: String,
     $genre_in: [String],
@@ -127,6 +128,7 @@ export const SEARCH_QUERY = `
       }
       media(
         type: ANIME,
+        id_in: $id_in,
         search: $search,
         genre: $genre,
         genre_in: $genre_in,

@@ -128,6 +128,7 @@ export type AnimeSort =
   | "FAVOURITES_DESC";
 
 export interface SearchFilterParams {
+  idIn?: number[];
   query?: string;
   genre?: string;
   genres?: string[];
