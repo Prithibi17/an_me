@@ -41,6 +41,7 @@ export function BrowseListing({ data, params, topAnime }: { data: AnimePageResul
   const [isChangingPage, startTransition] = useTransition();
   const currentPage = data.pageInfo.currentPage || 1;
   const lastPage = Math.max(data.pageInfo.lastPage || 1, 1);
+  const isLatest = params.view === "latest";
   const visiblePages = (() => {
     if (lastPage <= 7) return Array.from({ length: lastPage }, (_, index) => index + 1);
     if (currentPage <= 4) return [1, 2, 3, 4, 5];
@@ -88,7 +89,12 @@ export function BrowseListing({ data, params, topAnime }: { data: AnimePageResul
             {data.media.map((anime, index) => {
               const title = getPreferredTitle(anime.title);
               const counts = getEpisodeCounts(anime);
-              const detailsHref = `/anime/${anime.id}/details`;
+              const latestEpisode = anime.latestAiredEpisode || 0;
+              const releasedAt = anime.latestReleasedEpisodeAt || 0;
+              const detailsHref = isLatest && latestEpisode > 0
+                ? `/anime/${anime.id}?ep=${latestEpisode}`
+                : `/anime/${anime.id}/details`;
+              const releaseDate = releasedAt ? new Date(releasedAt * 1000) : null;
               return (
                 <article key={anime.id} className="group relative min-w-0">
                   <AnimeHoverPreview anime={anime} side={index % 6 < 3 ? "right" : "left"} />
@@ -97,17 +103,20 @@ export function BrowseListing({ data, params, topAnime }: { data: AnimePageResul
                       <Image src={anime.coverImage} alt={title} fill sizes="(max-width:640px) 50vw, 16vw" className="object-cover" />
                       <span className="absolute left-1.5 top-1.5 rounded bg-black/65 px-1.5 py-0.5 text-[9px] font-black">HD</span>
                       <div className="absolute bottom-1.5 left-1.5 flex gap-1 text-[9px] font-bold text-black">
-                        <span className="flex items-center gap-0.5 rounded bg-[#57d889] px-1.5 py-0.5"><Subtitles className="h-2.5 w-2.5" />{counts.sub}</span>
+                        {counts.sub > 0 && <span className="flex items-center gap-0.5 rounded bg-[#57d889] px-1.5 py-0.5"><Subtitles className="h-2.5 w-2.5" />{counts.sub}</span>}
                         {counts.dub > 0 && <span className="flex items-center gap-0.5 rounded bg-[#48cce9] px-1.5 py-0.5"><Mic className="h-2.5 w-2.5" />{counts.dub}</span>}
-                        <span className="rounded bg-black/70 px-1.5 py-0.5 text-white">{counts.total ?? "?"}</span>
+                        {!isLatest && counts.total && <span className="rounded bg-black/70 px-1.5 py-0.5 text-white">{counts.total}</span>}
                       </div>
+                      {isLatest && latestEpisode > 0 && <span className="absolute bottom-1.5 right-1.5 rounded bg-black/80 px-2 py-1 text-[9px] font-black text-white backdrop-blur">EP {latestEpisode}</span>}
                     </div>
-                    <h2 className="mt-2 truncate text-xs font-bold group-hover:text-[#ff2f6d]">{title}</h2>
+                    <h2 className="mt-2 line-clamp-2 min-h-8 text-xs font-bold leading-4 group-hover:text-[#ff2f6d]" title={title}>{title}</h2>
                   </Link>
-                  <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] text-white/45">
+                  <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] text-white/50">
                     <Link href={`/search?type=${anime.format || "TV"}`} className="hover:text-[#ff2f6d]">{anime.format || "TV"}</Link>
-                    {anime.seasonYear ? <><span>•</span><span>{anime.seasonYear}</span></> : null}
-                    {anime.duration ? <><span>•</span><span>{anime.duration}m</span></> : null}
+                    {isLatest && releaseDate ? <><span>•</span><time suppressHydrationWarning dateTime={releaseDate.toISOString()} title={releaseDate.toLocaleString()}>{releaseDate.toLocaleDateString(undefined, { month: "short", day: "numeric", year: releaseDate.getFullYear() === new Date().getFullYear() ? undefined : "numeric" })}</time></> : null}
+                    {isLatest && anime.status ? <><span>•</span><span className={anime.status === "RELEASING" ? "text-emerald-300" : "text-white/45"}>{anime.status === "RELEASING" ? "Airing" : anime.status === "FINISHED" ? "Completed" : anime.status.replaceAll("_", " ")}</span></> : null}
+                    {!isLatest && anime.seasonYear ? <><span>•</span><span>{anime.seasonYear}</span></> : null}
+                    {!isLatest && anime.duration ? <><span>•</span><span>{anime.duration}m</span></> : null}
                   </div>
                 </article>
               );

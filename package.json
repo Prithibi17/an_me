@@ -6,7 +6,8 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:release-feed": "node --experimental-strip-types --test src/lib/anilist/release-feed.test.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",

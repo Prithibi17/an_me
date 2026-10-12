@@ -1,6 +1,6 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import { getFullAnimeCatalogPage, getRecentlyAiredAnime, getTopRatedAnime, getTrendingAnime, searchAnime } from "@/lib/anilist/client";
+import { getRecentlyAiredAnime, getRecentlyAiredAnimePage, getTopRatedAnime, getTrendingAnime, searchAnime } from "@/lib/anilist/client";
 import type { AnimePageResult } from "@/lib/anilist/types";
 import { BrowseListing } from "@/components/search/BrowseListing";
 import { enrichAnimeAvailability } from "@/lib/anikoto/client";
@@ -14,6 +14,16 @@ interface PageProps {
 
 export default async function FilterPage({ searchParams }: PageProps) {
   const params = await searchParams;
+  if (params.view === "latest" && !/^\d+$/.test(params.snapshot || "")) {
+    const next = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value && key !== "snapshot") next.set(key, value);
+    });
+    // A server-generated five-minute snapshot keeps every page in one stable feed.
+    // eslint-disable-next-line react-hooks/purity -- request-time server boundary, not a client render value
+    next.set("snapshot", String(Math.floor(Date.now() / 300_000) * 300));
+    redirect(`/search?${next.toString()}`);
+  }
   const parsedPage = parseInt(params.page || "1", 10);
   const page = Number.isFinite(parsedPage) ? Math.max(1, parsedPage) : 1;
   const sort = params.view === "new" ? "START_DATE_DESC" : params.sort || "TRENDING_DESC";
@@ -34,7 +44,7 @@ export default async function FilterPage({ searchParams }: PageProps) {
   }
 
   const dataPromise: Promise<AnimePageResult> = params.view === "latest"
-    ? getFullAnimeCatalogPage(page, 36)
+    ? getRecentlyAiredAnimePage(page, 30, Number(params.snapshot))
     : searchAnime({
     query: params.q?.trim() || undefined,
     sort: (params.view === "latest" ? "START_DATE_DESC" : sort) as any,
@@ -57,11 +67,28 @@ export default async function FilterPage({ searchParams }: PageProps) {
     getTrendingAnime(1, 10),
     getTopRatedAnime(1, 10),
   ]);
-  if (initialData.media.length === 0 && page > initialData.pageInfo.lastPage) redirect(`/search?view=${params.view || "latest"}&page=${initialData.pageInfo.lastPage}`);
+  if (initialData.media.length === 0 && page > initialData.pageInfo.lastPage) {
+    const corrected = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value && key !== "page") corrected.set(key, value);
+    });
+    corrected.set("page", String(initialData.pageInfo.lastPage));
+    redirect(`/search?${corrected.toString()}`);
+  }
   const enriched = await enrichAnimeAvailability([...initialData.media, ...rawToday, ...rawWeek, ...rawMonth]);
   const byId = new Map(enriched.map((anime) => [anime.id, anime]));
   initialData.media = initialData.media
-    .map((anime) => byId.get(anime.id) || anime);
+    .map((anime) => {
+      const available = byId.get(anime.id) || anime;
+      return params.view === "latest"
+        ? {
+            ...available,
+            latestAiredEpisode: anime.latestAiredEpisode,
+            latestReleasedEpisodeAt: anime.latestReleasedEpisodeAt,
+            airingAt: anime.airingAt,
+          }
+        : available;
+    });
   const mapEnriched = (items: typeof rawWeek) => items.map((anime) => byId.get(anime.id) || anime);
   const topSource = [...mapEnriched(rawToday), ...mapEnriched(rawWeek), ...mapEnriched(rawMonth)];
   const posterItems = await Promise.all(

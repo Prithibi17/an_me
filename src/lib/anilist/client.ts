@@ -17,6 +17,8 @@ import {
 import { normalizeAnime } from "./normalize";
 import { filterAnime, isAllowedAnime } from "./content-filter";
 import releasedCatalog from "@/data/released-anilist-catalog.json";
+import releaseFeed from "@/data/anilist-release-feed.json";
+import { selectLatestVerifiedSchedules, type ReleaseSchedule } from "./release-feed";
 
 const ANILIST_ENDPOINT = "https://graphql.anilist.co";
 
@@ -110,9 +112,9 @@ export async function getTopRatedAnime(page = 1, perPage = 10): Promise<Anime[]>
   }
 }
 
-let releaseArchiveCache: { expiresAt: number; media: Anime[] } | null = null;
 const RELEASED_CATALOG_STATUSES = ["FINISHED", "RELEASING", "HIATUS"];
 const RELEASED_CATALOG_IDS = releasedCatalog.ids as number[];
+const VERIFIED_RELEASES = releaseFeed.releases as Array<{ mediaId: number; episode: number; airingAt: number; scheduleId: number }>;
 
 function tomorrowDateInt() {
   const tomorrow = new Date();
@@ -155,111 +157,52 @@ export async function getFullAnimeCatalogPage(page = 1, perPage = 36): Promise<A
   };
 }
 
-const RELEASE_FEED_MEDIA_FIELDS = `
-  id
-  title { english romaji native }
-  coverImage { extraLarge large medium color }
-  bannerImage
-  description(asHtml: false)
-  averageScore
-  genres
-  episodes
-  duration
-  countryOfOrigin
-  status
-  isAdult
-  format
-  season
-  seasonYear
-`;
-
-function paginateReleaseArchive(media: Anime[], page: number, perPage: number): AnimePageResult {
-  const total = media.length;
-  const lastPage = Math.max(1, Math.ceil(total / perPage));
-  const start = (page - 1) * perPage;
-  return {
-    media: media.slice(start, start + perPage),
-    pageInfo: {
-      total,
-      perPage,
-      currentPage: page,
-      lastPage,
-      hasNextPage: page < lastPage,
-    },
-  };
-}
-
-export async function getRecentlyAiredAnimePage(page = 1, perPage = 18): Promise<AnimePageResult> {
+export async function getRecentlyAiredAnimePage(page = 1, perPage = 30, snapshot?: number): Promise<AnimePageResult> {
   try {
-    if (releaseArchiveCache && releaseArchiveCache.expiresAt > Date.now()) {
-      return paginateReleaseArchive(releaseArchiveCache.media, page, perPage);
-    }
-    const now = Math.floor(Date.now() / 300_000) * 300;
-    type SchedulePage = {
-      Page: {
-        pageInfo: { total: number; lastPage: number; hasNextPage: boolean };
-        airingSchedules: any[];
-      };
-    };
-
-    type RawSchedule = { id: number; airingAt: number; episode: number; media?: any };
-    const first = await anilistRequest<SchedulePage>(RECENTLY_AIRED_QUERY, {
+    const currentSnapshot = Math.floor(Date.now() / 300_000) * 300;
+    const asOf = Number.isInteger(snapshot) && snapshot! > 0
+      ? Math.min(snapshot!, currentSnapshot)
+      : currentSnapshot;
+    type RawSchedule = ReleaseSchedule & { media?: any };
+    const recent = await anilistRequest<{ Page: { airingSchedules: RawSchedule[] } }>(RECENTLY_AIRED_QUERY, {
       page: 1,
       perPage: 50,
-      airingAt_lesser: now,
+      airingAt_lesser: asOf,
     });
-    const sourceLastPage = Math.min(100, Math.max(1, first.Page?.pageInfo?.lastPage || 1));
-    const schedules: RawSchedule[] = [...(first.Page?.airingSchedules || [])];
-
-    // Fetch the provider archive in ten-page GraphQL batches. This creates one
-    // consistent dataset before deduplication, classification, sorting and
-    // pagination, without making up to 100 individual HTTP requests.
-    for (let startPage = 2; startPage <= sourceLastPage; startPage += 10) {
-      const pages = Array.from(
-        { length: Math.min(10, sourceLastPage - startPage + 1) },
-        (_, index) => startPage + index,
-      );
-      const fields = pages.map((sourcePage) => `
-        p${sourcePage}: Page(page: ${sourcePage}, perPage: 50) {
-          airingSchedules(airingAt_lesser: $airingAt_lesser, sort: TIME_DESC) {
-            id airingAt episode
-            media { ${RELEASE_FEED_MEDIA_FIELDS} }
-          }
-        }
-      `).join("\n");
-      const batch = await anilistRequest<Record<string, { airingSchedules?: RawSchedule[] }>>(
-        `query ReleaseArchive($airingAt_lesser: Int) { ${fields} }`,
-        { airingAt_lesser: now },
-      );
-      for (const sourcePage of pages) schedules.push(...(batch[`p${sourcePage}`]?.airingSchedules || []));
-    }
-
-    schedules.sort((a, b) => b.airingAt - a.airingAt || b.id - a.id);
-    const uniqueAnime: Anime[] = [];
-    const seenMediaIds = new Set<number>();
-    for (const schedule of schedules) {
-        if (!schedule.media || seenMediaIds.has(schedule.media.id)) continue;
-        if (!Number.isInteger(schedule.episode) || schedule.episode < 1 || schedule.airingAt > now) continue;
-        if (!schedule.media.title?.english && !schedule.media.title?.romaji) continue;
-        seenMediaIds.add(schedule.media.id);
-        const normalized = normalizeAnime({
-          ...schedule.media,
-          airingAt: schedule.airingAt,
-          latestReleasedEpisodeAt: schedule.airingAt,
-          latestEpisode: schedule.episode,
-        });
-        if (isAllowedAnime(normalized)) uniqueAnime.push(normalized);
-    }
-
-    const statusPriority = (status?: string | null) => status === "RELEASING" ? 0 : status === "FINISHED" ? 1 : 2;
-    uniqueAnime.sort((a, b) =>
-      statusPriority(a.status) - statusPriority(b.status) ||
-      (b.latestReleasedEpisodeAt || 0) - (a.latestReleasedEpisodeAt || 0) ||
-      b.id - a.id
+    const recentSchedules = selectLatestVerifiedSchedules(recent.Page?.airingSchedules || [], asOf);
+    const releasesByMedia = new Map(
+      VERIFIED_RELEASES.filter((item) => item.airingAt <= asOf).map((item) => [item.mediaId, item]),
     );
+    for (const item of recentSchedules) {
+      const mediaId = Number(item.media?.id);
+      if (!isAllowedAnime(normalizeAnime(item.media))) continue;
+      const existing = releasesByMedia.get(mediaId);
+      if (!existing || item.airingAt > existing.airingAt || (item.airingAt === existing.airingAt && item.id > existing.scheduleId)) {
+        releasesByMedia.set(mediaId, { mediaId, episode: item.episode, airingAt: item.airingAt, scheduleId: item.id });
+      }
+    }
+    const releases = [...releasesByMedia.values()].sort((a, b) => b.airingAt - a.airingAt || b.scheduleId - a.scheduleId);
+    const total = releases.length;
+    const lastPage = Math.max(1, Math.ceil(total / perPage));
+    const pageRecords = releases.slice((page - 1) * perPage, page * perPage);
+    if (pageRecords.length === 0) {
+      return { media: [], pageInfo: { total, perPage, currentPage: page, lastPage, hasNextPage: false } };
+    }
 
-    releaseArchiveCache = { expiresAt: Date.now() + 3 * 60 * 1000, media: uniqueAnime };
-    return paginateReleaseArchive(uniqueAnime, page, perPage);
+    // Resolve the complete page in one exact ID query. Mixing schedule-embedded
+    // media with a second partial lookup caused some valid records to disappear
+    // from otherwise full pages.
+    const resolved = await searchAnime({ idIn: pageRecords.map((item) => item.mediaId), page: 1, perPage: pageRecords.length });
+    const mediaById = new Map(resolved.media.map((anime) => [anime.id, anime] as const));
+    const media = pageRecords
+      .flatMap((release): Anime[] => {
+        const anime = mediaById.get(release.mediaId);
+        if (!anime) return [];
+        const releasedAnime: Anime = { ...anime, latestAiredEpisode: release.episode, latestReleasedEpisodeAt: release.airingAt, airingAt: release.airingAt };
+        return isAllowedAnime(releasedAnime) ? [releasedAnime] : [];
+      })
+      ;
+    return { media, pageInfo: { total, perPage, currentPage: page, lastPage, hasNextPage: page < lastPage } };
   } catch (err) {
     console.error("Failed to fetch recently aired anime:", err);
     return {
