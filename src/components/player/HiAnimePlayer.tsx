@@ -619,10 +619,11 @@ export function HiAnimePlayer({
           {/* Scrollable Episode Items */}
           <div
             ref={epListRef}
+            style={episodeView === "grid" ? { gridAutoRows: "max-content", rowGap: "12px" } : undefined}
             className={cn(
               "flex-1 lg:overflow-y-auto text-xs",
               episodeView === "grid"
-                ? "grid grid-cols-3 content-start gap-x-2 gap-y-3 p-2.5"
+                ? "grid grid-cols-3 content-start gap-x-2 p-2.5"
                 : "grid grid-cols-6 lg:block gap-2 lg:gap-0 lg:divide-y lg:divide-white/5 p-3 sm:p-4 lg:p-1",
             )}
           >
@@ -651,7 +652,7 @@ export function HiAnimePlayer({
                       onClick={() => selectEpisode(ep.number)}
                       title={ep.title || `Episode ${ep.number}`}
                       className={cn(
-                        "group relative aspect-video min-w-0 overflow-hidden rounded-md border bg-[#0e1015] text-left transition-all cursor-pointer",
+                        "group relative block aspect-video w-full min-w-0 self-start overflow-hidden rounded-md border bg-[#0e1015] text-left transition-all cursor-pointer",
                         isActive
                           ? "border-[#38bdf8] ring-1 ring-[#38bdf8]/75 shadow-[0_0_0_1px_rgba(56,189,248,0.12)]"
                           : "border-white/10 hover:border-white/35",
