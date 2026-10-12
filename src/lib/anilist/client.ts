@@ -20,40 +20,43 @@ import { filterAnime, isAllowedAnime } from "./content-filter";
 const ANILIST_ENDPOINT = "https://graphql.anilist.co";
 
 async function anilistRequest<T>(query: string, variables: Record<string, any> = {}, retries = 2): Promise<T> {
-  try {
-    const res = await fetch(ANILIST_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ query, variables }),
-      next: { revalidate: 300 },
-    });
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      const res = await fetch(ANILIST_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ query, variables }),
+        next: { revalidate: 300 },
+      });
 
-    if (res.status === 429 && retries > 0) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      return anilistRequest<T>(query, variables, retries - 1);
-    }
+      if (!res.ok) {
+        const errorBody = await res.text().catch(() => "");
+        const error = new Error("AniList request failed: " + res.status + " " + res.statusText + " " + errorBody);
+        if (res.status === 429 && attempt < retries) {
+          const retryAfter = Number(res.headers.get("retry-after"));
+          await new Promise((resolve) => setTimeout(resolve, Number.isFinite(retryAfter) ? Math.min(retryAfter * 1000, 5000) : 1500));
+          lastError = error;
+          continue;
+        }
+        throw error;
+      }
 
-    if (!res.ok) {
-      const errorBody = await res.text().catch(() => "");
-      throw new Error("AniList request failed: " + res.status + " " + res.statusText + " " + errorBody);
+      const json = await res.json();
+      if (json.errors && json.errors.length > 0) {
+        throw new Error(json.errors[0].message || "GraphQL error");
+      }
+      return json.data;
+    } catch (error) {
+      lastError = error;
+      if (attempt >= retries) break;
+      await new Promise((resolve) => setTimeout(resolve, 750 * (attempt + 1)));
     }
-
-    const json = await res.json();
-    if (json.errors && json.errors.length > 0) {
-      throw new Error(json.errors[0].message || "GraphQL error");
-    }
-
-    return json.data;
-  } catch (err) {
-    if (retries > 0) {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      return anilistRequest<T>(query, variables, retries - 1);
-    }
-    throw err;
   }
+  throw lastError;
 }
 
 export function getCurrentSeason(): { season: AnimeSeason; year: number } {
@@ -116,15 +119,16 @@ async function getCatalogYearIndex() {
   // AniList caps GraphQL complexity at 500, so build the archive index in two
   // cached requests rather than asking for every year in one oversized query.
   const batches = Array.from({ length: Math.ceil(years.length / 70) }, (_, index) => years.slice(index * 70, index * 70 + 70));
-  const responses = await Promise.all(batches.map(async (batch, index) => {
+  const responses = [];
+  for (const [index, batch] of batches.entries()) {
     const fields = batch.map((year) => `
       y${year}: Page(page: 1, perPage: 1) {
         pageInfo { total }
         media(type: ANIME, isAdult: false, startDate_greater: ${(year - 1) * 10000 + 1231}, startDate_lesser: ${(year + 1) * 10000 + 101}) { id }
       }
     `).join("\n");
-    return anilistRequest<Record<string, { pageInfo?: { total?: number } }>>(`query FullCatalogYearIndex${index} { ${fields} }`);
-  }));
+    responses.push(await anilistRequest<Record<string, { pageInfo?: { total?: number } }>>(`query FullCatalogYearIndex${index} { ${fields} }`));
+  }
   const data = Object.assign({}, ...responses) as Record<string, { pageInfo?: { total?: number } }>;
   const counts = years
     .map((year) => ({ year, total: data[`y${year}`]?.pageInfo?.total || 0 }))
@@ -139,9 +143,30 @@ async function getCatalogYearIndex() {
 
 /** Full AniList catalog, partitioned by release year to bypass its 5,000-item query cap. */
 export async function getFullAnimeCatalogPage(page = 1, perPage = 36): Promise<AnimePageResult> {
+  const safePage = Math.max(1, page);
+  // Fetch the visible page first. Besides being the cheapest request, this
+  // guarantees useful content even when the more expensive year index is
+  // temporarily rate-limited. AniList exposes the first 5,000 sorted records
+  // directly; pages beyond that limit are served by the year buckets below.
+  const directPage = safePage <= Math.ceil(5000 / perPage)
+    ? await searchAnime({ sort: "START_DATE_DESC", page: safePage, perPage })
+    : null;
   try {
     const index = await getCatalogYearIndex();
-    const safePage = Math.max(1, page);
+    const lastPage = Math.max(1, Math.ceil(index.total / perPage));
+    if (directPage?.media.length) {
+      return {
+        media: directPage.media,
+        pageInfo: {
+          total: index.total,
+          perPage,
+          currentPage: safePage,
+          lastPage,
+          hasNextPage: safePage < lastPage,
+        },
+      };
+    }
+
     let offset = (safePage - 1) * perPage;
     let remaining = perPage;
     const media: Anime[] = [];
@@ -175,7 +200,6 @@ export async function getFullAnimeCatalogPage(page = 1, perPage = 36): Promise<A
       offset = 0;
     }
 
-    const lastPage = Math.max(1, Math.ceil(index.total / perPage));
     return {
       media,
       pageInfo: {
@@ -188,7 +212,8 @@ export async function getFullAnimeCatalogPage(page = 1, perPage = 36): Promise<A
     };
   } catch (error) {
     console.error("Failed to fetch full anime catalog:", error);
-    return searchAnime({ sort: "START_DATE_DESC", page, perPage });
+    if (directPage?.media.length) return directPage;
+    return searchAnime({ sort: "START_DATE_DESC", page: safePage, perPage });
   }
 }
 

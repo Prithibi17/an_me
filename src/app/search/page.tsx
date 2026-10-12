@@ -48,8 +48,11 @@ export default async function FilterPage({ searchParams }: PageProps) {
     perPage: params.view === "latest" ? 36 : 24,
     });
 
-  const [initialData, rawToday, rawWeek, rawMonth] = await Promise.all([
-    dataPromise,
+  // Resolve the primary listing first. On shared/serverless IPs this prevents
+  // optional sidebar requests from consuming AniList's rate allowance before
+  // the content the user actually opened.
+  const initialData = await dataPromise;
+  const [rawToday, rawWeek, rawMonth] = await Promise.all([
     getRecentlyAiredAnime(1, 10),
     getTrendingAnime(1, 10),
     getTopRatedAnime(1, 10),
