@@ -1,6 +1,6 @@
 import React from "react";
 import { redirect } from "next/navigation";
-import { getRecentlyAiredAnime, getRecentlyAiredAnimePage, getTopRatedAnime, getTrendingAnime, searchAnime } from "@/lib/anilist/client";
+import { getFullAnimeCatalogPage, getRecentlyAiredAnime, getTopRatedAnime, getTrendingAnime, searchAnime } from "@/lib/anilist/client";
 import type { AnimePageResult } from "@/lib/anilist/types";
 import { BrowseListing } from "@/components/search/BrowseListing";
 import { enrichAnimeAvailability } from "@/lib/anikoto/client";
@@ -34,10 +34,10 @@ export default async function FilterPage({ searchParams }: PageProps) {
   }
 
   const dataPromise: Promise<AnimePageResult> = params.view === "latest"
-    ? getRecentlyAiredAnimePage(page, 36)
+    ? getFullAnimeCatalogPage(page, 36)
     : searchAnime({
     query: params.q?.trim() || undefined,
-    sort: sort as any,
+    sort: (params.view === "latest" ? "START_DATE_DESC" : sort) as any,
     genres,
     format,
     status,
@@ -45,8 +45,8 @@ export default async function FilterPage({ searchParams }: PageProps) {
     score,
     startDate_lesser: params.view === "new" ? today : undefined,
     page,
-    perPage: 24,
-  });
+    perPage: params.view === "latest" ? 36 : 24,
+    });
 
   const [initialData, rawToday, rawWeek, rawMonth] = await Promise.all([
     dataPromise,
@@ -54,14 +54,7 @@ export default async function FilterPage({ searchParams }: PageProps) {
     getTrendingAnime(1, 10),
     getTopRatedAnime(1, 10),
   ]);
-  if (params.view === "latest" && initialData.media.length === 0 && page > initialData.pageInfo.lastPage) {
-    const corrected = new URLSearchParams();
-    Object.entries(params).forEach(([key, value]) => {
-      if (value && key !== "page") corrected.set(key, value);
-    });
-    corrected.set("page", String(initialData.pageInfo.lastPage));
-    redirect(`/search?${corrected.toString()}`);
-  }
+  if (initialData.media.length === 0 && page > initialData.pageInfo.lastPage) redirect(`/search?view=${params.view || "latest"}&page=${initialData.pageInfo.lastPage}`);
   const enriched = await enrichAnimeAvailability([...initialData.media, ...rawToday, ...rawWeek, ...rawMonth]);
   const byId = new Map(enriched.map((anime) => [anime.id, anime]));
   initialData.media = initialData.media

@@ -12,6 +12,11 @@ export const MEDIA_FIELDS_FRAGMENT = `
     color
   }
   bannerImage
+  trailer {
+    id
+    site
+    thumbnail
+  }
   description(asHtml: false)
   averageScore
   meanScore
@@ -244,4 +249,3 @@ export const AIRING_SCHEDULE_QUERY = `
     }
   }
 `;
-

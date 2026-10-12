@@ -315,7 +315,7 @@ export async function enrichAnimeWithTmdb(
       name: trailer.name || `${titles[0]} official trailer`,
       type: trailer.type,
       official: Boolean(trailer.official),
-    } : options.posterOnly ? anime.trailer : numberedSeason ? null : anime.trailer,
+    } : anime.trailer,
     tmdb: { id: match.id, mediaType },
     dataSources: Array.from(new Set([...(anime.dataSources || ["AniList"]), "TMDB"])),
   };

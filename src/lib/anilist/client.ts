@@ -107,6 +107,90 @@ export async function getTopRatedAnime(page = 1, perPage = 10): Promise<Anime[]>
 }
 
 let releaseArchiveCache: { expiresAt: number; media: Anime[] } | null = null;
+let catalogYearCache: { expiresAt: number; counts: Array<{ year: number; total: number }>; total: number } | null = null;
+
+async function getCatalogYearIndex() {
+  if (catalogYearCache && catalogYearCache.expiresAt > Date.now()) return catalogYearCache;
+  const newestYear = new Date().getUTCFullYear() + 3;
+  const years = Array.from({ length: newestYear - 1909 }, (_, index) => newestYear - index);
+  // AniList caps GraphQL complexity at 500, so build the archive index in two
+  // cached requests rather than asking for every year in one oversized query.
+  const batches = Array.from({ length: Math.ceil(years.length / 70) }, (_, index) => years.slice(index * 70, index * 70 + 70));
+  const responses = await Promise.all(batches.map(async (batch, index) => {
+    const fields = batch.map((year) => `
+      y${year}: Page(page: 1, perPage: 1) {
+        pageInfo { total }
+        media(type: ANIME, isAdult: false, startDate_greater: ${(year - 1) * 10000 + 1231}, startDate_lesser: ${(year + 1) * 10000 + 101}) { id }
+      }
+    `).join("\n");
+    return anilistRequest<Record<string, { pageInfo?: { total?: number } }>>(`query FullCatalogYearIndex${index} { ${fields} }`);
+  }));
+  const data = Object.assign({}, ...responses) as Record<string, { pageInfo?: { total?: number } }>;
+  const counts = years
+    .map((year) => ({ year, total: data[`y${year}`]?.pageInfo?.total || 0 }))
+    .filter((entry) => entry.total > 0);
+  catalogYearCache = {
+    expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+    counts,
+    total: counts.reduce((sum, entry) => sum + entry.total, 0),
+  };
+  return catalogYearCache;
+}
+
+/** Full AniList catalog, partitioned by release year to bypass its 5,000-item query cap. */
+export async function getFullAnimeCatalogPage(page = 1, perPage = 36): Promise<AnimePageResult> {
+  try {
+    const index = await getCatalogYearIndex();
+    const safePage = Math.max(1, page);
+    let offset = (safePage - 1) * perPage;
+    let remaining = perPage;
+    const media: Anime[] = [];
+
+    for (const bucket of index.counts) {
+      if (offset >= bucket.total) {
+        offset -= bucket.total;
+        continue;
+      }
+      while (remaining > 0 && offset < bucket.total) {
+        const providerPage = Math.floor(offset / 50) + 1;
+        const withinPage = offset % 50;
+        const result = await searchAnime({
+          sort: "START_DATE_DESC",
+          startDate_greater: (bucket.year - 1) * 10000 + 1231,
+          startDate_lesser: (bucket.year + 1) * 10000 + 101,
+          page: providerPage,
+          perPage: 50,
+        });
+        if (result.pageInfo.total === 0 && bucket.total > 0) {
+          throw new Error(`AniList catalog bucket ${bucket.year} is temporarily unavailable.`);
+        }
+        const slice = result.media.slice(withinPage, withinPage + remaining);
+        media.push(...slice);
+        const consumed = Math.max(slice.length, Math.min(50 - withinPage, bucket.total - offset));
+        offset += consumed;
+        remaining -= slice.length;
+        if (consumed <= 0) break;
+      }
+      if (remaining <= 0) break;
+      offset = 0;
+    }
+
+    const lastPage = Math.max(1, Math.ceil(index.total / perPage));
+    return {
+      media,
+      pageInfo: {
+        total: index.total,
+        perPage,
+        currentPage: safePage,
+        lastPage,
+        hasNextPage: safePage < lastPage,
+      },
+    };
+  } catch (error) {
+    console.error("Failed to fetch full anime catalog:", error);
+    return searchAnime({ sort: "START_DATE_DESC", page, perPage });
+  }
+}
 
 const RELEASE_FEED_MEDIA_FIELDS = `
   id

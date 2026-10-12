@@ -109,6 +109,14 @@ export function normalizeAnime(raw: any, rank?: number): Anime {
     latestAiredEpisode,
     latestReleasedEpisodeAt: raw.latestReleasedEpisodeAt || raw.airingAt || null,
     airingAt: raw.airingAt || null,
+    trailer: raw.trailer?.site === "youtube" && raw.trailer?.id
+      ? {
+          youtubeId: String(raw.trailer.id).trim(),
+          name: `${raw.title?.english || raw.title?.romaji || "Anime"} trailer`,
+          type: "Trailer",
+          official: false,
+        }
+      : null,
     rank,
   };
 }
