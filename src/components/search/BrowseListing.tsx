@@ -116,7 +116,7 @@ export function BrowseListing({ data, params, topAnime }: { data: AnimePageResul
 
           {data.media.length === 0 && <div className="py-24 text-center text-white/50">No anime found.</div>}
 
-          <nav className="flex justify-center items-center gap-2 py-12" aria-label="Pagination" aria-busy={isChangingPage}>
+          {data.media.length > 0 && lastPage > 1 && <nav className="flex justify-center items-center gap-2 py-12" aria-label="Pagination" aria-busy={isChangingPage}>
             <button type="button" aria-label="First page" disabled={currentPage <= 1 || isChangingPage} onClick={() => goToPage(1)} className={pageButtonClass(false, currentPage <= 1)}><ChevronsLeft className="h-4 w-4" /></button>
             <button type="button" aria-label="Previous page" disabled={currentPage <= 1 || isChangingPage} onClick={() => goToPage(currentPage - 1)} className={pageButtonClass(false, currentPage <= 1)}><ChevronLeft className="h-4 w-4" /></button>
             {visiblePages[0] > 1 && (
@@ -134,7 +134,7 @@ export function BrowseListing({ data, params, topAnime }: { data: AnimePageResul
             )}
             <button type="button" aria-label="Next page" disabled={currentPage >= lastPage || isChangingPage} onClick={() => goToPage(currentPage + 1)} className={pageButtonClass(false, currentPage >= lastPage)}><ChevronRight className="h-4 w-4" /></button>
             <button type="button" aria-label="Last page" disabled={currentPage >= lastPage || isChangingPage} onClick={() => goToPage(lastPage)} className={pageButtonClass(false, currentPage >= lastPage)}><ChevronsRight className="h-4 w-4" /></button>
-          </nav>
+          </nav>}
         </section>
 
         <aside className="lg:col-span-4 xl:col-span-3 flex flex-col gap-5 lg:sticky lg:top-20">

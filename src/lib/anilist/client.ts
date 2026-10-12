@@ -141,6 +141,14 @@ async function getCatalogYearIndex() {
   const counts = years
     .map((year) => ({ year, total: data[`y${year}`]?.pageInfo?.total || 0 }))
     .filter((entry) => entry.total > 0);
+  // AniList can incorrectly report its global 5,000-result ceiling for every
+  // aliased Page field. Summing those values created hundreds of thousands of
+  // phantom titles and advertised pages that could never return data. Reject
+  // that response and use the verified direct-query pagination instead.
+  const cappedBuckets = counts.filter((entry) => entry.total >= 5000);
+  if (cappedBuckets.length > 0 || counts.length === 0) {
+    throw new Error("AniList returned an invalid yearly catalog index.");
+  }
   catalogYearCache = {
     expiresAt: Date.now() + 24 * 60 * 60 * 1000,
     counts,
