@@ -622,7 +622,7 @@ export function HiAnimePlayer({
             className={cn(
               "flex-1 lg:overflow-y-auto text-xs",
               episodeView === "grid"
-                ? "grid grid-cols-3 content-start gap-2 p-2.5"
+                ? "grid grid-cols-3 content-start gap-x-2 gap-y-3 p-2.5"
                 : "grid grid-cols-6 lg:block gap-2 lg:gap-0 lg:divide-y lg:divide-white/5 p-3 sm:p-4 lg:p-1",
             )}
           >
@@ -653,7 +653,7 @@ export function HiAnimePlayer({
                       className={cn(
                         "group relative aspect-video min-w-0 overflow-hidden rounded-md border bg-[#0e1015] text-left transition-all cursor-pointer",
                         isActive
-                          ? "border-[#ff4f86] ring-1 ring-[#ff4f86]/70"
+                          ? "border-[#38bdf8] ring-1 ring-[#38bdf8]/75 shadow-[0_0_0_1px_rgba(56,189,248,0.12)]"
                           : "border-white/10 hover:border-white/35",
                       )}
                     >
@@ -667,7 +667,7 @@ export function HiAnimePlayer({
                       <span className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/15 to-transparent" />
                       <span className={cn(
                         "absolute bottom-1 left-1 right-1 truncate text-[10px] font-extrabold",
-                        isActive ? "text-[#ff77a2]" : "text-white",
+                        isActive ? "text-[#38bdf8]" : "text-white",
                       )}>
                         EP {ep.number}
                       </span>
@@ -682,14 +682,14 @@ export function HiAnimePlayer({
                     className={cn(
                       "w-full min-h-11 lg:min-h-0 justify-center lg:justify-start text-center lg:text-left px-2 lg:px-3 py-2.5 rounded-lg lg:rounded flex items-center gap-1 lg:gap-3 border lg:border-0 border-white/10 transition-colors cursor-pointer group",
                       isActive
-                        ? "bg-[#ff4f86] text-[#111] font-bold shadow-sm"
+                        ? "bg-[#38bdf8] text-[#07131a] font-bold shadow-sm"
                         : "text-white/70 hover:text-white hover:bg-white/5"
                     )}
                   >
                     <span
                       className={cn(
                         "w-auto lg:w-5 text-center lg:text-right font-mono text-sm lg:text-[11px] shrink-0",
-                        isActive ? "text-[#111]" : "text-white/40 group-hover:text-white/70"
+                        isActive ? "text-[#07131a]" : "text-white/40 group-hover:text-white/70"
                       )}
                     >
                       {ep.number}
