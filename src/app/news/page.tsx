@@ -1,18 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
   Newspaper,
   Calendar,
-  Clock,
   ChevronRight,
   Sparkles,
   Play,
   X,
-  Share2,
   ExternalLink,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +28,15 @@ interface NewsArticle {
   relatedAnimeId?: number;
   relatedAnimeTitle?: string;
   source: string;
+}
+
+interface LiveAnimeNewsItem {
+  title: string;
+  category: "Announcements" | "Trailers" | "Production" | "Broadcast";
+  publishedAt: string;
+  summary: string;
+  sourceName: string;
+  sourceUrl: string;
 }
 
 const NEWS_ARTICLES: NewsArticle[] = [
@@ -159,6 +167,30 @@ const NEWS_ARTICLES: NewsArticle[] = [
 export default function NewsPage() {
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
+  const [liveNews, setLiveNews] = useState<LiveAnimeNewsItem[]>([]);
+  const [liveNewsLoading, setLiveNewsLoading] = useState(true);
+  const [liveNewsError, setLiveNewsError] = useState("");
+
+  const loadLiveNews = useCallback(async () => {
+    setLiveNewsLoading(true);
+    setLiveNewsError("");
+    try {
+      const response = await fetch("/api/ai/anime-news");
+      const payload = await response.json() as { items?: LiveAnimeNewsItem[]; error?: string };
+      if (!response.ok || !payload.items?.length) throw new Error(payload.error || "No live stories were returned.");
+      setLiveNews(payload.items);
+    } catch (error) {
+      setLiveNewsError(error instanceof Error ? error.message : "Live anime news is unavailable.");
+    } finally {
+      setLiveNewsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Initial client hydration starts the remote digest request once.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- loading state belongs to this explicit request lifecycle
+    void loadLiveNews();
+  }, [loadLiveNews]);
 
   const categories = ["All", "Announcements", "Trailers", "Production", "Broadcast"];
 
@@ -209,6 +241,61 @@ export default function NewsPage() {
           })}
         </div>
       </div>
+
+      {/* Source-grounded OpenRouter news digest */}
+      <section className="mb-8 rounded-2xl border border-cyan-400/15 bg-[#11141b] p-4 sm:p-5 shadow-lg">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-cyan-300" />
+              <h2 className="text-sm font-black text-white">Live Anime News</h2>
+              <span className="rounded bg-cyan-400/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-cyan-300">AI + cited sources</span>
+            </div>
+            <p className="mt-1 text-[11px] text-white/45">Current stories researched through OpenRouter. Open the original source to verify the full report.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void loadLiveNews()}
+            disabled={liveNewsLoading}
+            className="flex h-8 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 text-[11px] font-bold text-white/70 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
+          >
+            <RefreshCw className={cn("h-3.5 w-3.5", liveNewsLoading && "animate-spin")} />
+            Refresh
+          </button>
+        </div>
+
+        {liveNewsLoading ? (
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => <div key={index} className="h-32 animate-pulse rounded-xl bg-white/5" />)}
+          </div>
+        ) : liveNewsError ? (
+          <div className="rounded-xl border border-amber-300/10 bg-amber-300/5 px-4 py-3 text-xs text-amber-100/70">{liveNewsError} The editorial archive remains available below.</div>
+        ) : (
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {liveNews.map((item) => (
+              <a
+                key={`${item.sourceUrl}-${item.title}`}
+                href={item.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex min-h-32 flex-col justify-between rounded-xl border border-white/5 bg-[#171a22] p-4 transition hover:border-cyan-300/30 hover:bg-[#1b1f29]"
+              >
+                <div>
+                  <div className="mb-2 flex items-center justify-between gap-2 text-[9px] font-bold uppercase tracking-wide">
+                    <span className="text-cyan-300">{item.category}</span>
+                    <time className="text-white/35" dateTime={item.publishedAt}>{new Date(item.publishedAt).toLocaleDateString()}</time>
+                  </div>
+                  <h3 className="line-clamp-2 text-sm font-bold leading-snug text-white group-hover:text-cyan-200">{item.title}</h3>
+                  <p className="mt-2 line-clamp-2 text-[11px] leading-relaxed text-white/50">{item.summary}</p>
+                </div>
+                <span className="mt-3 flex items-center gap-1 text-[10px] font-bold text-white/40 group-hover:text-cyan-300">
+                  {item.sourceName}<ExternalLink className="h-3 w-3" />
+                </span>
+              </a>
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* Featured Big Spotlight Card */}
       {filteredNews.length > 0 && (

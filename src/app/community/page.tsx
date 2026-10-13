@@ -7,10 +7,7 @@ import {
   Plus,
   Search,
   Send,
-  User,
   X,
-  Share2,
-  TrendingUp,
 } from "lucide-react";
 import { getCurrentUser, subscribeToAuth, type UserProfile } from "@/lib/storage/auth";
 import { cn } from "@/lib/utils";
@@ -37,6 +34,8 @@ export default function CommunityPage() {
   const [selectedPost, setSelectedPost] = useState<DiscussionPost | null>(null);
   const [showNewPostModal, setShowNewPostModal] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({});
+  const [isModerating, setIsModerating] = useState(false);
+  const [moderationError, setModerationError] = useState("");
 
   // New post form fields
   const [newTitle, setNewTitle] = useState("");
@@ -48,6 +47,8 @@ export default function CommunityPage() {
 
   // Load persisted community discussions
   useEffect(() => {
+    // Hydrate browser-only auth and locally persisted discussions after mount.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage/auth are unavailable during server render
     setUser(getCurrentUser());
     const unsubscribe = subscribeToAuth(setUser);
     try {
@@ -88,11 +89,31 @@ export default function CommunityPage() {
     savePosts(updated);
   };
 
-  const handleCreatePost = (e: React.FormEvent) => {
+  const moderateCommunityContent = async (kind: "discussion" | "comment", content: string, title = "") => {
+    const response = await fetch("/api/ai/community-moderation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind, title, content }),
+    });
+    const payload = await response.json() as { allowed?: boolean; reason?: string; error?: string };
+    if (!response.ok) throw new Error(payload.error || "AI moderation is unavailable.");
+    if (!payload.allowed) throw new Error(payload.reason || "This submission does not meet the community guidelines.");
+  };
+
+  const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim() || !newContent.trim()) return;
 
     if (!user) return;
+    setIsModerating(true);
+    setModerationError("");
+    try {
+      await moderateCommunityContent("discussion", newContent.trim(), newTitle.trim());
+    } catch (error) {
+      setModerationError(error instanceof Error ? error.message : "This discussion could not be approved.");
+      setIsModerating(false);
+      return;
+    }
     const newPostItem: DiscussionPost = {
       id: "post-" + Date.now(),
       author: user.username,
@@ -113,13 +134,23 @@ export default function CommunityPage() {
     setNewContent("");
     setShowNewPostModal(false);
     setSelectedPost(newPostItem);
+    setIsModerating(false);
   };
 
-  const handleAddComment = (e: React.FormEvent) => {
+  const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!commentText.trim() || !selectedPost) return;
 
     if (!user) return;
+    setIsModerating(true);
+    setModerationError("");
+    try {
+      await moderateCommunityContent("comment", commentText.trim(), selectedPost.title);
+    } catch (error) {
+      setModerationError(error instanceof Error ? error.message : "This comment could not be approved.");
+      setIsModerating(false);
+      return;
+    }
     const commentAuthor = user.username;
     const updatedPost = {
       ...selectedPost,
@@ -134,6 +165,7 @@ export default function CommunityPage() {
     savePosts(updatedPosts);
     setSelectedPost(updatedPost);
     setCommentText("");
+    setIsModerating(false);
   };
 
   const categories = [
@@ -176,7 +208,11 @@ export default function CommunityPage() {
 
         {/* Action Button: New Post */}
         <button
-          onClick={() => user && setShowNewPostModal(true)}
+          onClick={() => {
+            if (!user) return;
+            setModerationError("");
+            setShowNewPostModal(true);
+          }}
           disabled={!user}
           title={user ? "Create a discussion" : "Log in to create a discussion"}
           className="px-4 py-2 rounded-xl bg-[#ff2f6d] hover:bg-[#e9235e] text-white font-bold text-xs transition-all shadow-md shadow-[#ff2f6d]/20 flex items-center gap-1.5 cursor-pointer self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
@@ -236,7 +272,10 @@ export default function CommunityPage() {
             return (
               <div
                 key={post.id}
-                onClick={() => setSelectedPost(post)}
+                onClick={() => {
+                  setModerationError("");
+                  setSelectedPost(post);
+                }}
                 className="p-4 sm:p-5 rounded-xl bg-[#13151b] border border-white/5 hover:border-white/10 transition-all flex flex-col gap-3 cursor-pointer group shadow-sm"
               >
                 {/* Author row & Category */}
@@ -304,7 +343,10 @@ export default function CommunityPage() {
             className="relative w-full max-w-2xl bg-[#13151b] border border-white/10 rounded-2xl shadow-2xl p-5 sm:p-6 flex flex-col gap-4 select-none max-h-[90vh] overflow-y-auto"
           >
             <button
-              onClick={() => setSelectedPost(null)}
+              onClick={() => {
+                setModerationError("");
+                setSelectedPost(null);
+              }}
               className="absolute top-4 right-4 p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -362,19 +404,20 @@ export default function CommunityPage() {
                 <input
                   type="text"
                   placeholder={user ? "Write a comment..." : "Log in to comment"}
-                  disabled={!user}
+                  disabled={!user || isModerating}
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   className="flex-1 h-9 px-3 rounded-lg bg-[#181a24] text-xs text-white placeholder-white/30 border border-white/5 focus:border-[#ff2f6d]/50 focus:outline-none transition-colors"
                 />
                 <button
                   type="submit"
-                  disabled={!user || !commentText.trim()}
+                  disabled={!user || !commentText.trim() || isModerating}
                   className="px-4 h-9 rounded-lg bg-[#ff2f6d] hover:bg-[#e9235e] text-white font-bold text-xs transition-colors cursor-pointer disabled:opacity-40"
                 >
                   <Send className="w-3.5 h-3.5" />
                 </button>
               </form>
+              {moderationError && <p className="text-[11px] text-rose-300">{moderationError}</p>}
             </div>
           </div>
         </div>
@@ -388,7 +431,10 @@ export default function CommunityPage() {
             className="relative w-full max-w-lg bg-[#13151b] border border-white/10 rounded-2xl shadow-2xl p-6 flex flex-col gap-4 select-none"
           >
             <button
-              onClick={() => setShowNewPostModal(false)}
+              onClick={() => {
+                setModerationError("");
+                setShowNewPostModal(false);
+              }}
               className="absolute top-4 right-4 p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -435,11 +481,13 @@ export default function CommunityPage() {
 
               <button
                 type="submit"
-                disabled={!newTitle.trim() || !newContent.trim()}
+                disabled={!newTitle.trim() || !newContent.trim() || isModerating}
                 className="w-full h-10 mt-1 rounded-lg bg-[#ff2f6d] hover:bg-[#e9235e] text-white font-bold text-xs transition-all shadow-md shadow-[#ff2f6d]/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40"
               >
-                Publish Discussion
+                {isModerating ? "Checking community guidelines..." : "Publish Discussion"}
               </button>
+              <p className="text-[10px] leading-relaxed text-white/35">New discussions and comments are checked by AI moderation before publishing.</p>
+              {moderationError && <p className="text-[11px] text-rose-300">{moderationError}</p>}
             </form>
           </div>
         </div>
