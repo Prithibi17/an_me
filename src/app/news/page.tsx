@@ -170,15 +170,22 @@ export default function NewsPage() {
   const [liveNews, setLiveNews] = useState<LiveAnimeNewsItem[]>([]);
   const [liveNewsLoading, setLiveNewsLoading] = useState(true);
   const [liveNewsError, setLiveNewsError] = useState("");
+  const [liveNewsPage, setLiveNewsPage] = useState(1);
+  const [hasOlderNews, setHasOlderNews] = useState(true);
 
-  const loadLiveNews = useCallback(async () => {
+  const loadLiveNews = useCallback(async (page = 1, replace = false) => {
     setLiveNewsLoading(true);
     setLiveNewsError("");
     try {
-      const response = await fetch("/api/ai/anime-news", { cache: "no-store" });
+      const response = await fetch(`/api/ai/anime-news?page=${page}`, { cache: "no-store" });
       const payload = await response.json() as { items?: LiveAnimeNewsItem[]; error?: string };
       if (!response.ok || !payload.items?.length) throw new Error(payload.error || "No live stories were returned.");
-      setLiveNews(payload.items);
+      setLiveNews((current) => {
+        const combined = replace ? payload.items! : [...current, ...payload.items!];
+        return combined.filter((item, index, items) => items.findIndex((candidate) => candidate.sourceUrl === item.sourceUrl) === index);
+      });
+      setLiveNewsPage(page);
+      setHasOlderNews(payload.items.length > 0);
     } catch (error) {
       setLiveNewsError(error instanceof Error ? error.message : "Live anime news is unavailable.");
     } finally {
@@ -251,11 +258,11 @@ export default function NewsPage() {
               <h2 className="text-sm font-black text-white">Live Anime News</h2>
               <span className="rounded bg-cyan-400/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-wide text-cyan-300">AI + cited sources</span>
             </div>
-            <p className="mt-1 text-[11px] text-white/45">Current stories researched through OpenRouter. Open the original source to verify the full report.</p>
+            <p className="mt-1 text-[11px] text-white/45">Current stories researched through OpenRouter. Load older 21-day windows to continue through the archive.</p>
           </div>
           <button
             type="button"
-            onClick={() => void loadLiveNews()}
+            onClick={() => void loadLiveNews(1, true)}
             disabled={liveNewsLoading}
             className="flex h-8 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 text-[11px] font-bold text-white/70 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
           >
@@ -264,15 +271,16 @@ export default function NewsPage() {
           </button>
         </div>
 
-        {liveNewsLoading ? (
+        {liveNewsLoading && liveNews.length === 0 ? (
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => <div key={index} className="h-32 animate-pulse rounded-xl bg-white/5" />)}
           </div>
         ) : liveNewsError ? (
           <div className="rounded-xl border border-amber-300/10 bg-amber-300/5 px-4 py-3 text-xs text-amber-100/70">{liveNewsError} The editorial archive remains available below.</div>
         ) : (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {liveNews.map((item) => (
+          <>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {liveNews.map((item) => (
               <a
                 key={`${item.sourceUrl}-${item.title}`}
                 href={item.sourceUrl}
@@ -292,8 +300,24 @@ export default function NewsPage() {
                   {item.sourceName}<ExternalLink className="h-3 w-3" />
                 </span>
               </a>
-            ))}
-          </div>
+              ))}
+            </div>
+            {liveNewsError && (
+              <p className="mt-4 text-center text-[11px] text-amber-200/70">{liveNewsError} You can retry loading this page.</p>
+            )}
+            {hasOlderNews && (
+              <div className="mt-5 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => void loadLiveNews(liveNewsPage + 1)}
+                  disabled={liveNewsLoading}
+                  className="rounded-xl border border-cyan-300/20 bg-cyan-300/10 px-5 py-2.5 text-xs font-black text-cyan-200 transition hover:border-cyan-300/40 hover:bg-cyan-300/15 disabled:cursor-wait disabled:opacity-50"
+                >
+                  {liveNewsLoading ? "Loading older news..." : "Load older news"}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </section>
 
