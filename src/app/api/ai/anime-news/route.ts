@@ -19,8 +19,8 @@ const NEWS_SCHEMA = {
   properties: {
     items: {
       type: "array",
-      minItems: 3,
-      maxItems: 8,
+      minItems: 8,
+      maxItems: 12,
       items: {
         type: "object",
         additionalProperties: false,
@@ -57,19 +57,19 @@ export async function GET() {
       model: process.env.OPENROUTER_NEWS_MODEL || "google/gemini-2.5-flash-lite",
       schemaName: "anime_news_digest",
       schema: NEWS_SCHEMA,
-      maxTokens: 5_000,
+      maxTokens: 6_500,
       // The web plugin performs one deterministic search pass before the model
       // writes the schema response. The server tool can leave some routed models
       // at an intermediate "I'll search" message instead of returning the digest.
-      plugins: [{ id: "web", max_results: 10 }, { id: "response-healing" }],
+      plugins: [{ id: "web", max_results: 20 }, { id: "response-healing" }],
       messages: [
         {
           role: "system",
-          content: "You are the news desk for an anime streaming website. Return only verified anime industry news. Never invent announcements, dates, studios, release schedules, quotes, or URLs. Prefer official anime sites, studios, publishers, distributors, and established anime newsrooms. Exclude rumors and duplicate coverage.",
+          content: "You are the news desk for an anime streaming website. Return only verified anime industry news. Never invent announcements, dates, studios, release schedules, quotes, or URLs. Prefer official anime sites, studios, publishers, distributors, and established anime newsrooms such as Anime News Network, Crunchyroll News, ORICON, and official Japanese production sites. Exclude rumors, database-only AniList metadata updates, and duplicate coverage. Use a diverse mix of sources and include no more than three stories from the same domain.",
         },
         {
           role: "user",
-          content: `Today is ${today}. Find 6 important anime news stories published in the last 14 days. Each item must link directly to the exact source article that supports it. Summaries must distinguish confirmed facts from plans and schedules.`,
+          content: `Today is ${today}. Find 10 important anime news stories published in the last 21 days. Cover a useful mix of announcements, trailers, production updates, and broadcast news. Each item must link directly to the exact source article that supports it. Summaries must distinguish confirmed facts from plans and schedules.`,
         },
       ],
     });

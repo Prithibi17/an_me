@@ -175,7 +175,7 @@ export default function NewsPage() {
     setLiveNewsLoading(true);
     setLiveNewsError("");
     try {
-      const response = await fetch("/api/ai/anime-news");
+      const response = await fetch("/api/ai/anime-news", { cache: "no-store" });
       const payload = await response.json() as { items?: LiveAnimeNewsItem[]; error?: string };
       if (!response.ok || !payload.items?.length) throw new Error(payload.error || "No live stories were returned.");
       setLiveNews(payload.items);
