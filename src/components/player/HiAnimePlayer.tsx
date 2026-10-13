@@ -110,12 +110,14 @@ export function HiAnimePlayer({
     if (episodes.length === 0) { setAvailability({ sub: [], dub: [] }); return; }
     let active = true;
     setAvailability(null);
-    fetch(`/api/anime/availability?animeId=${anime.id}&count=${episodes.length}`)
+    const params = new URLSearchParams({ animeId: String(anime.id), count: String(episodes.length) });
+    if (anime.idMal) params.set("malId", String(anime.idMal));
+    fetch(`/api/anime/availability?${params}`)
       .then((response) => response.ok ? response.json() : Promise.reject())
       .then((result) => { if (active) setAvailability(result); })
       .catch(() => { if (active) setAvailability({ sub: episodes.map((episode) => episode.number), dub: [] }); });
     return () => { active = false; };
-  }, [anime.id, episodes]);
+  }, [anime.id, anime.idMal, episodes]);
 
   useEffect(() => {
     if (availability && track === "dub" && !currentDubAvailable) setTrack("sub");

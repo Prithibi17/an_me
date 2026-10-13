@@ -14,9 +14,9 @@ function decodePayload(html: string) {
   try { return JSON.parse(Buffer.from(output, "binary").toString("utf8")); } catch { return null; }
 }
 
-async function available(animeId: number, episode: number, track: "sub" | "dub") {
+async function probeAvailable(source: "ani" | "mal", animeId: number, episode: number, track: "sub" | "dub") {
   try {
-    const response = await fetch(`https://zokoanime.video/stream/ani/${animeId}/${episode}/${track}`, {
+    const response = await fetch(`https://zokoanime.video/stream/${source}/${animeId}/${episode}/${track}`, {
       headers: { "User-Agent": "Anme/1.0" }, signal: AbortSignal.timeout(8000), cache: "no-store",
     });
     if (!response.ok) return false;
@@ -25,20 +25,31 @@ async function available(animeId: number, episode: number, track: "sub" | "dub")
   } catch { return false; }
 }
 
+async function available(anilistId: number, malId: number | null, episode: number, track: "sub" | "dub") {
+  const checks = [probeAvailable("ani", anilistId, episode, track)];
+  if (malId) checks.push(probeAvailable("mal", malId, episode, track));
+  return (await Promise.all(checks)).some(Boolean);
+}
+
 export async function GET(request: NextRequest) {
   const animeId = Number(request.nextUrl.searchParams.get("animeId"));
+  const rawMalId = request.nextUrl.searchParams.get("malId");
+  const malId = rawMalId ? Number(rawMalId) : null;
   const count = Math.min(100, Number(request.nextUrl.searchParams.get("count")));
-  if (!Number.isInteger(animeId) || animeId < 1 || !Number.isInteger(count) || count < 1) {
+  if (!Number.isInteger(animeId) || animeId < 1 || (malId !== null && (!Number.isInteger(malId) || malId < 1)) || !Number.isInteger(count) || count < 1) {
     return NextResponse.json({ error: "Invalid anime or episode count." }, { status: 400 });
   }
-  const key = `${animeId}:${count}`;
+  const key = `${animeId}:${malId || 0}:${count}`;
   const cached = cache.get(key);
   if (cached && cached.expires > Date.now()) return NextResponse.json({ sub: cached.sub, dub: cached.dub });
 
   const sub: number[] = [], dub: number[] = [];
   for (let start = 1; start <= count; start += 10) {
     const numbers = Array.from({ length: Math.min(10, count - start + 1) }, (_, index) => start + index);
-    const results = await Promise.all(numbers.flatMap((episode) => [available(animeId, episode, "sub"), available(animeId, episode, "dub")]));
+    const results = await Promise.all(numbers.flatMap((episode) => [
+      available(animeId, malId, episode, "sub"),
+      available(animeId, malId, episode, "dub"),
+    ]));
     numbers.forEach((episode, index) => {
       if (results[index * 2]) sub.push(episode);
       if (results[index * 2 + 1]) dub.push(episode);
