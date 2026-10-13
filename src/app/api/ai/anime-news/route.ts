@@ -19,7 +19,7 @@ const NEWS_SCHEMA = {
   properties: {
     items: {
       type: "array",
-      minItems: 8,
+      minItems: 1,
       maxItems: 12,
       items: {
         type: "object",
@@ -69,7 +69,7 @@ export async function GET() {
         },
         {
           role: "user",
-          content: `Today is ${today}. Find 10 important anime news stories published in the last 21 days. Cover a useful mix of announcements, trailers, production updates, and broadcast news. Each item must link directly to the exact source article that supports it. Summaries must distinguish confirmed facts from plans and schedules.`,
+          content: `Today is ${today}. Find the important, independently verified anime news stories published in the last 21 days, returning up to 12. The item count must reflect how many valid stories are actually available; do not target a fixed count and do not pad the response. Cover announcements, trailers, production updates, and broadcast news. Each item must link directly to the exact source article that supports it. Summaries must distinguish confirmed facts from plans and schedules.`,
         },
       ],
     });
