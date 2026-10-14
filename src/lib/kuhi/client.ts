@@ -36,6 +36,20 @@ export interface KuhiChapterResponse {
   pages?: Array<KuhiChapterPage | string>;
 }
 
+interface KuhiMangaReleaseResponse {
+  title: string;
+  slug: string;
+  source: KuhiMangaSource;
+  poster?: string | null;
+  banner?: string | null;
+  synopsis?: string | null;
+  status?: string | null;
+  type?: string | null;
+  genres?: string[];
+  released_chapters_count?: number;
+  chapters?: KuhiMangaChapter[];
+}
+
 interface KuhiSearchResult {
   title: string;
   slug: string;
@@ -88,9 +102,13 @@ export async function resolveKuhiManga(title: string, type?: string | null) {
     });
 
   for (const match of matches) {
+    const releases = await getKuhiMangaReleases(match.slug);
+    if (releases?.chapters?.length) return releases;
     const info = await getKuhiMangaInfo(match.slug, match.source);
     if (info?.chapters?.length) return { ...info, source: match.source, slug: match.slug };
   }
+  const directReleases = await getKuhiMangaReleases(normalizeTitle(title).replaceAll(" ", "-"));
+  if (directReleases?.chapters?.length) return directReleases;
   return null;
 }
 
@@ -101,6 +119,23 @@ function itemType(item: KuhiSearchResult) {
 export async function getKuhiMangaInfo(slug: string, source: KuhiMangaSource) {
   const query = new URLSearchParams({ source });
   return kuhiFetch<KuhiMangaInfo>(`/api/manga/info/${encodeURIComponent(slug)}?${query}`, 600);
+}
+
+export async function getKuhiMangaReleases(slug: string): Promise<KuhiMangaInfo | null> {
+  const data = await kuhiFetch<KuhiMangaReleaseResponse>(`/api/manga/releases/${encodeURIComponent(slug)}`, 300);
+  if (!data?.chapters?.length) return null;
+  return {
+    title: data.title,
+    slug: data.slug,
+    source: data.source,
+    poster: data.poster,
+    description: data.synopsis,
+    status: data.status,
+    type: data.type,
+    genres: data.genres,
+    total_chapters: data.released_chapters_count || data.chapters.length,
+    chapters: data.chapters,
+  };
 }
 
 export async function getKuhiChapter(chapterId: string, source: KuhiMangaSource) {
