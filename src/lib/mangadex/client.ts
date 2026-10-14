@@ -15,6 +15,10 @@ export interface ChapterRelease {
   sourceUrl: string;
 }
 
+export interface MangaDexChapterPages {
+  pages: string[];
+}
+
 interface RawMangaAttributes {
   title?: Record<string, string>;
   altTitles?: Array<Record<string, string>>;
@@ -41,6 +45,21 @@ async function mangaDexFetch<T>(path: string): Promise<T> {
   const response = await fetch(`${API_ROOT}${path}`, { headers: { Accept: "application/json", "User-Agent": "Anme/1.0" }, next: { revalidate: 60 }, signal: AbortSignal.timeout(8_000) });
   if (!response.ok) throw new Error(`MangaDex request failed: ${response.status}`);
   return response.json() as Promise<T>;
+}
+
+export async function getMangaDexChapterPages(chapterId: string): Promise<MangaDexChapterPages | null> {
+  try {
+    const payload = await mangaDexFetch<{
+      baseUrl: string;
+      chapter: { hash: string; data: string[]; dataSaver: string[] };
+    }>(`/at-home/server/${encodeURIComponent(chapterId)}`);
+    const files = payload.chapter.dataSaver?.length ? payload.chapter.dataSaver : payload.chapter.data;
+    const quality = payload.chapter.dataSaver?.length ? "data-saver" : "data";
+    return { pages: files.map((file) => `${payload.baseUrl}/${quality}/${payload.chapter.hash}/${file}`) };
+  } catch (error) {
+    console.error(`Failed to load MangaDex chapter ${chapterId}:`, error);
+    return null;
+  }
 }
 
 export async function getLatestChapterReleases(limit = 18): Promise<ChapterRelease[]> {

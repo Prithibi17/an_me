@@ -71,9 +71,12 @@ export async function getKuhiAnimePlayer(animeId: number, episode: number, audio
 
 export async function resolveKuhiManga(title: string, type?: string | null) {
   const requestedType = type?.toLocaleLowerCase();
-  const query = new URLSearchParams({ q: title, type: requestedType || "all", source: "all" });
-  const data = await kuhiFetch<{ results?: KuhiSearchResult[] }>(`/api/manga/search?${query}`, 600);
-  const results = data?.results || [];
+  const sources: KuhiMangaSource[] = ["toraka", "vortex", "mangadex"];
+  const responses = await Promise.all(sources.map((source) => {
+    const query = new URLSearchParams({ q: title, type: requestedType || "all", source });
+    return kuhiFetch<{ results?: KuhiSearchResult[] }>(`/api/manga/search?${query}`, 600);
+  }));
+  const results = responses.flatMap((data) => data?.results || []);
   const normalized = normalizeTitle(title);
   const sourceRank: Record<KuhiMangaSource, number> = { toraka: 0, vortex: 1, mangadex: 2, anilist: 3 };
   const matches = results
