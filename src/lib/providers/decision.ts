@@ -1,4 +1,4 @@
-export type PlaybackServerId = "megaplay-ani" | "megaplay-mal" | "zokoanime-ani" | "zokoanime-mal" | "anikoto";
+export type PlaybackServerId = "megaplay-ani" | "megaplay-mal" | "zokoanime-ani" | "zokoanime-mal" | "anikoto" | "kuhi";
 
 export function serverOrder(hasCatalogEpisodeSource: boolean, hasMalId = true): PlaybackServerId[] {
   // The catalog episode ID is MegaPlay's exact episode mapping. Prefer it
@@ -8,6 +8,7 @@ export function serverOrder(hasCatalogEpisodeSource: boolean, hasMalId = true): 
   resolvers.push("megaplay-ani");
   resolvers.push("zokoanime-ani");
   if (hasMalId) resolvers.push("zokoanime-mal");
+  resolvers.push("kuhi");
   return resolvers;
 }
 

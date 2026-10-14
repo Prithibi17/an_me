@@ -60,6 +60,8 @@ type AnikotoSource = {
   dubUrl: string | null;
 };
 
+type KuhiSource = { playerUrl: string };
+
 export function HiAnimePlayer({
   anime,
   currentEpisode,
@@ -76,6 +78,8 @@ export function HiAnimePlayer({
   const [availability, setAvailability] = useState<{ sub: number[]; dub: number[] } | null>(null);
   const [anikotoSource, setAnikotoSource] = useState<AnikotoSource | null>(null);
   const [isAnikotoLoading, setIsAnikotoLoading] = useState(false);
+  const [kuhiSource, setKuhiSource] = useState<KuhiSource | null>(null);
+  const [isKuhiLoading, setIsKuhiLoading] = useState(false);
   const preferredServerRef = useRef<string | null>(null);
   const confirmedSubCount = Math.max(anime.subEpisodeCount || 0, availability?.sub.length || 0);
   const confirmedDubCount = Math.max(anime.dubEpisodeCount || 0, availability?.dub.length || 0);
@@ -105,6 +109,19 @@ export function HiAnimePlayer({
       .finally(() => { if (active) setIsAnikotoLoading(false); });
     return () => { active = false; };
   }, [anime.id, anime.idMal, currentEpisode, track]);
+
+  useEffect(() => {
+    let active = true;
+    setIsKuhiLoading(true);
+    setKuhiSource(null);
+    const params = new URLSearchParams({ animeId: String(anime.id), episode: String(currentEpisode), audio: track });
+    fetch(`/api/kuhi/anime/player?${params}`)
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then((result: KuhiSource) => { if (active) setKuhiSource(result); })
+      .catch(() => { if (active) setKuhiSource(null); })
+      .finally(() => { if (active) setIsKuhiLoading(false); });
+    return () => { active = false; };
+  }, [anime.id, currentEpisode, track]);
 
   useEffect(() => {
     if (episodes.length === 0) { setAvailability({ sub: [], dub: [] }); return; }
@@ -284,6 +301,8 @@ export function HiAnimePlayer({
   // Generate embed URL from current provider
   const embedUrl = selectedServer === "anikoto"
     ? (track === "dub" ? anikotoSource?.dubUrl : anikotoSource?.subUrl) || ""
+    : selectedServer === "kuhi"
+      ? kuhiSource?.playerUrl || ""
     : provider.getEmbedUrl({
         source: selectedServerOption?.source || "anilist",
         animeId: selectedServerOption?.source === "mal" ? anime.idMal || anime.id : anime.id,
@@ -735,13 +754,15 @@ export function HiAnimePlayer({
                   <UpcomingCountdown nextAiringEpisode={anime.nextAiringEpisode} />
                 </div>
               </div>
-            ) : hasError || (selectedServer === "anikoto" && !embedUrl) ? (
+            ) : hasError || ((selectedServer === "anikoto" || selectedServer === "kuhi") && !embedUrl) ? (
               <PlayerError
                 onRetry={() => {
                   tryNextServer();
                 }}
                 message={selectedServer === "anikoto"
-                  ? "Server 3 is currently unavailable. Try Server 1 or Server 2."
+                  ? "Server 3 is currently unavailable. Try another server."
+                  : selectedServer === "kuhi"
+                    ? "Server 4 is currently unavailable for this episode. Try another server."
                   : "This episode stream is currently unavailable on this server. Please try another server or audio language below."}
               />
             ) : (
@@ -961,6 +982,21 @@ export function HiAnimePlayer({
                   {isAnikotoLoading && (
                     <span className="px-2 text-[10px] text-white/40">Checking Server 3…</span>
                   )}
+                  <button
+                    onClick={() => handleSelectServer("kuhi", "sub")}
+                    className={cn(
+                      "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer border",
+                      selectedServer === "kuhi" && track === "sub"
+                        ? "bg-gradient-to-r from-[#2563eb] to-[#06b6d4] border-transparent text-white shadow-sm"
+                        : "bg-gradient-to-r from-[#2563eb]/20 to-[#06b6d4]/20 border-[#38bdf8]/45 text-[#8be8ff] hover:from-[#2563eb]/35 hover:to-[#06b6d4]/35"
+                    )}
+                    title={kuhiSource ? "Kuhi built-in player" : "Kuhi is checking this episode"}
+                  >
+                    Server 4
+                  </button>
+                  {isKuhiLoading && (
+                    <span className="px-2 text-[10px] text-white/40">Checking Server 4…</span>
+                  )}
                 </div>
               </div>
 
@@ -1004,6 +1040,18 @@ export function HiAnimePlayer({
                       Server 3
                     </button>
                   )}
+                  <button
+                    onClick={() => handleSelectServer("kuhi", "dub")}
+                    className={cn(
+                      "px-3 py-1 rounded text-xs font-bold transition-all cursor-pointer border",
+                      selectedServer === "kuhi" && track === "dub"
+                        ? "bg-gradient-to-r from-[#2563eb] to-[#06b6d4] border-transparent text-white shadow-sm"
+                        : "bg-gradient-to-r from-[#2563eb]/20 to-[#06b6d4]/20 border-[#38bdf8]/45 text-[#8be8ff] hover:from-[#2563eb]/35 hover:to-[#06b6d4]/35"
+                    )}
+                    title="Kuhi built-in dubbed player"
+                  >
+                    Server 4
+                  </button>
                 </div>
               </div>}
             </div>

@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "image.tmdb.org" },
       { protocol: "https", hostname: "uploads.mangadex.org" },
+      { protocol: "https", hostname: "anime-and-manwhua.vercel.app" },
     ],
   },
 };
