@@ -62,6 +62,25 @@ export async function getMangaDexChapterPages(chapterId: string): Promise<MangaD
   }
 }
 
+export async function findMangaDexChapterPages(title: string, chapterNumber: string): Promise<MangaDexChapterPages | null> {
+  try {
+    const mangaQuery = new URLSearchParams({ title, limit: "10" });
+    const manga = await mangaDexFetch<{ data: RawManga[] }>(`/manga?${mangaQuery}`);
+    const wanted = title.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/^(the|a|an)\s+/, "");
+    const match = manga.data.find((item) => preferredTitle(item.attributes).toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/^(the|a|an)\s+/, "") === wanted);
+    if (!match) return null;
+    const chapterQuery = new URLSearchParams({ manga: match.id, chapter: chapterNumber, limit: "1" });
+    chapterQuery.append("translatedLanguage[]", "en");
+    chapterQuery.append("contentRating[]", "safe");
+    chapterQuery.append("contentRating[]", "suggestive");
+    const chapters = await mangaDexFetch<{ data: RawChapter[] }>(`/chapter?${chapterQuery}`);
+    return chapters.data[0] ? getMangaDexChapterPages(chapters.data[0].id) : null;
+  } catch (error) {
+    console.error(`Failed to find MangaDex chapter ${chapterNumber} for ${title}:`, error);
+    return null;
+  }
+}
+
 export async function getLatestChapterReleases(limit = 18): Promise<ChapterRelease[]> {
   try {
     // Pull a wider chronological window so the mixed feed can include the

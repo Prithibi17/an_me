@@ -44,7 +44,7 @@ interface KuhiSearchResult {
 }
 
 function normalizeTitle(value: string) {
-  return value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  return value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/^(the|a|an)\s+/, "");
 }
 
 async function kuhiFetch<T>(path: string, revalidate = 300): Promise<T | null> {
