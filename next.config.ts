@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.crunchyroll.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "image.tmdb.org" },
+      { protocol: "https", hostname: "uploads.mangadex.org" },
     ],
   },
 };

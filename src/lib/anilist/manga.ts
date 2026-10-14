@@ -18,6 +18,7 @@ export interface Manga {
   volumes?: number | null;
   startDate?: { year?: number | null; month?: number | null; day?: number | null } | null;
   updatedAt?: number | null;
+  countryOfOrigin?: string | null;
 }
 
 interface RawManga {
@@ -34,6 +35,7 @@ interface RawManga {
   volumes?: number | null;
   startDate?: Manga["startDate"];
   updatedAt?: number | null;
+  countryOfOrigin?: string | null;
 }
 
 interface MangaPageInfo {
@@ -58,6 +60,7 @@ const FIELDS = `
   volumes
   startDate { year month day }
   updatedAt
+  countryOfOrigin
 `;
 
 const QUERY = `
@@ -88,6 +91,7 @@ function normalize(raw: RawManga): Manga {
     volumes: raw.volumes || null,
     startDate: raw.startDate || null,
     updatedAt: raw.updatedAt || null,
+    countryOfOrigin: raw.countryOfOrigin || null,
   };
 }
 
@@ -141,6 +145,14 @@ export async function getMangaDetails(id: number) {
 
 export function mangaTitle(manga: Manga) {
   return manga.title.english || manga.title.romaji || manga.title.native || "Untitled manga";
+}
+
+export function publicationType(country?: string | null, format?: string | null) {
+  if (format === "NOVEL") return "Novel";
+  if (country === "KR") return "Manhwa";
+  if (country === "CN" || country === "TW" || country === "HK") return "Manhua";
+  if (country === "JP") return "Manga";
+  return "Comic";
 }
 
 export function mangaDate(manga: Manga) {
