@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { Anime } from "@/lib/anilist/types";
+import { chooseTmdbSeason, explicitSeasonNumber, type TmdbSeasonSummary } from "@/lib/tmdb/season-match";
 
 const API_ROOT = "https://api.themoviedb.org/3";
 const IMAGE_ROOT = "https://image.tmdb.org/t/p/original";
@@ -37,13 +38,6 @@ interface VideoFile {
   official?: boolean;
   iso_639_1?: string;
   published_at?: string;
-}
-
-interface TmdbSeasonSummary {
-  season_number: number;
-  air_date?: string | null;
-  episode_count?: number;
-  name?: string;
 }
 
 interface TmdbEpisode {
@@ -102,15 +96,17 @@ function candidateScore(anime: Anime, result: SearchResult) {
   const yearDistance = anime.seasonYear && year ? Math.abs(anime.seasonYear - year) : 0;
   // TMDB stores later TV seasons under the original series, whose first-air
   // year can be much older. The exact season is validated separately below.
-  const isNumberedTvSeason = anime.format !== "MOVIE" && Boolean(explicitSeasonNumber(anime));
-  if (!isNumberedTvSeason && yearDistance > 2) return -1;
+  const isTv = anime.format !== "MOVIE";
+  // TMDB represents later installments as seasons of a series whose top-level
+  // first-air year can be much older. Validate the exact season after search.
+  if (!isTv && yearDistance > 2) return -1;
 
   const animeOrigin = anime.countryOfOrigin === "JP" || anime.countryOfOrigin === "CN";
   const matchingOrigin = result.origin_country?.includes(anime.countryOfOrigin || "") ||
     (anime.countryOfOrigin === "JP" && result.original_language === "ja") ||
     (anime.countryOfOrigin === "CN" && result.original_language === "zh");
 
-  return (exact ? 100 : 60) - (isNumberedTvSeason ? 0 : yearDistance * 12) +
+  return (exact ? 100 : 60) - (isTv ? 0 : yearDistance * 12) +
     (animeOrigin && matchingOrigin ? 8 : 0);
 }
 
@@ -150,52 +146,6 @@ function chooseTrailer(videos: VideoFile[] | undefined) {
       languageRank(a.iso_639_1) - languageRank(b.iso_639_1) ||
       (b.published_at || "").localeCompare(a.published_at || "");
   })[0] || null;
-}
-
-function explicitSeasonNumber(anime: Anime) {
-  const value = [anime.title.english, anime.title.romaji].filter(Boolean).join(" ");
-  const match = value.match(/(?:season|series)\s*(\d+)|(?:^|\s)(\d+)(?:st|nd|rd|th)\s+season/i);
-  return Number(match?.[1] || match?.[2]) || null;
-}
-
-function chooseTmdbSeason(anime: Anime, seasons: TmdbSeasonSummary[]) {
-  const regular = seasons.filter((season) => season.season_number > 0);
-  if (!regular.length) return null;
-
-  const explicit = explicitSeasonNumber(anime);
-  if (explicit) {
-    const season = regular.find((item) => item.season_number === explicit);
-    if (!season) return null;
-    const airYear = season.air_date ? Number(season.air_date.slice(0, 4)) : null;
-    if (anime.seasonYear && (!airYear || Math.abs(anime.seasonYear - airYear) > 1)) return null;
-    if (anime.episodes && season.episode_count) {
-      const allowedDifference = Math.max(2, Math.ceil(anime.episodes * 0.2));
-      if (Math.abs(anime.episodes - season.episode_count) > allowedDifference) return null;
-    }
-    return season.season_number;
-  }
-
-  const best = [...regular].sort((a, b) => {
-    const yearA = a.air_date ? Number(a.air_date.slice(0, 4)) : 0;
-    const yearB = b.air_date ? Number(b.air_date.slice(0, 4)) : 0;
-    const yearDistanceA = anime.seasonYear && yearA ? Math.abs(anime.seasonYear - yearA) : 99;
-    const yearDistanceB = anime.seasonYear && yearB ? Math.abs(anime.seasonYear - yearB) : 99;
-    const countDistanceA = anime.episodes && a.episode_count ? Math.abs(anime.episodes - a.episode_count) : 99;
-    const countDistanceB = anime.episodes && b.episode_count ? Math.abs(anime.episodes - b.episode_count) : 99;
-    return yearDistanceA - yearDistanceB || countDistanceA - countDistanceB || b.season_number - a.season_number;
-  })[0];
-  if (!best) return null;
-
-  // Do not force a season match for continuously numbered, long-running shows
-  // that TMDB divides into smaller seasons (for example, One Piece). An
-  // incorrect still is worse than falling back to AniList/Kitsu artwork.
-  if (regular.length > 1) {
-    if (!anime.episodes || !best.episode_count) return null;
-    const allowedDifference = Math.max(2, Math.ceil(anime.episodes * 0.2));
-    if (Math.abs(anime.episodes - best.episode_count) > allowedDifference) return null;
-  }
-
-  return best.season_number;
 }
 
 function mergeEpisodeStills(anime: Anime, episodes: TmdbEpisode[]) {
@@ -258,7 +208,9 @@ export async function enrichAnimeWithTmdb(
     options.posterOnly
       ? Promise.resolve(null)
       : tmdbFetch<{ results?: VideoFile[] }>(`/${mediaType}/${match.id}/videos`),
-    mediaType === "tv" && (options.includeEpisodeStills || Boolean(numberedSeason))
+    // Always inspect seasons for TV poster matching. Series-level TMDB posters
+    // are not safe for independently catalogued anime installments.
+    mediaType === "tv"
       ? tmdbFetch<{ seasons?: TmdbSeasonSummary[] }>(`/tv/${match.id}`)
       : Promise.resolve(null),
   ]);
@@ -266,10 +218,9 @@ export async function enrichAnimeWithTmdb(
     ? chooseTmdbSeason(anime, tvDetails.seasons)
     : null;
 
-  // A numbered season must match TMDB's season number and air year before any
-  // TMDB media is accepted. Otherwise series-level trailers and episode stills
-  // commonly belong to an older season.
-  if (numberedSeason && !tmdbSeasonNumber) return anime;
+  // Every TV entry must resolve to one exact TMDB season before accepting any
+  // TMDB artwork. Ambiguous matches retain AniList's installment-specific art.
+  if (mediaType === "tv" && !tmdbSeasonNumber) return anime;
 
   const [seasonDetails, seasonImages, seasonVideos] = tmdbSeasonNumber
     ? await Promise.all([
@@ -296,7 +247,7 @@ export async function enrichAnimeWithTmdb(
     ? null
     : chooseImage(images?.backdrops, [null, "ja", "en", "zh"], "landscape");
   const posterPath = chooseImage(
-    numberedSeason ? seasonImages?.posters : images?.posters,
+    mediaType === "tv" ? seasonImages?.posters : images?.posters,
     ["en", null, "ja", "zh"],
     "portrait",
   );
