@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { MessageSquare, Send, Radio } from "lucide-react";
+import { Radio } from "lucide-react";
 import { BrandLogo } from "./BrandLogo";
 
 const ALPHABET = [
@@ -47,24 +47,6 @@ export function Footer() {
           </Link>
 
           <div className="flex items-center gap-2">
-            <a
-              href="https://discord.com"
-              target="_blank"
-              rel="noreferrer"
-              className="w-8 h-8 rounded-full bg-[#5865F2] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
-              title="Discord"
-            >
-              <MessageSquare className="w-4 h-4" />
-            </a>
-            <a
-              href="https://telegram.org"
-              target="_blank"
-              rel="noreferrer"
-              className="w-8 h-8 rounded-full bg-[#229ED9] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
-              title="Telegram"
-            >
-              <Send className="w-4 h-4" />
-            </a>
             <a
               href="https://reddit.com"
               target="_blank"

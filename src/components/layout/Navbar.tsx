@@ -11,7 +11,6 @@ import {
   Languages,
   Newspaper,
   MessageSquare,
-  Send,
   Radio,
   LogOut,
   Bookmark,
@@ -79,8 +78,14 @@ export function Navbar() {
             </Link>
           </div>
 
+          {/* Primary media switcher */}
+          <nav className="hidden md:flex items-center rounded-lg border border-white/8 bg-[#181a22] p-1 text-[11px] font-black" aria-label="Content type">
+            <Link href="/" className={cn("rounded-md px-3 py-1.5 transition-colors", !pathname.startsWith("/manga") ? "bg-[#ff2f6d] text-white" : "text-white/50 hover:text-white")}>Anime</Link>
+            <Link href="/manga" className={cn("rounded-md px-3 py-1.5 transition-colors", pathname.startsWith("/manga") ? "bg-[#ff2f6d] text-white" : "text-white/50 hover:text-white")}>Manga</Link>
+          </nav>
+
           {/* Center: Live Search Bar with Filter Button & Dropdown Autocomplete */}
-          <div className="flex-1 max-w-xl mx-2 hidden sm:block">
+          <div className="flex-1 max-w-sm mx-2 hidden sm:block">
             <NavbarSearch langPreference={langPreference} />
           </div>
 
@@ -88,24 +93,6 @@ export function Navbar() {
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             {/* Social icons */}
             <div className="hidden xl:flex items-center gap-1.5 mr-2">
-              <a
-                href="https://discord.com"
-                target="_blank"
-                rel="noreferrer"
-                className="w-7 h-7 rounded-full bg-[#5865F2] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
-                title="Discord"
-              >
-                <MessageSquare className="w-3.5 h-3.5" />
-              </a>
-              <a
-                href="https://telegram.org"
-                target="_blank"
-                rel="noreferrer"
-                className="w-7 h-7 rounded-full bg-[#229ED9] flex items-center justify-center text-white hover:opacity-90 transition-opacity"
-                title="Telegram"
-              >
-                <Send className="w-3.5 h-3.5" />
-              </a>
               <a
                 href="https://reddit.com"
                 target="_blank"

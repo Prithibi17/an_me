@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Compass } from "lucide-react";
+import { Home, Compass, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function MobileNav() {
@@ -11,6 +11,7 @@ export function MobileNav() {
 
   const items = [
     { label: "Home", href: "/", icon: Home },
+    { label: "Manga", href: "/manga", icon: BookOpen },
     { label: "Search", href: "/search", icon: Compass },
   ];
 

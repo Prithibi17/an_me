@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import {
-  X,
   ChevronLeft,
   Home,
   Film,
@@ -16,9 +15,8 @@ import {
   MessageSquare,
   SlidersHorizontal,
   Compass,
-  Radio,
-  Send,
   Layers,
+  BookOpen,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
@@ -32,6 +30,7 @@ interface SidebarDrawerProps {
 
 const NAV_LINKS = [
   { label: "Home", href: "/", icon: Home },
+  { label: "Manga Home", href: "/manga", icon: BookOpen },
   { label: "Subbed Anime", href: "/filter?language=SUB", icon: Layers },
   { label: "Dubbed Anime", href: "/filter?language=DUB", icon: Layers },
   { label: "Most Popular", href: "/filter?sort=Most+Watched", icon: Flame },
@@ -131,37 +130,6 @@ export function SidebarDrawer({ isOpen, onClose }: SidebarDrawerProps) {
 
         {/* Scrollable Navigation Area */}
         <div className="flex-1 overflow-y-auto p-3 space-y-4 text-xs">
-          {/* Community Social Links Bar */}
-          <div className="grid grid-cols-3 gap-2">
-            <a
-              href="https://discord.com"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#5865F2]/15 hover:bg-[#5865F2]/25 text-white/90 text-[11px] font-semibold transition-colors border border-[#5865F2]/20"
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-[#5865F2]" />
-              <span>Discord</span>
-            </a>
-            <a
-              href="https://telegram.org"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#229ED9]/15 hover:bg-[#229ED9]/25 text-white/90 text-[11px] font-semibold transition-colors border border-[#229ED9]/20"
-            >
-              <Send className="w-3.5 h-3.5 text-[#229ED9]" />
-              <span>Telegram</span>
-            </a>
-            <a
-              href="https://reddit.com"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#FF4500]/15 hover:bg-[#FF4500]/25 text-white/90 text-[11px] font-semibold transition-colors border border-[#FF4500]/20"
-            >
-              <Radio className="w-3.5 h-3.5 text-[#FF4500]" />
-              <span>Reddit</span>
-            </a>
-          </div>
-
           {/* Primary Menu Links */}
           <div className="space-y-0.5">
             {NAV_LINKS.map((link) => {

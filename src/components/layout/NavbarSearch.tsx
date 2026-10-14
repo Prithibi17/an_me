@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Search, SlidersHorizontal, Loader2 } from "lucide-react";
 import { Anime } from "@/lib/anilist/types";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,8 @@ export function NavbarSearch({
   onCloseMobile,
 }: NavbarSearchProps) {
   const router = useRouter();
+  const pathname = usePathname();
+  const isManga = pathname.startsWith("/manga");
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Anime[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,12 +50,9 @@ export function NavbarSearch({
   useEffect(() => {
     const trimmed = query.trim();
     if (!trimmed) {
-      setSuggestions([]);
-      setIsLoading(false);
       return;
     }
 
-    setIsLoading(true);
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -61,17 +60,18 @@ export function NavbarSearch({
     abortControllerRef.current = controller;
 
     const timeoutId = setTimeout(async () => {
+      setIsLoading(true);
       try {
         const res = await fetch(
-          `/api/anime/filter?q=${encodeURIComponent(trimmed)}&perPage=6`,
+          `${isManga ? "/api/manga/filter" : "/api/anime/filter"}?q=${encodeURIComponent(trimmed)}&perPage=6`,
           { signal: controller.signal }
         );
         if (!res.ok) throw new Error("Search suggestion request failed");
         const data = await res.json();
         setSuggestions(data.media || []);
         setSelectedIndex(-1);
-      } catch (err: any) {
-        if (err.name !== "AbortError") {
+      } catch (err: unknown) {
+        if (!(err instanceof DOMException && err.name === "AbortError")) {
           console.error("Suggestion error:", err);
           setSuggestions([]);
         }
@@ -86,7 +86,7 @@ export function NavbarSearch({
       clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [query]);
+  }, [query, isManga]);
 
   const handleSearchSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -96,16 +96,16 @@ export function NavbarSearch({
       const selected = suggestions[selectedIndex];
       setIsOpen(false);
       if (onCloseMobile) onCloseMobile();
-      router.push(`/anime/${selected.id}/details`);
+      router.push(isManga ? `/manga/${selected.id}` : `/anime/${selected.id}/details`);
       return;
     }
 
     setIsOpen(false);
     if (onCloseMobile) onCloseMobile();
     if (trimmed) {
-      router.push(`/filter?q=${encodeURIComponent(trimmed)}`);
+      router.push(isManga ? `/manga?q=${encodeURIComponent(trimmed)}` : `/filter?q=${encodeURIComponent(trimmed)}`);
     } else {
-      router.push("/filter");
+      router.push(isManga ? "/manga" : "/filter");
     }
   };
 
@@ -145,9 +145,9 @@ export function NavbarSearch({
     setIsOpen(false);
     if (onCloseMobile) onCloseMobile();
     if (trimmed) {
-      router.push(`/filter?q=${encodeURIComponent(trimmed)}`);
+      router.push(isManga ? `/manga?q=${encodeURIComponent(trimmed)}` : `/filter?q=${encodeURIComponent(trimmed)}`);
     } else {
-      router.push("/filter");
+      router.push(isManga ? "/manga" : "/filter");
     }
   };
 
@@ -160,10 +160,15 @@ export function NavbarSearch({
         <input
           ref={inputRef}
           type="text"
-          placeholder="Search anime..."
+          placeholder={isManga ? "Search manga..." : "Search anime..."}
           value={query}
           onChange={(e) => {
-            setQuery(e.target.value);
+            const value = e.target.value;
+            setQuery(value);
+            if (!value.trim()) {
+              setSuggestions([]);
+              setIsLoading(false);
+            }
             setIsOpen(true);
           }}
           onFocus={() => {
@@ -193,7 +198,7 @@ export function NavbarSearch({
             onClick={() => {
               setIsOpen(false);
               if (onCloseMobile) onCloseMobile();
-              router.push("/filter");
+              router.push(isManga ? "/manga" : "/filter");
             }}
             className="flex items-center gap-1 px-2 py-1 rounded bg-[#2b2d38] hover:bg-[#353846] text-[10px] font-semibold text-white/80 transition-colors cursor-pointer"
           >
@@ -228,7 +233,7 @@ export function NavbarSearch({
                   return (
                     <Link
                       key={anime.id}
-                      href={`/anime/${anime.id}/details`}
+                      href={isManga ? `/manga/${anime.id}` : `/anime/${anime.id}/details`}
                       onClick={() => {
                         setIsOpen(false);
                         if (onCloseMobile) onCloseMobile();
@@ -313,7 +318,7 @@ export function NavbarSearch({
           ) : (
             <div className="p-4 text-center">
               <div className="text-xs text-white/60">
-                No anime found for &ldquo;{query}&rdquo;
+                No {isManga ? "manga" : "anime"} found for &ldquo;{query}&rdquo;
               </div>
               <button
                 type="button"
