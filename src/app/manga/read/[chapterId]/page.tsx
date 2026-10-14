@@ -1,8 +1,8 @@
-/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { BookOpen, ChevronLeft } from "lucide-react";
-import { getKuhiChapter, isKuhiMangaSource } from "@/lib/kuhi/client";
+import { getKuhiChapter, isKuhiMangaSource, resolveKuhiManga } from "@/lib/kuhi/client";
 import { findMangaDexChapterPages, getMangaDexChapterPages } from "@/lib/mangadex/client";
+import { MangaReader } from "@/components/manga/MangaReader";
 
 export default async function MangaReaderPage({ params, searchParams }: PageProps<"/manga/read/[chapterId]">) {
   const { chapterId } = await params;
@@ -18,9 +18,7 @@ export default async function MangaReaderPage({ params, searchParams }: PageProp
     ? await findMangaDexChapterPages(title, chapterNumber)
     : null;
   const pages = directMangaDex?.pages || (kuhiPages.length ? kuhiPages : mangaDexFallback?.pages) || [];
+  const catalog = await resolveKuhiManga(title);
 
-  return <main className="min-h-screen bg-[#050608] text-white"><header className="sticky top-0 z-30 border-b border-white/10 bg-[#0d0f14]/95 px-4 py-3 backdrop-blur"><div className="mx-auto flex max-w-5xl items-center justify-between gap-4"><Link href="/manga" className="inline-flex items-center gap-1 text-sm font-bold text-white/65 hover:text-[#ff2f6d]"><ChevronLeft className="h-4 w-4" />Manga</Link><div className="min-w-0 text-right"><h1 className="truncate text-sm font-black">{title}</h1><p className="text-[11px] uppercase tracking-wider text-white/35">Continuous reader</p></div></div></header>{pages.length ? <div className="mx-auto max-w-5xl">{pages.map((src, index) => {
-    const imageSrc = src.includes(".mangadex.network/") ? `/api/manga/image?url=${encodeURIComponent(src)}` : src;
-    return <img key={`${src}-${index}`} src={imageSrc} alt={`${title} page ${index + 1}`} loading={index < 2 ? "eager" : "lazy"} className="mx-auto block h-auto w-full bg-black" />;
-  })}</div> : <div className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center gap-4 px-6 text-center"><BookOpen className="h-12 w-12 text-[#ff2f6d]" /><h1 className="text-2xl font-black">Chapter pages are temporarily unavailable</h1><p className="text-sm leading-6 text-white/50">The chapter exists, but the source did not return readable page images. Please try this chapter again later or choose another chapter.</p><Link href="/manga" className="rounded-full bg-[#ff2f6d] px-5 py-2.5 text-sm font-black">Back to manga</Link></div>}</main>;
+  return <main className="min-h-screen bg-[#050608] text-white"><header className="sticky top-0 z-30 border-b border-white/10 bg-[#0d0f14]/95 px-4 py-3 backdrop-blur"><div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4"><Link href="/manga" className="inline-flex items-center gap-1 text-sm font-bold text-white/65 hover:text-[#ff2f6d]"><ChevronLeft className="h-4 w-4" />Manga</Link><div className="min-w-0 text-right"><h1 className="truncate text-sm font-black">{title}</h1><p className="text-[11px] uppercase tracking-wider text-white/35">Manga reader</p></div></div></header>{pages.length ? <MangaReader title={title} pages={pages} currentChapterId={chapterId} currentChapterNumber={chapterNumber} source={catalog?.source || source} poster={catalog?.poster} description={catalog?.description} chapters={catalog?.chapters || []} /> : <div className="mx-auto flex min-h-[70vh] max-w-xl flex-col items-center justify-center gap-4 px-6 text-center"><BookOpen className="h-12 w-12 text-[#ff2f6d]" /><h1 className="text-2xl font-black">Chapter pages are temporarily unavailable</h1><p className="text-sm leading-6 text-white/50">The chapter exists, but the source did not return readable page images. Please try this chapter again later or choose another chapter.</p><Link href="/manga" className="rounded-full bg-[#ff2f6d] px-5 py-2.5 text-sm font-black">Back to manga</Link></div>}</main>;
 }
