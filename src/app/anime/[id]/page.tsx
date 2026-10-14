@@ -46,6 +46,9 @@ function AnimePageContent({
     async function loadData() {
       setIsLoading(true);
       try {
+        // Start the rich request immediately so TMDB/provider enrichment runs
+        // while the lightweight core response paints the player shell.
+        const fullDataPromise = fetchAnimeDetails(animeId);
         const coreData = await fetchAnimeDetails(animeId, { core: true });
 
         if (!isMounted) return;
@@ -66,7 +69,7 @@ function AnimePageContent({
         }
         setIsLoading(false);
 
-        const data = await fetchAnimeDetails(animeId) || coreData;
+        const data = await fullDataPromise || coreData;
         if (!isMounted) return;
         setAnime(data);
         // Load episodes with strict real AniList airing boundaries

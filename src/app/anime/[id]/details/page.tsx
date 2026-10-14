@@ -1,18 +1,21 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { fetchAnimeDetails } from "@/lib/data/client";
 import type { Anime } from "@/lib/anilist/types";
 import { getDefaultPlaybackProvider, type EpisodeItem } from "@/lib/providers";
 import { getAnimeWatchProgress } from "@/lib/storage/watch-history";
 import { AnimeHero } from "@/components/details/AnimeHero";
-import { CharactersList } from "@/components/details/CharactersList";
 import { DetailsTabs, type DetailTab } from "@/components/details/DetailsTabs";
-import { EpisodeSection } from "@/components/details/EpisodeSection";
-import { Overview } from "@/components/details/Overview";
-import { RelatedList } from "@/components/details/RelatedList";
 import { Skeleton } from "@/components/ui/Skeleton";
+
+const TabSkeleton = () => <Skeleton className="mt-5 h-48 w-full rounded-xl" />;
+const Overview = dynamic(() => import("@/components/details/Overview").then((module) => module.Overview), { loading: TabSkeleton });
+const EpisodeSection = dynamic(() => import("@/components/details/EpisodeSection").then((module) => module.EpisodeSection), { loading: TabSkeleton });
+const CharactersList = dynamic(() => import("@/components/details/CharactersList").then((module) => module.CharactersList), { loading: TabSkeleton });
+const RelatedList = dynamic(() => import("@/components/details/RelatedList").then((module) => module.RelatedList), { loading: TabSkeleton });
 
 export default function AnimeDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -28,6 +31,9 @@ export default function AnimeDetailsPage({ params }: { params: Promise<{ id: str
     let active = true;
     async function load() {
       try {
+        // Parallelize the rich metadata request with the fast core request.
+        // The hero paints from core data while enrichment continues.
+        const fullDataPromise = fetchAnimeDetails(animeId, { includeEpisodeStills: false });
         const coreData = await fetchAnimeDetails(animeId, { core: true });
         if (!coreData || !active) return;
         setAnime(coreData);
@@ -41,7 +47,7 @@ export default function AnimeDetailsPage({ params }: { params: Promise<{ id: str
         }
         setLoading(false);
 
-        const data = await fetchAnimeDetails(animeId) || coreData;
+        const data = await fullDataPromise || coreData;
         if (!active) return;
         setAnime(data);
         const list = await getDefaultPlaybackProvider().getEpisodes(

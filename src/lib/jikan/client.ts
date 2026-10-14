@@ -36,7 +36,9 @@ export async function getJikanAnime(malId: number): Promise<Partial<Anime> | nul
     const response = await fetch(`https://api.jikan.moe/v4/anime/${malId}/full`, {
       headers: { Accept: "application/json", "User-Agent": "Anme/1.0" },
       next: { revalidate: 86400 },
-      signal: AbortSignal.timeout(10_000),
+      // Jikan only fills metadata missing from AniList. Do not let an optional
+      // provider delay the watch/details experience when it is unavailable.
+      signal: AbortSignal.timeout(2_500),
     });
     if (!response.ok) return null;
     const raw = (await response.json() as { data?: JikanAnime }).data;
