@@ -19,6 +19,7 @@ export interface Manga {
   startDate?: { year?: number | null; month?: number | null; day?: number | null } | null;
   updatedAt?: number | null;
   countryOfOrigin?: string | null;
+  synonyms?: string[];
 }
 
 interface RawManga {
@@ -36,6 +37,7 @@ interface RawManga {
   startDate?: Manga["startDate"];
   updatedAt?: number | null;
   countryOfOrigin?: string | null;
+  synonyms?: string[] | null;
 }
 
 interface MangaPageInfo {
@@ -92,6 +94,7 @@ function normalize(raw: RawManga): Manga {
     startDate: raw.startDate || null,
     updatedAt: raw.updatedAt || null,
     countryOfOrigin: raw.countryOfOrigin || null,
+    synonyms: raw.synonyms || [],
   };
 }
 

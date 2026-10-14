@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 interface MangaReaderProps {
   title: string;
+  lookupTitle: string;
   pages: string[];
   currentChapterId: string;
   currentChapterNumber?: string;
@@ -19,7 +20,7 @@ interface MangaReaderProps {
   chapters: KuhiMangaChapter[];
 }
 
-export function MangaReader({ title, pages, currentChapterId, currentChapterNumber, source, poster, description, chapters }: MangaReaderProps) {
+export function MangaReader({ title, lookupTitle, pages, currentChapterId, currentChapterNumber, source, poster, description, chapters }: MangaReaderProps) {
   const router = useRouter();
   const [mode, setMode] = useState<"vertical" | "horizontal">("vertical");
 
@@ -36,7 +37,7 @@ export function MangaReader({ title, pages, currentChapterId, currentChapterNumb
   function selectChapter(id: string) {
     const chapter = chapters.find((item) => item.id === id);
     if (!chapter || chapter.is_locked) return;
-    router.push(`/manga/read/${encodeURIComponent(chapter.id)}?source=${source}&title=${encodeURIComponent(title)}&chapter=${encodeURIComponent(chapter.number)}`);
+    router.push(`/manga/read/${encodeURIComponent(chapter.id)}?source=${source}&title=${encodeURIComponent(title)}&lookup=${encodeURIComponent(lookupTitle)}&chapter=${encodeURIComponent(chapter.number)}`);
   }
 
   const readable = chapters.filter((chapter) => !chapter.is_locked);

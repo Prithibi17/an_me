@@ -102,12 +102,12 @@ export async function resolveKuhiManga(title: string, type?: string | null) {
     });
 
   for (const match of matches) {
-    const releases = await getKuhiMangaReleases(match.slug);
+    const releases = await getKuhiMangaReleases(match.slug, title);
     if (releases?.chapters?.length) return releases;
     const info = await getKuhiMangaInfo(match.slug, match.source);
     if (info?.chapters?.length) return { ...info, source: match.source, slug: match.slug };
   }
-  const directReleases = await getKuhiMangaReleases(normalizeTitle(title).replaceAll(" ", "-"));
+  const directReleases = await getKuhiMangaReleases(normalizeTitle(title).replaceAll(" ", "-"), title);
   if (directReleases?.chapters?.length) return directReleases;
   return null;
 }
@@ -121,9 +121,9 @@ export async function getKuhiMangaInfo(slug: string, source: KuhiMangaSource) {
   return kuhiFetch<KuhiMangaInfo>(`/api/manga/info/${encodeURIComponent(slug)}?${query}`, 600);
 }
 
-export async function getKuhiMangaReleases(slug: string): Promise<KuhiMangaInfo | null> {
+export async function getKuhiMangaReleases(slug: string, expectedTitle: string): Promise<KuhiMangaInfo | null> {
   const data = await kuhiFetch<KuhiMangaReleaseResponse>(`/api/manga/releases/${encodeURIComponent(slug)}`, 300);
-  if (!data?.chapters?.length) return null;
+  if (!data?.chapters?.length || normalizeTitle(data.title) !== normalizeTitle(expectedTitle)) return null;
   return {
     title: data.title,
     slug: data.slug,

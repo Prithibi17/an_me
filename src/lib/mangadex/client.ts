@@ -19,6 +19,14 @@ export interface MangaDexChapterPages {
   pages: string[];
 }
 
+export interface MangaDexCatalogChapter {
+  id: string;
+  number: string;
+  title: string | null;
+  is_locked: false;
+  release_date: string;
+}
+
 interface RawMangaAttributes {
   title?: Record<string, string>;
   altTitles?: Array<Record<string, string>>;
@@ -39,6 +47,10 @@ function preferredTitle(attributes?: RawMangaAttributes) {
   if (!attributes) return "Untitled comic";
   const candidates = [attributes.title?.en, attributes.title?.["ja-ro"], attributes.title?.["ko-ro"], attributes.title?.["zh-ro"], ...((attributes.altTitles || []).map((title) => title.en).filter(Boolean)), ...Object.values(attributes.title || {})];
   return candidates.find(Boolean) || "Untitled comic";
+}
+
+function comparableTitle(value: string) {
+  return value.toLocaleLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim().replace(/^(the|a|an)\s+/, "");
 }
 
 async function mangaDexFetch<T>(path: string): Promise<T> {
@@ -77,6 +89,50 @@ export async function findMangaDexChapterPages(title: string, chapterNumber: str
     return chapters.data[0] ? getMangaDexChapterPages(chapters.data[0].id) : null;
   } catch (error) {
     console.error(`Failed to find MangaDex chapter ${chapterNumber} for ${title}:`, error);
+    return null;
+  }
+}
+
+export async function getMangaDexCatalog(title: string): Promise<{ mangaId: string; chapters: MangaDexCatalogChapter[] } | null> {
+  try {
+    const mangaQuery = new URLSearchParams({ title, limit: "20" });
+    const manga = await mangaDexFetch<{ data: RawManga[] }>(`/manga?${mangaQuery}`);
+    const wanted = comparableTitle(title);
+    const match = manga.data.find((item) => comparableTitle(preferredTitle(item.attributes)) === wanted);
+    if (!match) return null;
+
+    const all: RawChapter[] = [];
+    let offset = 0;
+    let total = 1;
+    while (offset < total && offset < 2_000) {
+      const query = new URLSearchParams({ manga: match.id, limit: "100", offset: String(offset) });
+      query.append("translatedLanguage[]", "en");
+      query.append("contentRating[]", "safe");
+      query.append("contentRating[]", "suggestive");
+      query.set("order[chapter]", "asc");
+      const response = await mangaDexFetch<{ data: RawChapter[]; total: number }>(`/chapter?${query}`);
+      all.push(...response.data);
+      total = response.total;
+      offset += response.data.length;
+      if (!response.data.length) break;
+    }
+
+    const byNumber = new Map<string, MangaDexCatalogChapter>();
+    for (const chapter of all) {
+      const number = chapter.attributes.chapter;
+      if (!number || byNumber.has(number)) continue;
+      byNumber.set(number, {
+        id: chapter.id,
+        number,
+        title: chapter.attributes.title || null,
+        is_locked: false,
+        release_date: chapter.attributes.readableAt,
+      });
+    }
+    const chapters = [...byNumber.values()].sort((a, b) => Number(a.number) - Number(b.number));
+    return chapters.length ? { mangaId: match.id, chapters } : null;
+  } catch (error) {
+    console.error(`Failed to load MangaDex catalog for ${title}:`, error);
     return null;
   }
 }
