@@ -20,6 +20,7 @@ import releasedCatalog from "@/data/released-anilist-catalog.json";
 import releaseFeed from "@/data/anilist-release-feed.json";
 import { selectLatestVerifiedSchedules, type ReleaseSchedule } from "./release-feed";
 import { getSearchCorrections } from "@/lib/search/query-enhancer";
+import { rankAutocompleteCandidates } from "@/lib/search/query-heuristics";
 
 const ANILIST_ENDPOINT = "https://graphql.anilist.co";
 
@@ -422,6 +423,24 @@ export async function searchAnime(params: SearchFilterParams): Promise<AnimePage
       media: [],
     };
   }
+}
+
+export async function searchAnimeAutocomplete(query: string, perPage = 6): Promise<AnimePageResult> {
+  const limit = Math.min(12, Math.max(1, perPage));
+  const [providerMatches, ...catalogPages] = await Promise.all([
+    searchAnime({ query, sort: "POPULARITY_DESC", page: 1, perPage: 24 }),
+    ...[1, 2, 3, 4, 5, 6, 7, 8].map((page) => searchAnime({ sort: "POPULARITY_DESC", page, perPage: 50 })),
+  ]);
+  const media = rankAutocompleteCandidates(
+    query,
+    [...providerMatches.media, ...catalogPages.flatMap((page) => page.media)],
+    (anime) => [anime.title.english, anime.title.romaji],
+    limit,
+  );
+  return {
+    media,
+    pageInfo: { total: media.length, perPage: limit, currentPage: 1, lastPage: 1, hasNextPage: false },
+  };
 }
 
 export async function getUpcomingAnime(page = 1, perPage = 12): Promise<Anime[]> {

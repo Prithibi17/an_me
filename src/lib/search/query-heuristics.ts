@@ -41,3 +41,33 @@ export function deterministicCorrections(query: string) {
 export function sameNormalizedQuery(left: string, right: string) {
   return normalize(left) === normalize(right);
 }
+
+export function rankAutocompleteCandidates<T>(
+  query: string,
+  items: T[],
+  getTitles: (item: T) => Array<string | null | undefined>,
+  limit: number,
+) {
+  const needle = normalize(query);
+  if (!needle) return [];
+
+  const unique = Array.from(new Map(items.map((item) => {
+    const key = getTitles(item).map((title) => normalize(title || "")).filter(Boolean).join("|");
+    return [key, item] as const;
+  })).values());
+
+  return unique
+    .map((item, index) => {
+      const titles = getTitles(item).map((title) => normalize(title || "")).filter(Boolean);
+      const rank = Math.min(...titles.map((title) => {
+        if (title.startsWith(needle)) return 0;
+        if (title.split(" ").some((word) => word.startsWith(needle))) return 1;
+        if (title.includes(needle)) return 2;
+        return 3;
+      }));
+      return { item, index, rank };
+    })
+    .sort((left, right) => left.rank - right.rank || left.index - right.index)
+    .slice(0, limit)
+    .map(({ item }) => item);
+}

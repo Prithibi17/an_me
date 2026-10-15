@@ -1,4 +1,5 @@
 import { getSearchCorrections } from "@/lib/search/query-enhancer";
+import { rankAutocompleteCandidates } from "@/lib/search/query-heuristics";
 
 export interface MangaTitle {
   english?: string | null;
@@ -160,6 +161,24 @@ export async function getMangaList(options: {
     console.error("Failed to load manga:", error);
     return { pageInfo: { total: 0, currentPage: 1, lastPage: 1, hasNextPage: false }, media: [] as Manga[] };
   }
+}
+
+export async function searchMangaAutocomplete(query: string, perPage = 6) {
+  const limit = Math.min(12, Math.max(1, perPage));
+  const [providerMatches, ...catalogPages] = await Promise.all([
+    getMangaList({ search: query, sort: ["POPULARITY_DESC"], perPage: 24 }),
+    ...[1, 2, 3, 4, 5, 6, 7, 8].map((page) => getMangaList({ sort: ["POPULARITY_DESC"], page, perPage: 50 })),
+  ]);
+  const media = rankAutocompleteCandidates(
+    query,
+    [...providerMatches.media, ...catalogPages.flatMap((page) => page.media)],
+    (manga) => [manga.title.english, manga.title.romaji, ...(manga.synonyms || [])],
+    limit,
+  );
+  return {
+    media,
+    pageInfo: { total: media.length, currentPage: 1, lastPage: 1, hasNextPage: false },
+  };
 }
 
 export async function getMangaDetails(id: number) {

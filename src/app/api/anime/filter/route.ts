@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchAnime } from "@/lib/anilist/client";
+import { searchAnime, searchAnimeAutocomplete } from "@/lib/anilist/client";
 
 export async function GET(request: NextRequest) {
   try {
@@ -53,6 +53,11 @@ export async function GET(request: NextRequest) {
     const perPage = searchParams.get("perPage")
       ? Math.min(Math.max(parseInt(searchParams.get("perPage")!, 10) || 24, 1), 50)
       : 24;
+
+    if (query && searchParams.get("autocomplete") === "1") {
+      const data = await searchAnimeAutocomplete(query, perPage);
+      return NextResponse.json(data, { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600" } });
+    }
 
     const data = await searchAnime({
       query,

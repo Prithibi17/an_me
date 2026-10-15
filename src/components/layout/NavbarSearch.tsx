@@ -63,7 +63,7 @@ export function NavbarSearch({
       setIsLoading(true);
       try {
         const res = await fetch(
-          `${isManga ? "/api/manga/filter" : "/api/anime/filter"}?q=${encodeURIComponent(trimmed)}&perPage=6`,
+          `${isManga ? "/api/manga/filter" : "/api/anime/filter"}?q=${encodeURIComponent(trimmed)}&perPage=6&autocomplete=1`,
           { signal: controller.signal }
         );
         if (!res.ok) throw new Error("Search suggestion request failed");
