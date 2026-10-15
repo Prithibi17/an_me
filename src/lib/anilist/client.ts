@@ -19,6 +19,7 @@ import { filterAnime, isAllowedAnime } from "./content-filter";
 import releasedCatalog from "@/data/released-anilist-catalog.json";
 import releaseFeed from "@/data/anilist-release-feed.json";
 import { selectLatestVerifiedSchedules, type ReleaseSchedule } from "./release-feed";
+import { getSearchCorrections } from "@/lib/search/query-enhancer";
 
 const ANILIST_ENDPOINT = "https://graphql.anilist.co";
 
@@ -379,9 +380,14 @@ export async function searchAnime(params: SearchFilterParams): Promise<AnimePage
   try {
     let data = await anilistRequest<{ Page: { pageInfo: any; media: any[] } }>(SEARCH_QUERY, variables);
     
-    // If no media found and we had a search query, try smart candidate fallbacks (e.g. hunterx -> hunter x)
+    // If AniList's strict title search misses, try spacing rules first and then
+    // a bounded AI/local spelling correction. Every candidate is verified by
+    // AniList before it is shown, so the model can never create catalog items.
     if ((!data.Page.media || data.Page.media.length === 0) && variables.search) {
-      const candidates = generateQueryCandidates(variables.search);
+      const candidates = Array.from(new Set([
+        ...generateQueryCandidates(variables.search),
+        ...await getSearchCorrections(variables.search, "anime"),
+      ])).slice(0, 4);
       for (const cand of candidates) {
         const fallbackVars = { ...variables, search: cand };
         const fallbackData = await anilistRequest<{ Page: { pageInfo: any; media: any[] } }>(SEARCH_QUERY, fallbackVars).catch(() => null);
@@ -389,6 +395,13 @@ export async function searchAnime(params: SearchFilterParams): Promise<AnimePage
           data = fallbackData;
           break;
         }
+      }
+
+      // A completely unknown query still gets useful catalog suggestions rather
+      // than a dead end. Existing filters remain applied.
+      if (!data.Page.media || data.Page.media.length === 0) {
+        const suggestionVars = { ...variables, search: undefined, sort: ["POPULARITY_DESC"], page: 1 };
+        data = await anilistRequest<{ Page: { pageInfo: any; media: any[] } }>(SEARCH_QUERY, suggestionVars);
       }
     }
 

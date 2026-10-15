@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test:release-feed": "node --experimental-strip-types --test src/lib/anilist/release-feed.test.ts",
-    "test:tmdb-season-match": "node --experimental-strip-types --test src/lib/tmdb/season-match.test.ts"
+    "test:tmdb-season-match": "node --experimental-strip-types --test src/lib/tmdb/season-match.test.ts",
+    "test:search": "node --experimental-strip-types --test src/lib/search/query-enhancer.test.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",

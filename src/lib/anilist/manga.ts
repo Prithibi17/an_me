@@ -1,3 +1,5 @@
+import { getSearchCorrections } from "@/lib/search/query-enhancer";
+
 export interface MangaTitle {
   english?: string | null;
   romaji?: string | null;
@@ -112,6 +114,24 @@ async function request<T>(query: string, variables: Record<string, unknown>): Pr
   return payload.data as T;
 }
 
+async function requestMangaList(options: {
+  sort: string[];
+  status?: string;
+  search?: string;
+  perPage?: number;
+  page?: number;
+  startDateGreater?: number;
+}) {
+  return request<{ Page: { pageInfo: MangaPageInfo; media: RawManga[] } }>(QUERY, {
+    page: options.page || 1,
+    perPage: options.perPage || 12,
+    sort: options.sort,
+    status: options.status,
+    search: options.search?.trim() || undefined,
+    startDateGreater: options.startDateGreater,
+  });
+}
+
 export async function getMangaList(options: {
   sort: string[];
   status?: string;
@@ -121,14 +141,20 @@ export async function getMangaList(options: {
   startDateGreater?: number;
 }) {
   try {
-    const data = await request<{ Page: { pageInfo: MangaPageInfo; media: RawManga[] } }>(QUERY, {
-      page: options.page || 1,
-      perPage: options.perPage || 12,
-      sort: options.sort,
-      status: options.status,
-      search: options.search?.trim() || undefined,
-      startDateGreater: options.startDateGreater,
-    });
+    let data = await requestMangaList(options);
+    if (options.search?.trim() && !data.Page.media?.length) {
+      const corrections = await getSearchCorrections(options.search, "manga");
+      for (const search of corrections) {
+        const corrected = await requestMangaList({ ...options, search }).catch(() => null);
+        if (corrected?.Page.media?.length) {
+          data = corrected;
+          break;
+        }
+      }
+      if (!data.Page.media?.length) {
+        data = await requestMangaList({ ...options, search: undefined, sort: ["POPULARITY_DESC"], page: 1 });
+      }
+    }
     return { pageInfo: data.Page.pageInfo, media: (data.Page.media || []).map(normalize) };
   } catch (error) {
     console.error("Failed to load manga:", error);

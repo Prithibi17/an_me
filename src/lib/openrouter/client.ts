@@ -23,6 +23,7 @@ interface JsonRequestOptions {
   tools?: OpenRouterTool[];
   plugins?: OpenRouterPlugin[];
   maxTokens?: number;
+  timeoutMs?: number;
 }
 
 function parseJsonPayload<T>(content: string): T {
@@ -42,12 +43,13 @@ export async function requestOpenRouterJson<T>({
   tools,
   plugins,
   maxTokens = 1800,
+  timeoutMs = 35_000,
 }: JsonRequestOptions): Promise<T> {
   const apiKey = process.env.OPENROUTER_API_KEY?.trim();
   if (!apiKey) throw new Error("OPENROUTER_API_KEY is not configured.");
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 35_000);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(OPENROUTER_URL, {
       method: "POST",
