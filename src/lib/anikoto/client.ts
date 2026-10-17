@@ -109,12 +109,15 @@ export async function getAnikotoAnimeMetadata(aniListId: number): Promise<Anikot
   };
 }
 
-export async function enrichAnimeAvailability<T extends { id: number }>(items: T[]): Promise<T[]> {
+export async function enrichAnimeAvailability<T extends { id: number; latestAiredEpisode?: number | null }>(items: T[]): Promise<T[]> {
   const catalog = await getCatalogMap();
   return items.map((item) => {
     const row = catalog.get(item.id);
     if (!row) return item;
-    const subEpisodeCount = positiveInteger(row.is_sub) || 0;
+    const subEpisodeCount = Math.max(
+      positiveInteger(row.is_sub) || 0,
+      positiveInteger(item.latestAiredEpisode) || 0,
+    );
     const dubEpisodeCount = positiveInteger(row.is_dub) || 0;
     return { ...item, subEpisodeCount, dubEpisodeCount };
   });

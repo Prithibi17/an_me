@@ -141,6 +141,7 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
     if (selectedStatus !== "All") params.set("status", selectedStatus);
     if (selectedSeason !== "All") params.set("season", selectedSeason);
     if (selectedScore !== "All") params.set("score", selectedScore);
+    if (selectedLanguage !== "All") params.set("language", selectedLanguage);
     if (selectedSort !== "Default") params.set("sort", getSortEnum(selectedSort));
     if (selectedGenres.length > 0) params.set("genres", selectedGenres.join(","));
     if (startYear) params.set("sy", startYear);
@@ -176,6 +177,7 @@ export function HiAnimeFilterView({ initialData, initialParams = {} }: HiAnimeFi
     selectedStatus,
     selectedSeason,
     selectedScore,
+    selectedLanguage,
     selectedSort,
     selectedGenres,
     startYear,

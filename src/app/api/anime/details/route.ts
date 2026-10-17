@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAnimeDetails } from "@/lib/anilist/client";
 import { getJikanAnime } from "@/lib/jikan/client";
-import { getAnikotoAnimeMetadata } from "@/lib/anikoto/client";
+import { enrichAnimeAvailability, getAnikotoAnimeMetadata } from "@/lib/anikoto/client";
 import { applyEpisodeAvailability, mergeAnimeMetadata } from "@/lib/data/decision";
 import { enrichAnimeWithTmdb } from "@/lib/tmdb/client";
 import type { Anime } from "@/lib/anilist/types";
@@ -42,8 +42,10 @@ export async function GET(request: NextRequest) {
         enrichAnimeWithTmdb(anime, { includeEpisodeStills }),
       ]);
       const merged = applyEpisodeAvailability(mergeAnimeMetadata(anime, jikan), anikoto);
+      const recommendations = await enrichAnimeAvailability(merged.recommendations || []);
       return {
         ...merged,
+        recommendations,
         coverImage: tmdbAnime.coverImage,
         bannerImage: tmdbAnime.bannerImage,
         titleLogo: tmdbAnime.titleLogo,

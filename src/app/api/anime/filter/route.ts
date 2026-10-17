@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchAnime, searchAnimeAutocomplete } from "@/lib/anilist/client";
+import { enrichAnimeAvailability } from "@/lib/anikoto/client";
+import { matchesEpisodeLanguage } from "@/lib/utils/episodes";
 
 export async function GET(request: NextRequest) {
   try {
@@ -56,6 +58,7 @@ export async function GET(request: NextRequest) {
 
     if (query && searchParams.get("autocomplete") === "1") {
       const data = await searchAnimeAutocomplete(query, perPage);
+      data.media = await enrichAnimeAvailability(data.media);
       return NextResponse.json(data, { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600" } });
     }
 
@@ -72,6 +75,9 @@ export async function GET(request: NextRequest) {
       page,
       perPage,
     });
+
+    data.media = (await enrichAnimeAvailability(data.media))
+      .filter((anime) => matchesEpisodeLanguage(anime, searchParams.get("language")));
 
     return NextResponse.json(data);
   } catch (err: any) {

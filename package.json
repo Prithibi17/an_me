@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test:release-feed": "node --experimental-strip-types --test src/lib/anilist/release-feed.test.ts",
     "test:tmdb-season-match": "node --experimental-strip-types --test src/lib/tmdb/season-match.test.ts",
-    "test:search": "node --experimental-strip-types --test src/lib/search/query-enhancer.test.ts"
+    "test:search": "node --experimental-strip-types --test src/lib/search/query-enhancer.test.ts",
+    "test:episodes": "node --experimental-strip-types --test src/lib/utils/episodes.test.ts src/lib/data/decision.test.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",

@@ -1,6 +1,8 @@
 import React from "react";
 import { searchAnime } from "@/lib/anilist/client";
 import { HiAnimeFilterView } from "@/components/search/HiAnimeFilterView";
+import { enrichAnimeAvailability } from "@/lib/anikoto/client";
+import { matchesEpisodeLanguage } from "@/lib/utils/episodes";
 
 export const revalidate = 180;
 
@@ -38,6 +40,8 @@ export default async function FilterPage({ searchParams }: PageProps) {
     page,
     perPage: 24,
   });
+  initialData.media = (await enrichAnimeAvailability(initialData.media))
+    .filter((anime) => matchesEpisodeLanguage(anime, params.language));
 
   return (
     <HiAnimeFilterView
